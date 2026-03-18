@@ -277,7 +277,7 @@ export function ServiceForm({ service }: { service?: Service }) {
             Delete Service
           </Button>
         ) : (
-          <div />
+          <span />
         )}
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (

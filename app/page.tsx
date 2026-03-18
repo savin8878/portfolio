@@ -21,6 +21,9 @@ import {
   getProcessSteps,
   getFeaturedTestimonials,
   getFeaturedBlogPosts,
+  getSocialLinks,
+  getPageContent,
+  getPageVisibility,
 } from "@/lib/data"
 
 export default async function HomePage() {
@@ -35,6 +38,9 @@ export default async function HomePage() {
     processSteps,
     testimonials,
     blogPosts,
+    socialLinks,
+    pageContent,
+    vis,
   ] = await Promise.all([
     getSiteSettings(),
     getHeroSection(),
@@ -46,47 +52,76 @@ export default async function HomePage() {
     getProcessSteps(),
     getFeaturedTestimonials(),
     getFeaturedBlogPosts(),
+    getSocialLinks(),
+    getPageContent("home"),
+    getPageVisibility("home"),
   ])
+
+  const show = (section: string) => vis[section] !== false
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
       <main>
-        <HeroSection
-          developerName={siteSettings?.developer_name || "Alex Chen"}
-          professionalTitle={
-            siteSettings?.professional_title || "Full-Stack Product Engineer"
-          }
-          tagline={
-            siteSettings?.tagline ||
-            "I build scalable SaaS platforms, AI tools, and high-performance web applications."
-          }
-          primaryCtaText={heroSection?.primary_cta_text || "View Case Studies"}
-          primaryCtaUrl={heroSection?.primary_cta_url || "/projects"}
-          secondaryCtaText={heroSection?.secondary_cta_text || "Start a Project"}
-          secondaryCtaUrl={heroSection?.secondary_cta_url || "/contact"}
-        />
-
-        {clients.length > 0 && <ClientsSection clients={clients} />}
-
-        {metrics.length > 0 && <MetricsSection metrics={metrics} />}
-
-        {projects.length > 0 && <FeaturedProjectsSection projects={projects} />}
-
-        {philosophy.length > 0 && <PhilosophySection items={philosophy} />}
-
-        {techStack.length > 0 && <TechStackSection techStack={techStack} />}
-
-        {processSteps.length > 0 && <ProcessSection steps={processSteps} />}
-
-        {testimonials.length > 0 && (
-          <TestimonialsSection testimonials={testimonials} />
+        {show("hero") && (
+          <HeroSection
+            developerName={siteSettings?.developer_name || "Alex Chen"}
+            professionalTitle={
+              siteSettings?.professional_title || "Full-Stack Product Engineer"
+            }
+            tagline={
+              siteSettings?.tagline ||
+              "I build scalable SaaS platforms, AI tools, and high-performance web applications."
+            }
+            primaryCtaText={heroSection?.primary_cta_text || "View Case Studies"}
+            primaryCtaUrl={heroSection?.primary_cta_url || "/projects"}
+            secondaryCtaText={heroSection?.secondary_cta_text || "Start a Project"}
+            secondaryCtaUrl={heroSection?.secondary_cta_url || "/contact"}
+            socialLinks={socialLinks}
+            content={pageContent.hero}
+          />
         )}
 
-        {blogPosts.length > 0 && <BlogPreviewSection posts={blogPosts} />}
+        {show("clients") && clients.length > 0 && (
+          <ClientsSection clients={clients} content={pageContent.clients} />
+        )}
 
-        <CtaSection />
+        {show("metrics") && metrics.length > 0 && (
+          <MetricsSection metrics={metrics} />
+        )}
+
+        {show("featured_projects") && projects.length > 0 && (
+          <FeaturedProjectsSection
+            projects={projects}
+            content={pageContent.featured_projects}
+          />
+        )}
+
+        {show("philosophy") && philosophy.length > 0 && (
+          <PhilosophySection items={philosophy} />
+        )}
+
+        {show("tech_stack") && techStack.length > 0 && (
+          <TechStackSection techStack={techStack} />
+        )}
+
+        {show("process") && processSteps.length > 0 && (
+          <ProcessSection steps={processSteps} content={pageContent.process} />
+        )}
+
+        {show("testimonials") && testimonials.length > 0 && (
+          <TestimonialsSection
+            testimonials={testimonials}
+            content={pageContent.testimonials}
+          />
+        )}
+
+        {show("blog_preview") && blogPosts.length > 0 && (
+          <BlogPreviewSection posts={blogPosts} content={pageContent.blog_preview} />
+        )}
+
+        {show("cta") && <CtaSection content={pageContent.cta} />}
       </main>
 
       <Footer />

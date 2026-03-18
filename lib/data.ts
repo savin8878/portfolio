@@ -17,6 +17,8 @@ import type {
   PhilosophyItem,
   Education,
   Certification,
+  SectionContent,
+  SectionVisibility,
 } from "./db"
 
 // Site Settings
@@ -170,4 +172,80 @@ export async function getProcessSteps(): Promise<ProcessStep[]> {
 export async function getPhilosophyItems(): Promise<PhilosophyItem[]> {
   const result = await sql`SELECT * FROM philosophy_items WHERE is_active = true ORDER BY display_order`
   return result as PhilosophyItem[]
+}
+
+// Section Content
+export async function getSectionContent(
+  page: string,
+  section: string
+): Promise<Record<string, unknown> | null> {
+  try {
+    const result = await sql`
+      SELECT content FROM section_content
+      WHERE page = ${page} AND section = ${section}
+    `
+    return (result[0]?.content as Record<string, unknown>) || null
+  } catch {
+    return null
+  }
+}
+
+export async function getPageContent(
+  page: string
+): Promise<Record<string, Record<string, unknown>>> {
+  try {
+    const result = await sql`
+      SELECT section, content FROM section_content
+      WHERE page = ${page}
+    `
+    const content: Record<string, Record<string, unknown>> = {}
+    for (const row of result) {
+      content[row.section as string] = row.content as Record<string, unknown>
+    }
+    return content
+  } catch {
+    return {}
+  }
+}
+
+export async function getAllSectionContent(): Promise<SectionContent[]> {
+  try {
+    const result = await sql`
+      SELECT * FROM section_content ORDER BY page, section
+    `
+    return result as SectionContent[]
+  } catch {
+    return []
+  }
+}
+
+// Section Visibility
+export async function getPageVisibility(
+  page: string
+): Promise<Record<string, boolean>> {
+  try {
+    const result = await sql`
+      SELECT section, is_visible FROM section_visibility
+      WHERE page = ${page}
+      ORDER BY display_order
+    `
+    const visibility: Record<string, boolean> = {}
+    for (const row of result) {
+      visibility[row.section as string] = row.is_visible as boolean
+    }
+    return visibility
+  } catch {
+    return {}
+  }
+}
+
+export async function getAllSectionVisibility(): Promise<SectionVisibility[]> {
+  try {
+    const result = await sql`
+      SELECT * FROM section_visibility ORDER BY page, display_order
+    `
+    return result as SectionVisibility[]
+  } catch {
+    return []
+  }
 }

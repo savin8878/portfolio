@@ -15,6 +15,8 @@ import {
   PenTool,
   Home,
   FormInput,
+  FileEdit,
+  ToggleLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -48,6 +50,16 @@ const navItems = [
     title: "Contact Submissions",
     href: "/admin/contacts",
     icon: Users,
+  },
+  {
+    title: "Page Content",
+    href: "/admin/content",
+    icon: FileEdit,
+  },
+  {
+    title: "Section Visibility",
+    href: "/admin/visibility",
+    icon: ToggleLeft,
   },
   {
     title: "Form Builder",

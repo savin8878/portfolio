@@ -4,6 +4,7 @@ import { Footer } from "@/components/footer"
 import { ContactForm } from "@/components/contact/contact-form"
 import { ContactInfo } from "@/components/contact/contact-info"
 import { sql } from "@/lib/db"
+import { getPageVisibility } from "@/lib/data"
 
 export const metadata: Metadata = {
   title: "Contact - Akash Vishwakarma",
@@ -21,7 +22,12 @@ async function getFormFields() {
 }
 
 export default async function ContactPage() {
-  const fields = await getFormFields()
+  const [fields, vis] = await Promise.all([
+    getFormFields(),
+    getPageVisibility("contact"),
+  ])
+
+  const show = (section: string) => vis[section] !== false
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,24 +36,30 @@ export default async function ContactPage() {
       <main className="pt-16">
         <section className="py-24 md:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <h1 className="text-4xl sm:text-5xl font-bold text-foreground text-balance">
-                Let&apos;s Build Something
-                <span className="text-accent"> Great</span>
-              </h1>
-              <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Have a project in mind? Fill out the form below and I will get
-                back to you within 24 hours to discuss how we can work together.
-              </p>
-            </div>
+            {show("hero") && (
+              <div className="text-center max-w-3xl mx-auto mb-16">
+                <h1 className="text-4xl sm:text-5xl font-bold text-foreground text-balance">
+                  Let&apos;s Build Something
+                  <span className="text-accent"> Great</span>
+                </h1>
+                <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
+                  Have a project in mind? Fill out the form below and I will get
+                  back to you within 24 hours to discuss how we can work together.
+                </p>
+              </div>
+            )}
 
             <div className="grid gap-12 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <ContactForm fields={fields} />
-              </div>
-              <div>
-                <ContactInfo />
-              </div>
+              {show("form") && (
+                <div className="lg:col-span-2">
+                  <ContactForm fields={fields} />
+                </div>
+              )}
+              {show("info") && (
+                <div>
+                  <ContactInfo />
+                </div>
+              )}
             </div>
           </div>
         </section>

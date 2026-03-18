@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -lS \"/c/Users/p/Desktop/New folder/new-fullstack-akash/components/admin/\"*.tsx)",
+      "Read(//c/Users/p/Desktop/New folder/new-fullstack-akash/**)"
+    ]
+  }
+}

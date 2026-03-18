@@ -2,22 +2,18 @@
 
 import { useRef } from "react"
 import { motion, useInView, useScroll, useSpring, useTransform } from "framer-motion"
-import { Search, Layers, Code2, CheckCircle, Rocket, RefreshCw } from "lucide-react"
 import type { ProcessStep } from "@/lib/db"
+import { iconMap, DefaultIcon } from "@/lib/icon-map"
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  search: Search,
-  layers: Layers,
-  code: Code2,
-  "check-circle": CheckCircle,
-  rocket: Rocket,
-  "refresh-cw": RefreshCw,
+interface ProcessSectionProps {
+  steps: ProcessStep[]
+  content?: Record<string, unknown>
 }
 
 function Step({ step, index, total }: { step: ProcessStep; index: number; total: number }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: "-60px" })
-  const Icon = iconMap[step.icon] || Code2
+  const Icon = iconMap[step.icon] || DefaultIcon
 
   return (
     <motion.div
@@ -67,11 +63,10 @@ function Step({ step, index, total }: { step: ProcessStep; index: number; total:
   )
 }
 
-export function ProcessSection({ steps }: { steps: ProcessStep[] }) {
+export function ProcessSection({ steps, content }: ProcessSectionProps) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true })
 
-  // Scroll-driven line fill
   const sectionRef = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -81,6 +76,21 @@ export function ProcessSection({ steps }: { steps: ProcessStep[] }) {
     stiffness: 60,
     damping: 20,
   })
+
+  const label = (content?.label as string) || "Process"
+  const title = (content?.title as string) || "How We Build"
+  const titleHighlight = (content?.title_highlight as string) || "Together"
+  const panelLabel = (content?.panel_label as string) || "My commitment"
+  const panelTitle = (content?.panel_title as string) || "Clarity at every step"
+  const panelDescription =
+    (content?.panel_description as string) ||
+    "No black boxes. You always know where the project stands, what was shipped, and what comes next. I aim for decisions together — not surprises after the fact."
+  const panelItems = (content?.panel_items as string[]) || [
+    "Weekly async updates",
+    "Shared project board",
+    "Code reviews & docs",
+    "Post-launch support",
+  ]
 
   return (
     <section ref={sectionRef} className="relative py-28 border-t border-border/40">
@@ -95,7 +105,7 @@ export function ProcessSection({ steps }: { steps: ProcessStep[] }) {
             className="flex items-center gap-3 mb-4"
           >
             <span className="h-px w-8 bg-accent" />
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">Process</span>
+            <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">{label}</span>
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -103,12 +113,12 @@ export function ProcessSection({ steps }: { steps: ProcessStep[] }) {
             transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="text-4xl sm:text-5xl font-black tracking-tight text-foreground"
           >
-            How We Build{" "}
+            {title}{" "}
             <span
               className="bg-clip-text text-transparent"
               style={{ backgroundImage: "linear-gradient(90deg, hsl(var(--accent)), #818cf8)" }}
             >
-              Together
+              {titleHighlight}
             </span>
           </motion.h2>
         </div>
@@ -132,23 +142,16 @@ export function ProcessSection({ steps }: { steps: ProcessStep[] }) {
               <div className="h-px w-full bg-linear-to-r from-transparent via-accent/60 to-transparent" />
               <div className="p-8">
                 <p className="text-xs font-bold tracking-[0.18em] uppercase text-accent mb-4">
-                  My commitment
+                  {panelLabel}
                 </p>
                 <h3 className="text-2xl font-black text-foreground leading-snug mb-4">
-                  Clarity at every step
+                  {panelTitle}
                 </h3>
                 <p className="text-muted-foreground leading-relaxed text-sm mb-8">
-                  No black boxes. You always know where the project stands, what was
-                  shipped, and what comes next. I aim for decisions together — not
-                  surprises after the fact.
+                  {panelDescription}
                 </p>
                 <div className="flex flex-col gap-3">
-                  {[
-                    "Weekly async updates",
-                    "Shared project board",
-                    "Code reviews & docs",
-                    "Post-launch support",
-                  ].map((item, i) => (
+                  {panelItems.map((item, i) => (
                     <motion.div
                       key={item}
                       initial={{ opacity: 0, x: -10 }}

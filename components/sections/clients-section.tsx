@@ -6,15 +6,15 @@ import { FadeIn } from "@/components/scroll-animations"
 
 interface ClientsSectionProps {
   clients: ClientLogo[]
+  content?: Record<string, unknown>
 }
 
-export function ClientsSection({ clients }: ClientsSectionProps) {
-  // Duplicate clients for seamless infinite scroll
+export function ClientsSection({ clients, content }: ClientsSectionProps) {
+  const subtitle = (content?.subtitle as string) || "Trusted by innovative companies"
   const duplicatedClients = [...clients, ...clients]
 
   return (
     <section className="py-16 relative overflow-hidden">
-      {/* Top and bottom gradient lines */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
@@ -22,17 +22,14 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
         <FadeIn>
           <div className="text-center mb-12">
             <p className="text-sm font-medium text-muted-foreground tracking-wider uppercase">
-              Trusted by innovative companies
+              {subtitle}
             </p>
           </div>
         </FadeIn>
       </div>
 
-      {/* Infinite scroll marquee */}
       <div className="relative">
-        {/* Left fade gradient */}
         <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-        {/* Right fade gradient */}
         <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
         <motion.div

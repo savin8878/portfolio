@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
 import { ArrowRight, ExternalLink, Github, ArrowUpRight } from "lucide-react"
@@ -36,7 +37,17 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       >
         {/* Visual panel */}
         <div className={`relative overflow-hidden ${isFeatured ? "h-64" : "h-48"} bg-muted`}>
-          <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-85`} />
+          {project.featured_image ? (
+            <Image
+              src={project.featured_image}
+              alt={project.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes={isFeatured ? "(max-width: 768px) 100vw, 66vw" : "(max-width: 768px) 100vw, 33vw"}
+            />
+          ) : (
+            <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-85`} />
+          )}
           <div
             className="absolute inset-0 opacity-[0.07]"
             style={{
@@ -44,18 +55,17 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
               backgroundSize: "18px 18px",
             }}
           />
-          {/* Large watermark letter */}
-          <div
-            className="absolute -right-2 -bottom-4 font-black text-white/[0.08] leading-none select-none pointer-events-none"
-            style={{ fontSize: isFeatured ? "11rem" : "8rem" }}
-          >
-            {project.title.charAt(0)}
-          </div>
-          {/* Index number */}
+          {!project.featured_image && (
+            <div
+              className="absolute -right-2 -bottom-4 font-black text-white/[0.08] leading-none select-none pointer-events-none"
+              style={{ fontSize: isFeatured ? "11rem" : "8rem" }}
+            >
+              {project.title.charAt(0)}
+            </div>
+          )}
           <div className="absolute top-4 left-5 text-[11px] font-bold text-white/50 tracking-widest">
             {String(index + 1).padStart(2, "0")}
           </div>
-          {/* Hover arrow */}
           <motion.div
             className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -63,7 +73,6 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           >
             <ArrowUpRight className="h-4 w-4 text-white" />
           </motion.div>
-          {/* Bottom description overlay on featured */}
           {isFeatured && (
             <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
               <p className="text-white/80 text-sm leading-relaxed line-clamp-2">
@@ -92,7 +101,6 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             </p>
           )}
 
-          {/* Tech badges */}
           <div className="flex flex-wrap gap-1.5 mt-auto">
             {project.tech_stack?.slice(0, isFeatured ? 5 : 3).map((tech) => (
               <Badge key={tech} variant="secondary" className="text-[11px] px-2 py-0.5 bg-muted/60 border border-border/40 hover:bg-accent/10 hover:text-accent transition-colors">
@@ -106,7 +114,6 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             )}
           </div>
 
-          {/* Metrics */}
           {project.results_metrics && (
             <div className="mt-4 pt-4 border-t border-border/40 grid grid-cols-2 gap-3">
               {Object.entries(project.results_metrics).slice(0, 2).map(([key, val]) => (
@@ -118,7 +125,6 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             </div>
           )}
 
-          {/* Links */}
           {(project.live_url || project.github_url) && (
             <div className="mt-4 flex gap-4 relative z-10">
               {project.live_url && (
@@ -139,9 +145,18 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   )
 }
 
-export function FeaturedProjectsSection({ projects }: { projects: Project[] }) {
+interface FeaturedProjectsSectionProps {
+  projects: Project[]
+  content?: Record<string, unknown>
+}
+
+export function FeaturedProjectsSection({ projects, content }: FeaturedProjectsSectionProps) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true })
+
+  const label = (content?.label as string) || "Featured Work"
+  const title = (content?.title as string) || "Case Studies &"
+  const titleHighlight = (content?.title_highlight as string) || "Projects"
 
   return (
     <section className="relative py-28">
@@ -156,7 +171,7 @@ export function FeaturedProjectsSection({ projects }: { projects: Project[] }) {
               className="flex items-center gap-3 mb-4"
             >
               <span className="h-px w-8 bg-accent" />
-              <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">Featured Work</span>
+              <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">{label}</span>
             </motion.div>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -164,9 +179,9 @@ export function FeaturedProjectsSection({ projects }: { projects: Project[] }) {
               transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
               className="text-4xl sm:text-5xl font-black tracking-tight text-foreground leading-tight"
             >
-              Case Studies &<br />
+              {title}<br />
               <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(90deg, hsl(var(--accent)), #818cf8)" }}>
-                Projects
+                {titleHighlight}
               </span>
             </motion.h2>
           </div>

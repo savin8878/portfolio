@@ -1,24 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import {
-  Cloud,
-  Rocket,
-  Lightbulb,
-  Code2,
-  CheckCircle,
-  Clock,
-  DollarSign,
-} from "lucide-react"
+import { CheckCircle, Clock, DollarSign } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import type { Service } from "@/lib/db"
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  cloud: Cloud,
-  rocket: Rocket,
-  lightbulb: Lightbulb,
-  code: Code2,
-}
+import { iconMap, DefaultIcon } from "@/lib/icon-map"
 
 interface ServiceCardProps {
   service: Service
@@ -26,7 +12,7 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ service, index }: ServiceCardProps) {
-  const Icon = iconMap[service.icon] || Code2
+  const Icon = iconMap[service.icon] || DefaultIcon
 
   return (
     <motion.div
@@ -59,8 +45,8 @@ export function ServiceCard({ service, index }: ServiceCardProps) {
       {/* Features */}
       {service.features && service.features.length > 0 && (
         <div className="mt-6 grid gap-2">
-          {service.features.map((feature, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm">
+          {service.features.map((feature) => (
+            <div key={feature} className="flex items-center gap-2 text-sm">
               <CheckCircle className="h-4 w-4 text-accent flex-shrink-0" />
               <span className="text-muted-foreground">{feature}</span>
             </div>

@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
+import { generateSlug } from "@/lib/utils"
 
 interface Project {
   id?: number
@@ -69,13 +70,6 @@ export function ProjectForm({
   const [techStackInput, setTechStackInput] = useState(
     (project?.tech_stack || []).join(", ")
   )
-
-  function generateSlug(title: string) {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -346,7 +340,7 @@ export function ProjectForm({
             Delete Project
           </Button>
         ) : (
-          <div />
+          <span />
         )}
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (

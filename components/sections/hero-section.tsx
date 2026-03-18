@@ -4,6 +4,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowRight, Github, Linkedin, Twitter, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import type { SocialLink } from "@/lib/db"
 
 interface HeroSectionProps {
   developerName: string
@@ -13,9 +14,17 @@ interface HeroSectionProps {
   primaryCtaUrl: string
   secondaryCtaText: string
   secondaryCtaUrl: string
+  socialLinks?: SocialLink[]
+  content?: Record<string, unknown>
 }
 
-const socialLinks = [
+const socialIcons: Record<string, typeof Github> = {
+  github: Github,
+  linkedin: Linkedin,
+  twitter: Twitter,
+}
+
+const fallbackSocialLinks = [
   { href: "https://github.com", icon: Github, label: "GitHub" },
   { href: "https://linkedin.com", icon: Linkedin, label: "LinkedIn" },
   { href: "https://twitter.com", icon: Twitter, label: "Twitter" },
@@ -30,7 +39,12 @@ export function HeroSection({
   primaryCtaUrl,
   secondaryCtaText,
   secondaryCtaUrl,
+  socialLinks,
+  content,
 }: HeroSectionProps) {
+  const availabilityText =
+    (content?.availability_text as string) || "Available for new projects"
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Elements */}
@@ -55,7 +69,7 @@ export function HeroSection({
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
               </span>
               <span className="text-sm font-medium text-foreground">
-                Available for new projects
+                {availabilityText}
               </span>
             </div>
           </motion.div>
@@ -115,18 +129,35 @@ export function HeroSection({
             transition={{ duration: 0.5, delay: 0.5 }}
             className="mt-12 flex gap-6"
           >
-            {socialLinks.map((social) => (
-              <Link
-                key={social.label}
-                href={social.href}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <social.icon className="h-5 w-5" />
-                <span className="sr-only">{social.label}</span>
-              </Link>
-            ))}
+            {socialLinks && socialLinks.length > 0
+              ? socialLinks.map((link) => {
+                  const Icon =
+                    socialIcons[link.platform.toLowerCase()] || Mail
+                  return (
+                    <Link
+                      key={link.id}
+                      href={link.url}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span className="sr-only">{link.platform}</span>
+                    </Link>
+                  )
+                })
+              : fallbackSocialLinks.map((social) => (
+                  <Link
+                    key={social.label}
+                    href={social.href}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <social.icon className="h-5 w-5" />
+                    <span className="sr-only">{social.label}</span>
+                  </Link>
+                ))}
           </motion.div>
         </div>
       </div>

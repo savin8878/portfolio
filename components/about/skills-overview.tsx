@@ -1,17 +1,21 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { Progress } from "@/components/ui/progress"
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
 import type { TechStackItem } from "@/lib/db"
 
 interface SkillsOverviewProps {
   techStack: TechStackItem[]
+  content?: Record<string, unknown>
 }
 
-const categoryOrder = ["Frontend", "Backend", "Infrastructure", "Tools"]
+const CATEGORY_ORDER = ["Frontend", "Backend", "Infrastructure", "Tools"]
 
-export function SkillsOverview({ techStack }: SkillsOverviewProps) {
-  const groupedTech = techStack.reduce(
+export function SkillsOverview({ techStack, content }: SkillsOverviewProps) {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true })
+
+  const grouped = techStack.reduce(
     (acc, tech) => {
       if (!acc[tech.category]) {
         acc[tech.category] = []
@@ -22,61 +26,112 @@ export function SkillsOverview({ techStack }: SkillsOverviewProps) {
     {} as Record<string, TechStackItem[]>
   )
 
-  const sortedCategories = categoryOrder.filter(
-    (category) => groupedTech[category]
-  )
+  const categories = CATEGORY_ORDER.filter((c) => grouped[c])
 
   return (
-    <section className="py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-sm font-semibold text-accent uppercase tracking-wider">
-            Technical Skills
-          </h2>
-          <p className="mt-2 text-3xl sm:text-4xl font-bold text-foreground text-balance">
-            Skills & Expertise
-          </p>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            A comprehensive overview of my technical capabilities built over
-            years of hands-on experience.
-          </p>
-        </motion.div>
+    <section className="relative py-28 border-t border-border/40">
+      {/* Subtle dot grid — matching metrics-section */}
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 0)",
+          backgroundSize: "32px 32px",
+        }}
+      />
 
-        <div className="grid gap-12 lg:grid-cols-2">
-          {sortedCategories.map((category, categoryIndex) => (
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Section Header — left-aligned home page style */}
+        <div ref={ref} className="mb-14">
+          <motion.div
+            initial={{ opacity: 0, x: -16 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5 }}
+            className="flex items-center gap-3 mb-4"
+          >
+            <span className="h-px w-8 bg-accent" />
+            <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">
+              {(content?.label as string) || "Tech Stack"}
+            </span>
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-4xl sm:text-5xl font-black tracking-tight text-foreground"
+          >
+            {(content?.title as string) || "Skills &"}{" "}
+            <span
+              className="bg-clip-text text-transparent"
+              style={{ backgroundImage: "linear-gradient(90deg, hsl(var(--accent)), #818cf8)" }}
+            >
+              {(content?.title_highlight as string) || "Expertise"}
+            </span>
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mt-4 text-lg text-muted-foreground max-w-2xl leading-relaxed"
+          >
+            {(content?.description as string) ||
+              "A comprehensive overview of my technical capabilities built over years of hands-on experience."}
+          </motion.p>
+        </div>
+
+        {/* Grid — matching home tech-stack-section style */}
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+          {categories.map((category, ci) => (
             <motion.div
               key={category}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
-              className="p-6 rounded-2xl bg-card border border-border"
+              initial={{ opacity: 0, y: 24 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.15 + ci * 0.08, ease: [0.22, 1, 0.36, 1] }}
             >
-              <h3 className="text-lg font-semibold text-foreground mb-6">
-                {category}
-              </h3>
-              <div className="space-y-4">
-                {groupedTech[category].map((tech) => (
-                  <div key={tech.id}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-foreground">
+              {/* Category label */}
+              <div className="flex items-center gap-2 mb-5">
+                <span className="h-px w-5 bg-accent/50" />
+                <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-accent">
+                  {category}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {grouped[category].map((tech, ti) => (
+                  <motion.div
+                    key={tech.id}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={inView ? { opacity: 1, x: 0 } : {}}
+                    transition={{ duration: 0.4, delay: 0.2 + ci * 0.08 + ti * 0.04 }}
+                    className="group flex items-center justify-between rounded-xl border border-border/50 bg-card px-4 py-3 hover:border-accent/40 hover:bg-accent/[0.03] transition-all duration-300"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors duration-200">
                         {tech.name}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {tech.years_experience} years
+                      <span className="text-[10px] text-muted-foreground ml-2">
+                        {tech.years_experience}y
                       </span>
                     </div>
-                    <Progress
-                      value={tech.proficiency_level * 20}
-                      className="h-2"
-                    />
-                  </div>
+
+                    {/* Proficiency dots — matching home tech-stack */}
+                    <div className="flex gap-1 shrink-0 ml-3">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <motion.span
+                          key={i}
+                          initial={{ scale: 0 }}
+                          animate={inView ? { scale: 1 } : {}}
+                          transition={{
+                            delay: 0.25 + ci * 0.08 + ti * 0.04 + i * 0.04,
+                            type: "spring",
+                            stiffness: 400,
+                          }}
+                          className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                            i < tech.proficiency_level ? "bg-accent" : "bg-border"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>

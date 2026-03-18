@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server"
 import { sql } from "@/lib/db"
-
-function generateSlug(title: string) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-}
+import { generateSlug } from "@/lib/utils"
 
 export async function POST(request: Request) {
   try {

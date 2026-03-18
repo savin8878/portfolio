@@ -2,14 +2,23 @@
 
 import { useRef, useState } from "react"
 import { motion, useInView, AnimatePresence } from "framer-motion"
-import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react"
+import { Star, ChevronLeft, ChevronRight } from "lucide-react"
 import type { Testimonial } from "@/lib/db"
 
-export function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) {
+interface TestimonialsSectionProps {
+  testimonials: Testimonial[]
+  content?: Record<string, unknown>
+}
+
+export function TestimonialsSection({ testimonials, content }: TestimonialsSectionProps) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true })
   const [active, setActive] = useState(0)
   const [dir, setDir] = useState(1)
+
+  const label = (content?.label as string) || "Testimonials"
+  const title = (content?.title as string) || "What Clients"
+  const titleHighlight = (content?.title_highlight as string) || "Say"
 
   if (!testimonials.length) return null
 
@@ -35,7 +44,7 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
             className="flex items-center gap-3 mb-4"
           >
             <span className="h-px w-8 bg-accent" />
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">Testimonials</span>
+            <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">{label}</span>
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -43,12 +52,12 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
             transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="text-4xl sm:text-5xl font-black tracking-tight text-foreground leading-tight"
           >
-            What Clients{" "}
+            {title}{" "}
             <span
               className="bg-clip-text text-transparent"
               style={{ backgroundImage: "linear-gradient(90deg, hsl(var(--accent)), #818cf8)" }}
             >
-              Say
+              {titleHighlight}
             </span>
           </motion.h2>
         </div>
@@ -62,13 +71,11 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            {/* Large quote mark */}
             <div className="absolute -top-4 -left-2 text-[120px] leading-none font-black text-accent/[0.07] select-none pointer-events-none">
               &ldquo;
             </div>
 
             <div className="relative rounded-2xl border border-border/50 bg-card overflow-hidden p-8 md:p-10">
-              {/* Top accent bar */}
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
 
               <AnimatePresence mode="wait" custom={dir}>
@@ -80,7 +87,6 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
                   exit={{ opacity: 0, x: dir * -30 }}
                   transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  {/* Stars */}
                   <div className="flex gap-1 mb-6">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
@@ -90,12 +96,10 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
                     ))}
                   </div>
 
-                  {/* Quote text */}
                   <p className="text-lg md:text-xl text-foreground leading-relaxed font-medium mb-8">
                     &ldquo;{t.testimonial_text}&rdquo;
                   </p>
 
-                  {/* Author */}
                   <div className="flex items-center gap-4">
                     <div className="w-11 h-11 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
                       <span className="text-sm font-black text-accent">{t.client_name.charAt(0)}</span>
@@ -110,7 +114,6 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
                 </motion.div>
               </AnimatePresence>
 
-              {/* Navigation */}
               <div className="flex items-center gap-3 mt-8 pt-6 border-t border-border/40">
                 <button
                   onClick={prev}

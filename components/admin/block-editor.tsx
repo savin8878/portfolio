@@ -901,7 +901,7 @@ export function htmlToBlocks(html: string): ContentBlock[] {
 
     let type: BlockType = "paragraph";
     let content = el.innerHTML;
-    let metadata: any = {};
+    let metadata: ContentBlock["metadata"] = {};
 
     if (tag === "h1") type = "heading1";
     else if (tag === "h2") type = "heading2";

@@ -2,16 +2,9 @@
 
 import { useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
-import { Building2, Code2, BarChart3, Zap } from "lucide-react"
 import type { PhilosophyItem } from "@/lib/db"
 import { FadeIn, GlowCard, RevealText } from "@/components/scroll-animations"
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  building: Building2,
-  code: Code2,
-  "chart-bar": BarChart3,
-  zap: Zap,
-}
+import { iconMap, DefaultIcon } from "@/lib/icon-map"
 
 interface PhilosophySectionProps {
   items: PhilosophyItem[]
@@ -61,7 +54,7 @@ export function PhilosophySection({ items }: PhilosophySectionProps) {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {items.map((item, index) => {
-            const Icon = iconMap[item.icon] || Code2
+            const Icon = iconMap[item.icon] || DefaultIcon
             return (
               <FadeIn key={item.id} delay={index * 0.1}>
                 <GlowCard className="group h-full relative p-8 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-accent/40 transition-all duration-500">

@@ -269,7 +269,7 @@ export function TestimonialForm({
             Delete Testimonial
           </Button>
         ) : (
-          <div />
+          <span />
         )}
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (

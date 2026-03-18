@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { BlockEditor, ContentBlock, blocksToHtml, htmlToBlocks } from "./block-editor"
+import { generateSlug } from "@/lib/utils"
 
 interface BlogPost {
   id?: number
@@ -79,13 +80,6 @@ export function BlogPostForm({
     const html = blocksToHtml(blocks)
     setFormData(prev => ({ ...prev, content: html }))
   }, [blocks])
-
-  function generateSlug(title: string) {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-  }
 
   function estimateReadingTime(content: string) {
     const wordsPerMinute = 200
@@ -341,8 +335,8 @@ export function BlogPostForm({
 
               {tagsInput && (
                 <div className="flex flex-wrap gap-2">
-                  {tagsInput.split(",").filter(t => t.trim()).map((tag, i) => (
-                    <Badge key={i} variant="secondary">
+                  {tagsInput.split(",").filter(t => t.trim()).map((tag) => (
+                    <Badge key={tag.trim()} variant="secondary">
                       {tag.trim()}
                     </Badge>
                   ))}
@@ -479,7 +473,7 @@ export function BlogPostForm({
             Delete Post
           </Button>
         ) : (
-          <div />
+          <span />
         )}
         <div className="flex items-center gap-2">
           <Button

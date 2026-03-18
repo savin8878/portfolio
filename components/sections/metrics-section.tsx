@@ -2,15 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
-import { Package, Users, Rocket, Calendar } from "lucide-react"
 import type { ImpactMetric } from "@/lib/db"
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  package: Package,
-  users: Users,
-  rocket: Rocket,
-  calendar: Calendar,
-}
+import { iconMap, DefaultIcon } from "@/lib/icon-map"
 
 function Counter({ value, suffix }: { value: string; suffix: string }) {
   const ref = useRef<HTMLSpanElement>(null)
@@ -68,7 +61,7 @@ export function MetricsSection({ metrics }: { metrics: ImpactMetric[] }) {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-border/40">
           {metrics.map((metric, i) => {
-            const Icon = iconMap[metric.icon] || Package
+            const Icon = iconMap[metric.icon] || DefaultIcon
             return (
               <motion.div
                 key={metric.id}

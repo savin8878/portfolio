@@ -252,3 +252,20 @@ export interface Certification {
   display_order: number
   is_active: boolean
 }
+
+export interface SectionContent {
+  id: number
+  page: string
+  section: string
+  content: Record<string, unknown>
+  updated_at: Date
+}
+
+export interface SectionVisibility {
+  id: number
+  page: string
+  section: string
+  is_visible: boolean
+  display_order: number
+  updated_at: Date
+}

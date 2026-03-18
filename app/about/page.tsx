@@ -11,6 +11,8 @@ import {
   getTechStack,
   getEducation,
   getCertifications,
+  getPageContent,
+  getPageVisibility,
 } from "@/lib/data"
 
 export const metadata: Metadata = {
@@ -20,40 +22,55 @@ export const metadata: Metadata = {
 }
 
 export default async function AboutPage() {
-  const [siteSettings, experiences, techStack, education, certifications] =
+  const [siteSettings, experiences, techStack, education, certifications, pageContent, vis] =
     await Promise.all([
       getSiteSettings(),
       getExperiences(),
       getTechStack(),
       getEducation(),
       getCertifications(),
+      getPageContent("about"),
+      getPageVisibility("about"),
     ])
+
+  const show = (section: string) => vis[section] !== false
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
       <main className="pt-16">
-        <AboutHero
-          name={siteSettings?.developer_name || "Akash Vishwakarma"}
-          title={siteSettings?.professional_title || "Full-Stack Product Engineer"}
-          bio={
-            siteSettings?.site_description ||
-            "Full-Stack Product Engineer specializing in building scalable SaaS platforms, AI tools, and high-performance web applications."
-          }
-          location={siteSettings?.location || "San Francisco, CA"}
-          email={siteSettings?.email || "hello@alexchen.dev"}
-        />
+        {show("hero") && (
+          <AboutHero
+            name={siteSettings?.developer_name || "Akash Vishwakarma"}
+            title={siteSettings?.professional_title || "Full-Stack Product Engineer"}
+            bio={
+              siteSettings?.site_description ||
+              "Full-Stack Product Engineer specializing in building scalable SaaS platforms, AI tools, and high-performance web applications."
+            }
+            location={siteSettings?.location || "San Francisco, CA"}
+            email={siteSettings?.email || "hello@alexchen.dev"}
+            profileImage={siteSettings?.profile_image || null}
+            resumeUrl={siteSettings?.resume_url || null}
+            availabilityStatus={siteSettings?.availability_status || "Available for projects"}
+            content={pageContent.hero}
+          />
+        )}
 
-        <ExperienceTimeline
-          experiences={experiences}
-          education={education}
-          certifications={certifications}
-        />
+        {show("experience") && (
+          <ExperienceTimeline
+            experiences={experiences}
+            education={education}
+            certifications={certifications}
+            content={pageContent.experience}
+          />
+        )}
 
-        <SkillsOverview techStack={techStack} />
+        {show("skills") && (
+          <SkillsOverview techStack={techStack} content={pageContent.skills} />
+        )}
 
-        <CtaSection />
+        {show("cta") && <CtaSection />}
       </main>
 
       <Footer />
