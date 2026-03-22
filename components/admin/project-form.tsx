@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { generateSlug } from "@/lib/utils"
+import { AIWriteButton } from "@/components/admin/ai-assistant"
 
 interface Project {
   id?: number
@@ -158,7 +159,10 @@ export function ProjectForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="short_description">Short Description *</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="short_description">Short Description *</Label>
+              <AIWriteButton value={formData.short_description} onApply={(t) => setFormData({ ...formData, short_description: t })} context={`project: ${formData.title}`} />
+            </div>
             <Textarea
               id="short_description"
               value={formData.short_description}
@@ -213,7 +217,10 @@ export function ProjectForm({
           <h3 className="font-medium text-foreground">Case Study Details</h3>
 
           <div className="space-y-2">
-            <Label htmlFor="problem_statement">The Challenge</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="problem_statement">The Challenge</Label>
+              <AIWriteButton value={formData.problem_statement || ""} onApply={(t) => setFormData({ ...formData, problem_statement: t })} context={`challenge for project: ${formData.title}`} />
+            </div>
             <Textarea
               id="problem_statement"
               value={formData.problem_statement}
@@ -226,7 +233,10 @@ export function ProjectForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="solution">The Solution</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="solution">The Solution</Label>
+              <AIWriteButton value={formData.solution || ""} onApply={(t) => setFormData({ ...formData, solution: t })} context={`solution for project: ${formData.title}`} />
+            </div>
             <Textarea
               id="solution"
               value={formData.solution}
@@ -239,7 +249,10 @@ export function ProjectForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="full_description">Full Description</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="full_description">Full Description</Label>
+              <AIWriteButton value={formData.full_description || ""} onApply={(t) => setFormData({ ...formData, full_description: t })} context={`full description for project: ${formData.title}`} />
+            </div>
             <Textarea
               id="full_description"
               value={formData.full_description}

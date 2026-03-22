@@ -130,7 +130,6 @@ export function ProcessSection({ steps, content }: ProcessSectionProps) {
               <Step key={step.id} step={step} index={i} total={steps.length} />
             ))}
           </div>
-
           {/* Right panel — summary / CTA */}
           <motion.div
             initial={{ opacity: 0, x: 24 }}

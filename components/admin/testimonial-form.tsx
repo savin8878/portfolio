@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { AIWriteButton } from "@/components/admin/ai-assistant"
 
 interface Testimonial {
   id?: number
@@ -177,7 +178,10 @@ export function TestimonialForm({
           <h3 className="font-medium text-foreground">Testimonial</h3>
 
           <div className="space-y-2">
-            <Label htmlFor="testimonial_text">Testimonial Content *</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="testimonial_text">Testimonial Content *</Label>
+              <AIWriteButton value={formData.testimonial_text} onApply={(t) => setFormData({ ...formData, testimonial_text: t })} context={`testimonial from ${formData.client_name} at ${formData.client_company}`} />
+            </div>
             <Textarea
               id="testimonial_text"
               value={formData.testimonial_text}

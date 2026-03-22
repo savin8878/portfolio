@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { SectionContent } from "@/lib/db"
+import { AIWriteButton } from "@/components/admin/ai-assistant"
 
 // Schema defines the editable fields for each page/section
 const SECTION_SCHEMA: Record<
@@ -213,9 +214,18 @@ function SectionEditor({ page, section, schema, initialContent }: SectionEditorP
         <CardContent className="space-y-4 pt-0">
           {schema.fields.map((field) => (
             <div key={field.key} className="space-y-2">
-              <Label htmlFor={`${page}-${section}-${field.key}`}>
-                {field.label}
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor={`${page}-${section}-${field.key}`}>
+                  {field.label}
+                </Label>
+                {(field.type === "textarea" || field.type === "list") && (
+                  <AIWriteButton
+                    value={(content[field.key] as string) || ""}
+                    onApply={(t) => setContent({ ...content, [field.key]: t })}
+                    context={`${field.label} for ${section} section`}
+                  />
+                )}
+              </div>
               {field.type === "textarea" || field.type === "list" ? (
                 <Textarea
                   id={`${page}-${section}-${field.key}`}

@@ -17,6 +17,7 @@ import {
   FormInput,
   FileEdit,
   ToggleLeft,
+  FileUser,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -60,6 +61,11 @@ const navItems = [
     title: "Section Visibility",
     href: "/admin/visibility",
     icon: ToggleLeft,
+  },
+  {
+    title: "Resume Builder",
+    href: "/admin/resume-builder",
+    icon: FileUser,
   },
   {
     title: "Form Builder",

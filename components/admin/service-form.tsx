@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
+import { AIWriteButton } from "@/components/admin/ai-assistant"
 
 interface Service {
   id?: number
@@ -160,7 +161,10 @@ export function ServiceForm({ service }: { service?: Service }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="short_description">Short Description</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="short_description">Short Description</Label>
+              <AIWriteButton value={formData.short_description || ""} onApply={(t) => setFormData({ ...formData, short_description: t })} context={`service: ${formData.title}`} />
+            </div>
             <Textarea
               id="short_description"
               value={formData.short_description}
@@ -173,7 +177,10 @@ export function ServiceForm({ service }: { service?: Service }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="full_description">Full Description</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="full_description">Full Description</Label>
+              <AIWriteButton value={formData.full_description || ""} onApply={(t) => setFormData({ ...formData, full_description: t })} context={`full description for service: ${formData.title}`} />
+            </div>
             <Textarea
               id="full_description"
               value={formData.full_description}

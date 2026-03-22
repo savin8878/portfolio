@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { BlockEditor, ContentBlock, blocksToHtml, htmlToBlocks } from "./block-editor"
 import { generateSlug } from "@/lib/utils"
+import { AIWriteButton } from "@/components/admin/ai-assistant"
 
 interface BlogPost {
   id?: number
@@ -233,7 +234,10 @@ export function BlogPostForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="excerpt">Excerpt</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="excerpt">Excerpt</Label>
+                  <AIWriteButton value={formData.excerpt || ""} onApply={(t) => setFormData({ ...formData, excerpt: t })} context={`blog post excerpt for: ${formData.title}`} />
+                </div>
                 <Textarea
                   id="excerpt"
                   value={formData.excerpt}
@@ -351,7 +355,10 @@ export function BlogPostForm({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="meta_description">Meta Description</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="meta_description">Meta Description</Label>
+                  <AIWriteButton value={formData.meta_description || ""} onApply={(t) => setFormData({ ...formData, meta_description: t })} context={`SEO meta description for blog: ${formData.title}`} />
+                </div>
                 <Textarea
                   id="meta_description"
                   value={formData.meta_description}
