@@ -3,7 +3,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  serverExternalPackages: ["puppeteer"],
+  serverExternalPackages: ["puppeteer", "pdf-parse"],
   images: {
     remotePatterns: [
       {

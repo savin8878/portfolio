@@ -239,6 +239,22 @@ export async function getPageVisibility(
   }
 }
 
+// Section order — returns sections sorted by display_order
+export async function getPageSectionOrder(
+  page: string
+): Promise<string[]> {
+  try {
+    const result = await sql`
+      SELECT section, display_order FROM section_visibility
+      WHERE page = ${page}
+      ORDER BY display_order ASC
+    `
+    return result.map((r) => r.section as string)
+  } catch {
+    return []
+  }
+}
+
 export async function getAllSectionVisibility(): Promise<SectionVisibility[]> {
   try {
     const result = await sql`

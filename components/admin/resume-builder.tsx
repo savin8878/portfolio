@@ -69,6 +69,7 @@ import { ResumePreview } from "@/components/admin/resume-preview"
 import { downloadPDF, downloadDOCX } from "@/lib/resume-export"
 import { AISettingsPanel, AITailorPanel } from "@/components/admin/resume-ai-panel"
 import { AIWriteButton, AIAchievementsButton } from "@/components/admin/ai-assistant"
+import { ResumeImportPanel } from "@/components/admin/resume-import-panel"
 
 // Types
 export interface ResumeProfile {
@@ -129,9 +130,15 @@ export interface ResumeProject {
   id: string
   enabled: boolean
   title: string
+  role: string
   description: string
+  achievements: string[]
   techStack: string[]
   url: string
+  repoUrl: string
+  startDate: string
+  endDate: string
+  isCurrent: boolean
 }
 
 export interface ResumeCustomSection {
@@ -251,9 +258,15 @@ function buildInitialConfig(data: any): ResumeConfig {
       id: String(p.id),
       enabled: true,
       title: p.title || "",
-      description: p.short_description || "",
+      role: p.role || "",
+      description: p.short_description || p.description || "",
+      achievements: p.achievements || [],
       techStack: p.tech_stack || [],
-      url: p.live_url || p.github_url || "",
+      url: p.live_url || "",
+      repoUrl: p.github_url || "",
+      startDate: formatDate(p.start_date),
+      endDate: formatDate(p.end_date),
+      isCurrent: p.is_current || false,
     })),
     customSections: [],
     template: "classic",
@@ -606,9 +619,15 @@ export function ResumeBuilder({ data }: { data: any }) {
           id: generateId(),
           enabled: true,
           title: "",
+          role: "",
           description: "",
+          achievements: [],
           techStack: [],
           url: "",
+          repoUrl: "",
+          startDate: "",
+          endDate: "",
+          isCurrent: false,
         },
       ],
     }))
@@ -813,6 +832,20 @@ export function ResumeBuilder({ data }: { data: any }) {
     })
   }, [])
 
+  // Import handler — replaces entire sections with AI-parsed data
+  const handleImport = useCallback((data: Partial<ResumeConfig>) => {
+    setConfig((prev) => ({
+      ...prev,
+      ...(data.profile && { profile: data.profile }),
+      ...(data.experiences && { experiences: data.experiences }),
+      ...(data.education && { education: data.education }),
+      ...(data.certifications && { certifications: data.certifications }),
+      ...(data.skillCategories && { skillCategories: data.skillCategories }),
+      ...(data.projects && { projects: data.projects }),
+      ...(data.customSections && { customSections: data.customSections }),
+    }))
+  }, [])
+
   const sectionLabels: Record<string, string> = {
     summary: "Professional Summary",
     experience: "Work Experience",
@@ -892,6 +925,10 @@ export function ResumeBuilder({ data }: { data: any }) {
           <TabsTrigger value="ai" className="gap-1.5">
             <Sparkles className="h-3.5 w-3.5" />
             AI Tailor
+          </TabsTrigger>
+          <TabsTrigger value="import" className="gap-1.5">
+            <FileText className="h-3.5 w-3.5" />
+            Import
           </TabsTrigger>
         </TabsList>
 
@@ -1310,8 +1347,36 @@ export function ResumeBuilder({ data }: { data: any }) {
                                       <Input value={proj.title} onChange={(e) => updateProject(proj.id, "title", e.target.value)} className="mt-1 h-8 text-sm" />
                                     </div>
                                     <div>
-                                      <Label className="text-xs">URL</Label>
-                                      <Input value={proj.url} onChange={(e) => updateProject(proj.id, "url", e.target.value)} className="mt-1 h-8 text-sm" />
+                                      <Label className="text-xs">Your Role</Label>
+                                      <Input value={proj.role || ""} onChange={(e) => updateProject(proj.id, "role", e.target.value)} placeholder="Lead Developer, Architect..." className="mt-1 h-8 text-sm" />
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                      <Label className="text-xs">Live URL</Label>
+                                      <Input value={proj.url} onChange={(e) => updateProject(proj.id, "url", e.target.value)} placeholder="https://..." className="mt-1 h-8 text-sm" />
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">Repo URL</Label>
+                                      <Input value={proj.repoUrl || ""} onChange={(e) => updateProject(proj.id, "repoUrl", e.target.value)} placeholder="github.com/..." className="mt-1 h-8 text-sm" />
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div className="flex items-end gap-2">
+                                      <div className="flex-1">
+                                        <Label className="text-xs">Start Date</Label>
+                                        <Input type="date" value={proj.startDate || ""} onChange={(e) => updateProject(proj.id, "startDate", e.target.value)} className="mt-1 h-8 text-sm" />
+                                      </div>
+                                    </div>
+                                    {!proj.isCurrent && (
+                                      <div>
+                                        <Label className="text-xs">End Date</Label>
+                                        <Input type="date" value={proj.endDate || ""} onChange={(e) => updateProject(proj.id, "endDate", e.target.value)} className="mt-1 h-8 text-sm" />
+                                      </div>
+                                    )}
+                                    <div className="flex items-center gap-2 pt-4">
+                                      <Switch checked={proj.isCurrent || false} onCheckedChange={(v) => updateProject(proj.id, "isCurrent", v)} />
+                                      <Label className="text-xs">Ongoing</Label>
                                     </div>
                                   </div>
                                   <div>
@@ -1324,6 +1389,22 @@ export function ResumeBuilder({ data }: { data: any }) {
                                       />
                                     </div>
                                     <Textarea value={proj.description} onChange={(e) => updateProject(proj.id, "description", e.target.value)} className="mt-1 min-h-[50px] text-sm" />
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center justify-between">
+                                      <Label className="text-xs">Key Highlights (one per line)</Label>
+                                      <AIAchievementsButton
+                                        role={`${proj.title} project`}
+                                        description={proj.description}
+                                        onApply={(achievements) => updateProject(proj.id, "achievements", achievements)}
+                                      />
+                                    </div>
+                                    <Textarea
+                                      value={(proj.achievements || []).join("\n")}
+                                      onChange={(e) => updateProject(proj.id, "achievements", e.target.value.split("\n").filter((a) => a.trim()))}
+                                      placeholder="Built microservices architecture handling 10K req/s&#10;Reduced deployment time by 60% with CI/CD pipeline&#10;Led team of 4 engineers"
+                                      className="mt-1 min-h-[60px] text-sm"
+                                    />
                                   </div>
                                   <div>
                                     <Label className="text-xs">Tech Stack (comma-separated)</Label>
@@ -1645,6 +1726,106 @@ export function ResumeBuilder({ data }: { data: any }) {
                         name: "Slate",
                         desc: "Dark sidebar corporate",
                       },
+                      {
+                        id: "glass",
+                        name: "Glass",
+                        desc: "Frosted glassmorphism",
+                      },
+                      {
+                        id: "gradient",
+                        name: "Gradient",
+                        desc: "Bold gradient accents",
+                      },
+                      {
+                        id: "mono",
+                        name: "Mono",
+                        desc: "Brutalist monochrome",
+                      },
+                      {
+                        id: "timelinepro",
+                        name: "Timeline Pro",
+                        desc: "Centered timeline layout",
+                      },
+                      {
+                        id: "carddeck",
+                        name: "Card Deck",
+                        desc: "Elevated card sections",
+                      },
+                      {
+                        id: "dualtone",
+                        name: "Dual Tone",
+                        desc: "Split dark/light layout",
+                      },
+                      {
+                        id: "magazine",
+                        name: "Magazine",
+                        desc: "Editorial multi-column",
+                      },
+                      {
+                        id: "neon",
+                        name: "Neon",
+                        desc: "Dark cyberpunk glow",
+                      },
+                      {
+                        id: "paper",
+                        name: "Paper",
+                        desc: "Warm parchment classic",
+                      },
+                      {
+                        id: "stacked",
+                        name: "Stacked",
+                        desc: "Full-width horizontal bands",
+                      },
+                      {
+                        id: "retro",
+                        name: "Retro",
+                        desc: "70s vintage warm tones",
+                      },
+                      {
+                        id: "origami",
+                        name: "Origami",
+                        desc: "Folded paper panels",
+                      },
+                      {
+                        id: "terminal",
+                        name: "Terminal",
+                        desc: "Command-line hacker",
+                      },
+                      {
+                        id: "ribbon",
+                        name: "Ribbon",
+                        desc: "Banner ribbon accents",
+                      },
+                      {
+                        id: "zen",
+                        name: "Zen",
+                        desc: "Japanese minimalism",
+                      },
+                      {
+                        id: "diagonal",
+                        name: "Diagonal",
+                        desc: "Dynamic angled accents",
+                      },
+                      {
+                        id: "circuit",
+                        name: "Circuit",
+                        desc: "Tech circuit board",
+                      },
+                      {
+                        id: "waterfall",
+                        name: "Waterfall",
+                        desc: "Cascading indent flow",
+                      },
+                      {
+                        id: "polaroid",
+                        name: "Polaroid",
+                        desc: "Photo frame playful",
+                      },
+                      {
+                        id: "architect",
+                        name: "Architect",
+                        desc: "Blueprint precision",
+                      },
                     ].map((tmpl) => (
                       <button
                         key={tmpl.id}
@@ -1918,6 +2099,42 @@ export function ResumeBuilder({ data }: { data: any }) {
                 <CardHeader className="py-2 px-4 bg-muted/50">
                   <CardTitle className="text-xs font-medium text-muted-foreground">
                     Live Preview (updates as AI applies changes)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2">
+                  <div className="transform scale-[0.42] origin-top-left w-[238%] h-[1000px] overflow-hidden">
+                    <ResumePreview config={config} />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* ─── IMPORT TAB ─── */}
+        <TabsContent value="import">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <Card className="border-border/50">
+                <CardHeader className="py-3 px-4">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-accent" />
+                    <CardTitle className="text-sm font-semibold">Import & AI Resume Builder</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0">
+                  <ResumeImportPanel config={config} onImport={handleImport} />
+                </CardContent>
+              </Card>
+              <AISettingsPanel />
+            </div>
+
+            {/* Import Preview */}
+            <div className="sticky top-6">
+              <Card className="border-border/50 overflow-hidden">
+                <CardHeader className="py-2 px-4 bg-muted/50">
+                  <CardTitle className="text-xs font-medium text-muted-foreground">
+                    Live Preview (updates as content imports)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2">

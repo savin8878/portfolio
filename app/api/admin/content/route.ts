@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { sql } from "@/lib/db"
 
 export async function GET() {
@@ -36,6 +37,12 @@ export async function POST(request: Request) {
         updated_at = NOW()
       RETURNING id
     `
+
+    // Revalidate the page so changes show immediately
+    try {
+      if (page === "home") revalidatePath("/")
+      else revalidatePath(`/${page}`)
+    } catch {}
 
     return NextResponse.json({ success: true, id: result[0].id })
   } catch (error) {

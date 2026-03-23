@@ -10,6 +10,7 @@ import { ProcessSection } from "@/components/sections/process-section"
 import { TestimonialsSection } from "@/components/sections/testimonials-section"
 import { BlogPreviewSection } from "@/components/sections/blog-preview-section"
 import { CtaSection } from "@/components/sections/cta-section"
+import { CustomBlocksRenderer } from "@/components/custom-blocks-renderer"
 import {
   getSiteSettings,
   getHeroSection,
@@ -24,7 +25,14 @@ import {
   getSocialLinks,
   getPageContent,
   getPageVisibility,
+  getPageSectionOrder,
 } from "@/lib/data"
+
+// Default section order if none saved in DB
+const DEFAULT_ORDER = [
+  "hero", "clients", "metrics", "featured_projects", "philosophy",
+  "tech_stack", "process", "testimonials", "blog_preview", "cta",
+]
 
 export default async function HomePage() {
   const [
@@ -41,6 +49,7 @@ export default async function HomePage() {
     socialLinks,
     pageContent,
     vis,
+    sectionOrder,
   ] = await Promise.all([
     getSiteSettings(),
     getHeroSection(),
@@ -55,73 +64,75 @@ export default async function HomePage() {
     getSocialLinks(),
     getPageContent("home"),
     getPageVisibility("home"),
+    getPageSectionOrder("home"),
   ])
 
   const show = (section: string) => vis[section] !== false
 
+  // Use DB order if available, otherwise default
+  const order = sectionOrder.length > 0 ? sectionOrder : DEFAULT_ORDER
+
+  // Map section IDs to their rendered components
+  const sectionComponents: Record<string, React.ReactNode> = {
+    hero: show("hero") ? (
+      <HeroSection
+        key="hero"
+        developerName={siteSettings?.developer_name || "Alex Chen"}
+        professionalTitle={siteSettings?.professional_title || "Full-Stack Product Engineer"}
+        tagline={siteSettings?.tagline || "I build scalable SaaS platforms, AI tools, and high-performance web applications."}
+        primaryCtaText={heroSection?.primary_cta_text || "View Case Studies"}
+        primaryCtaUrl={heroSection?.primary_cta_url || "/projects"}
+        secondaryCtaText={heroSection?.secondary_cta_text || "Start a Project"}
+        secondaryCtaUrl={heroSection?.secondary_cta_url || "/contact"}
+        socialLinks={socialLinks}
+        content={pageContent.hero}
+      />
+    ) : null,
+
+    clients: show("clients") && clients.length > 0 ? (
+      <ClientsSection key="clients" clients={clients} content={pageContent.clients} />
+    ) : null,
+
+    metrics: show("metrics") && metrics.length > 0 ? (
+      <MetricsSection key="metrics" metrics={metrics} />
+    ) : null,
+
+    featured_projects: show("featured_projects") && projects.length > 0 ? (
+      <FeaturedProjectsSection key="featured_projects" projects={projects} content={pageContent.featured_projects} />
+    ) : null,
+
+    philosophy: show("philosophy") && philosophy.length > 0 ? (
+      <PhilosophySection key="philosophy" items={philosophy} />
+    ) : null,
+
+    tech_stack: show("tech_stack") && techStack.length > 0 ? (
+      <TechStackSection key="tech_stack" techStack={techStack} />
+    ) : null,
+
+    process: show("process") && processSteps.length > 0 ? (
+      <ProcessSection key="process" steps={processSteps} content={pageContent.process} />
+    ) : null,
+
+    testimonials: show("testimonials") && testimonials.length > 0 ? (
+      <TestimonialsSection key="testimonials" testimonials={testimonials} content={pageContent.testimonials} />
+    ) : null,
+
+    blog_preview: show("blog_preview") && blogPosts.length > 0 ? (
+      <BlogPreviewSection key="blog_preview" posts={blogPosts} content={pageContent.blog_preview} />
+    ) : null,
+
+    cta: show("cta") ? (
+      <CtaSection key="cta" content={pageContent.cta} />
+    ) : null,
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <Navbar />
 
-      <main>
-        {show("hero") && (
-          <HeroSection
-            developerName={siteSettings?.developer_name || "Alex Chen"}
-            professionalTitle={
-              siteSettings?.professional_title || "Full-Stack Product Engineer"
-            }
-            tagline={
-              siteSettings?.tagline ||
-              "I build scalable SaaS platforms, AI tools, and high-performance web applications."
-            }
-            primaryCtaText={heroSection?.primary_cta_text || "View Case Studies"}
-            primaryCtaUrl={heroSection?.primary_cta_url || "/projects"}
-            secondaryCtaText={heroSection?.secondary_cta_text || "Start a Project"}
-            secondaryCtaUrl={heroSection?.secondary_cta_url || "/contact"}
-            socialLinks={socialLinks}
-            content={pageContent.hero}
-          />
-        )}
-
-        {show("clients") && clients.length > 0 && (
-          <ClientsSection clients={clients} content={pageContent.clients} />
-        )}
-
-        {show("metrics") && metrics.length > 0 && (
-          <MetricsSection metrics={metrics} />
-        )}
-
-        {show("featured_projects") && projects.length > 0 && (
-          <FeaturedProjectsSection
-            projects={projects}
-            content={pageContent.featured_projects}
-          />
-        )}
-
-        {show("philosophy") && philosophy.length > 0 && (
-          <PhilosophySection items={philosophy} />
-        )}
-
-        {show("tech_stack") && techStack.length > 0 && (
-          <TechStackSection techStack={techStack} />
-        )}
-
-        {show("process") && processSteps.length > 0 && (
-          <ProcessSection steps={processSteps} content={pageContent.process} />
-        )}
-
-        {show("testimonials") && testimonials.length > 0 && (
-          <TestimonialsSection
-            testimonials={testimonials}
-            content={pageContent.testimonials}
-          />
-        )}
-
-        {show("blog_preview") && blogPosts.length > 0 && (
-          <BlogPreviewSection posts={blogPosts} content={pageContent.blog_preview} />
-        )}
-
-        {show("cta") && <CtaSection content={pageContent.cta} />}
+      <main className="relative">
+        <CustomBlocksRenderer page="home" />
+        {order.map((sectionId) => sectionComponents[sectionId] || null)}
       </main>
 
       <Footer />

@@ -401,12 +401,37 @@ function ClassicTemplate({ config }: { config: ResumeConfig }) {
         <div key="projects" style={{ marginBottom: "18px" }}>
           <SectionHead icon={<IconFolder color={accent} size={13} />} title="Key Projects" />
           {enabledProjects.map((proj) => (
-            <div key={proj.id} style={{ marginBottom: "10px", paddingLeft: "32px" }}>
+            <div key={proj.id} style={{ marginBottom: "14px", paddingLeft: "32px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
-                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
+                  {proj.role && <span style={{ fontSize: fs.body, color: accent, fontWeight: 500 }}> — {proj.role}</span>}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+                  {(proj.startDate || proj.endDate || proj.isCurrent) && (
+                    <span style={{ fontSize: fs.small, color: "#9ca3af" }}>
+                      {formatDisplayDate(proj.startDate)}{(proj.endDate || proj.isCurrent) && ` – ${proj.isCurrent ? "Present" : formatDisplayDate(proj.endDate)}`}
+                    </span>
+                  )}
+                </div>
               </div>
-              {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {(proj.url || proj.repoUrl) && (
+                <div style={{ display: "flex", gap: "10px", marginTop: "2px" }}>
+                  {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+                  {proj.repoUrl && <UrlLink url={proj.repoUrl} color="#6b7280" fontSize={fs.small} />}
+                </div>
+              )}
+              {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {proj.techStack.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
                   {proj.techStack.map((t, i) => (
@@ -4810,6 +4835,4276 @@ function SlateTemplate({ config }: { config: ResumeConfig }) {
 }
 
 /* ═══════════════════════════════════════════════
+   21. GLASS TEMPLATE
+   Glassmorphism design with frosted glass cards
+   ═══════════════════════════════════════════════ */
+function GlassTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 32
+
+  const glassCard: React.CSSProperties = {
+    background: "rgba(255,255,255,0.55)",
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
+    border: "1px solid rgba(255,255,255,0.35)",
+    borderRadius: "12px",
+    padding: "14px 16px",
+    marginBottom: "14px",
+    boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+  }
+
+  function GlassSection({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+    return (
+      <div style={glassCard}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "26px", height: "26px", borderRadius: "8px", background: `rgba(255,255,255,0.6)`, border: `1px solid ${accent}30`, flexShrink: 0 }}>
+            {icon}
+          </div>
+          <span style={{ fontSize: fs.h2, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "1.5px" }}>{title}</span>
+        </div>
+        {children}
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary" style={glassCard}>
+          <p style={{ fontSize: fs.body, lineHeight: 1.7, color: "#374151", margin: 0 }}>{p.summary}</p>
+        </div>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <GlassSection key="experience" icon={<IconBriefcase color={accent} size={13} />} title="Experience">
+          {enabledExp.map((exp) => (
+            <div key={exp.id} style={{ marginBottom: "12px", paddingBottom: "10px", borderBottom: "1px solid rgba(255,255,255,0.4)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{exp.title}</span>
+                  {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 500 }}> — {exp.company}</span>}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+                  <IconCalendar color="#9ca3af" size={10} />
+                  <span style={{ fontSize: fs.small, color: "#9ca3af" }}>
+                    {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                  </span>
+                </div>
+              </div>
+              {exp.location && (
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}>
+                  <IconMapPin color="#9ca3af" size={10} />
+                  <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{exp.location}</span>
+                </div>
+              )}
+              {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </GlassSection>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <GlassSection key="education" icon={<IconGradCap color={accent} size={13} />} title="Education">
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>
+                  {edu.degree}{edu.field && ` in ${edu.field}`}
+                </span>
+                <span style={{ fontSize: fs.small, color: "#9ca3af" }}>
+                  {formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}
+                </span>
+              </div>
+              <div style={{ fontSize: fs.body, color: "#6b7280", marginTop: "1px" }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </GlassSection>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <GlassSection key="skills" icon={<IconLayers color={accent} size={13} />} title="Skills">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+            {config.skillCategories.flatMap((cat) =>
+              cat.skills.map((skill, i) => (
+                <span key={`${cat.id}-${i}`} style={{
+                  fontSize: fs.small,
+                  padding: "4px 12px",
+                  borderRadius: "20px",
+                  background: "rgba(255,255,255,0.6)",
+                  backdropFilter: "blur(8px)",
+                  border: `1px solid ${accent}30`,
+                  color: accent,
+                  fontWeight: 600,
+                }}>{skill}</span>
+              ))
+            )}
+          </div>
+        </GlassSection>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <GlassSection key="projects" icon={<IconFolder color={accent} size={13} />} title="Projects">
+          {enabledProjects.map((proj) => (
+            <div key={proj.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
+                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+              </div>
+              {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.techStack.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                  {proj.techStack.map((t, i) => (
+                    <span key={i} style={{ fontSize: "9px", padding: "2px 8px", borderRadius: "10px", background: "rgba(255,255,255,0.5)", border: `1px solid ${accent}25`, color: accent, fontWeight: 500 }}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </GlassSection>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <GlassSection key="certifications" icon={<IconAward color={accent} size={13} />} title="Certifications">
+          {enabledCerts.map((cert) => (
+            <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "5px" }}>
+              <div>
+                <span style={{ fontSize: fs.h3, fontWeight: 600, color: "#111827" }}>{cert.name}</span>
+                {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280" }}> — {cert.issuer}</span>}
+                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} /></>}
+              </div>
+              {cert.date && <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{formatDisplayDate(cert.date)}</span>}
+            </div>
+          ))}
+        </GlassSection>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <GlassSection key={section.id} icon={<IconStar color={accent} size={13} />} title={section.title}>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </GlassSection>
+          ))
+        : null,
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, background: `linear-gradient(135deg, ${accent}08 0%, ${accent}15 50%, ${accent}05 100%)`, padding: 0, overflow: "hidden" }}>
+      {/* Frosted glass header */}
+      <div style={{
+        background: `linear-gradient(135deg, ${accent}cc, ${accent}aa)`,
+        backdropFilter: "blur(16px)",
+        padding: `${pad}px ${pad + 8}px ${pad - 8}px`,
+        position: "relative",
+      }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(255,255,255,0.1)", backdropFilter: "blur(20px)" }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            {config.showProfileImage && p.profileImage && (
+              <div style={{ width: "60px", height: "60px", borderRadius: "14px", border: "2px solid rgba(255,255,255,0.4)", overflow: "hidden", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+                <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            )}
+            <div>
+              <h1 style={{ fontSize: fs.h1, fontWeight: 800, color: "white", margin: 0, lineHeight: 1.2, textShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>
+                {p.fullName || "Your Name"}
+              </h1>
+              {p.title && <div style={{ fontSize: fs.h2, color: "rgba(255,255,255,0.9)", fontWeight: 500, marginTop: "4px" }}>{p.title}</div>}
+            </div>
+          </div>
+          {contacts.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "14px" }}>
+              {contacts.map((c, i) => (
+                <div key={i} style={{
+                  display: "flex", alignItems: "center", gap: "4px",
+                  fontSize: fs.small, color: "rgba(255,255,255,0.9)",
+                  background: "rgba(255,255,255,0.2)",
+                  backdropFilter: "blur(8px)",
+                  padding: "3px 10px",
+                  borderRadius: "20px",
+                  border: "1px solid rgba(255,255,255,0.25)",
+                }}>
+                  {contactIcon(c.type, "rgba(255,255,255,0.85)", 10)}
+                  <LinkText href={contactHref(c.type, c.value)} style={{ color: "rgba(255,255,255,0.95)" }}>{c.value}</LinkText>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: `${pad - 8}px ${pad + 8}px ${pad}px` }}>
+        {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   22. GRADIENT TEMPLATE
+   Bold gradient backgrounds and accent fills
+   ═══════════════════════════════════════════════ */
+function GradientTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const secondary = accent + "99"
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 32
+
+  function GradSection({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+    return (
+      <div style={{ marginBottom: "18px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", paddingLeft: "12px", borderLeft: `3px solid transparent`, borderImage: `linear-gradient(to bottom, ${accent}, ${secondary}) 1` }}>
+          {icon}
+          <span style={{ fontSize: fs.h2, fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "1.5px" }}>{title}</span>
+        </div>
+        {children}
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary" style={{ marginBottom: "18px", paddingLeft: "15px", borderLeft: `3px solid transparent`, borderImage: `linear-gradient(to bottom, ${accent}, ${secondary}) 1` }}>
+          <p style={{ fontSize: fs.body, lineHeight: 1.7, color: "#374151", margin: 0 }}>{p.summary}</p>
+        </div>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <GradSection key="experience" icon={<IconBriefcase color={accent} size={13} />} title="Experience">
+          {enabledExp.map((exp) => (
+            <div key={exp.id} style={{ marginBottom: "14px", paddingLeft: "15px", borderTop: `3px solid transparent`, borderImage: `linear-gradient(to right, ${accent}, ${secondary}, transparent) 1`, paddingTop: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{exp.title}</span>
+                  {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 500 }}> — {exp.company}</span>}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+                  <IconCalendar color="#9ca3af" size={10} />
+                  <span style={{ fontSize: fs.small, color: "#9ca3af" }}>
+                    {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                  </span>
+                </div>
+              </div>
+              {exp.location && (
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}>
+                  <IconMapPin color="#9ca3af" size={10} />
+                  <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{exp.location}</span>
+                </div>
+              )}
+              {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", background: `linear-gradient(135deg, ${accent}, ${secondary})` }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </GradSection>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <GradSection key="education" icon={<IconGradCap color={accent} size={13} />} title="Education">
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "10px", paddingLeft: "15px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>
+                  {edu.degree}{edu.field && ` in ${edu.field}`}
+                </span>
+                <span style={{ fontSize: fs.small, color: "#9ca3af" }}>
+                  {formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}
+                </span>
+              </div>
+              <div style={{ fontSize: fs.body, color: "#6b7280", marginTop: "1px" }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", background: `linear-gradient(135deg, ${accent}, ${secondary})` }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </GradSection>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <GradSection key="skills" icon={<IconLayers color={accent} size={13} />} title="Skills">
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", paddingLeft: "15px" }}>
+            {config.skillCategories.map((cat) => (
+              <div key={cat.id}>
+                <div style={{ fontSize: fs.small, fontWeight: 600, color: "#374151", marginBottom: "4px" }}>{cat.name}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {cat.skills.map((skill, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: fs.small }}>
+                      <span style={{ color: "#374151", fontWeight: 500 }}>{skill}</span>
+                      <div style={{ width: "50px", height: "4px", borderRadius: "2px", background: `linear-gradient(90deg, ${accent}, ${secondary})`, opacity: 0.7 + (0.3 * (1 - i / Math.max(cat.skills.length, 1))) }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </GradSection>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <GradSection key="projects" icon={<IconFolder color={accent} size={13} />} title="Projects">
+          {enabledProjects.map((proj) => (
+            <div key={proj.id} style={{ marginBottom: "10px", paddingLeft: "15px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
+                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+              </div>
+              {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.techStack.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                  {proj.techStack.map((t, i) => (
+                    <span key={i} style={{ fontSize: "9px", padding: "2px 8px", borderRadius: "3px", background: `linear-gradient(135deg, ${accent}15, ${secondary}15)`, border: `1px solid ${accent}25`, color: accent, fontWeight: 500 }}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </GradSection>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <GradSection key="certifications" icon={<IconAward color={accent} size={13} />} title="Certifications">
+          <div style={{ paddingLeft: "15px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "5px" }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 600, color: "#111827" }}>{cert.name}</span>
+                  {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280" }}> — {cert.issuer}</span>}
+                  {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} /></>}
+                </div>
+                {cert.date && <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{formatDisplayDate(cert.date)}</span>}
+              </div>
+            ))}
+          </div>
+        </GradSection>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <GradSection key={section.id} icon={<IconStar color={accent} size={13} />} title={section.title}>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, paddingLeft: "15px" }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", background: `linear-gradient(135deg, ${accent}, ${secondary})` }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </GradSection>
+          ))
+        : null,
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, padding: 0 }}>
+      {/* Gradient header */}
+      <div style={{ padding: `${pad}px ${pad + 8}px ${pad - 8}px`, borderBottom: `3px solid transparent`, borderImage: `linear-gradient(90deg, ${accent}, ${secondary}, transparent) 1` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {config.showProfileImage && p.profileImage && (
+            <div style={{ width: "60px", height: "60px", borderRadius: "50%", border: `3px solid transparent`, background: `linear-gradient(white, white) padding-box, linear-gradient(135deg, ${accent}, ${secondary}) border-box`, overflow: "hidden", flexShrink: 0 }}>
+              <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
+          <div>
+            <h1 style={{
+              fontSize: fs.h1, fontWeight: 800, margin: 0, lineHeight: 1.2,
+              background: `linear-gradient(135deg, ${accent}, ${secondary})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}>
+              {p.fullName || "Your Name"}
+            </h1>
+            {p.title && <div style={{ fontSize: fs.h2, color: "#6b7280", fontWeight: 500, marginTop: "4px" }}>{p.title}</div>}
+          </div>
+        </div>
+        {contacts.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: "12px", paddingBottom: "4px", borderBottom: `2px solid transparent`, borderImage: `linear-gradient(90deg, ${accent}40, transparent) 1` }}>
+            {contacts.map((c, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: fs.small, color: "#6b7280" }}>
+                {contactIcon(c.type, accent, 11)}
+                <LinkText href={contactHref(c.type, c.value)}>{c.value}</LinkText>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div style={{ padding: `${pad - 8}px ${pad + 8}px ${pad}px` }}>
+        {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   23. MONO TEMPLATE
+   Brutalist monochrome with bold typography
+   ═══════════════════════════════════════════════ */
+function MonoTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 32
+
+  const sectionNames: Record<string, { num: string; label: string }> = {
+    summary: { num: "01", label: "SUMMARY" },
+    experience: { num: "02", label: "EXPERIENCE" },
+    education: { num: "03", label: "EDUCATION" },
+    skills: { num: "04", label: "SKILLS" },
+    projects: { num: "05", label: "PROJECTS" },
+    certifications: { num: "06", label: "CERTIFICATIONS" },
+    custom: { num: "07", label: "OTHER" },
+  }
+
+  function MonoSection({ sectionKey, children }: { sectionKey: string; children: React.ReactNode }) {
+    const info = sectionNames[sectionKey] || { num: "00", label: sectionKey.toUpperCase() }
+    return (
+      <div style={{ marginBottom: "22px", position: "relative", paddingLeft: "60px" }}>
+        <div style={{ position: "absolute", left: 0, top: "-4px", fontSize: "48px", fontWeight: 900, color: `${accent}12`, lineHeight: 1, letterSpacing: "-2px", userSelect: "none" }}>
+          {info.num}
+        </div>
+        <div style={{ fontSize: "16px", fontWeight: 900, color: "#000000", textTransform: "uppercase", letterSpacing: "3px", marginBottom: "10px", borderBottom: `3px solid #000000`, paddingBottom: "4px", display: "inline-block" }}>
+          {info.label}
+        </div>
+        <div>{children}</div>
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <MonoSection key="summary" sectionKey="summary">
+          <p style={{ fontSize: fs.body, lineHeight: 1.7, color: "#000000", margin: 0, fontWeight: 500 }}>{p.summary}</p>
+        </MonoSection>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <MonoSection key="experience" sectionKey="experience">
+          {enabledExp.map((exp) => (
+            <div key={exp.id} style={{ marginBottom: "14px", paddingBottom: "10px", borderBottom: "2px solid #e5e7eb" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 900, color: "#000000", textTransform: "uppercase" }}>{exp.title}</span>
+                  {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 700 }}> // {exp.company}</span>}
+                </div>
+                <span style={{ fontSize: fs.small, color: "#000000", fontWeight: 700, flexShrink: 0 }}>
+                  {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "NOW" : formatDisplayDate(exp.endDate)}`}
+                </span>
+              </div>
+              {exp.location && <div style={{ fontSize: fs.small, color: "#6b7280", fontWeight: 600, marginTop: "2px" }}>{exp.location}</div>}
+              {exp.description && <p style={{ fontSize: fs.body, color: "#374151", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "6px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#374151", lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "5px", width: "8px", height: "8px", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </MonoSection>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <MonoSection key="education" sectionKey="education">
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 900, color: "#000000", textTransform: "uppercase" }}>
+                  {edu.degree}{edu.field && ` / ${edu.field}`}
+                </span>
+                <span style={{ fontSize: fs.small, color: "#000000", fontWeight: 700 }}>
+                  {formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}
+                </span>
+              </div>
+              <div style={{ fontSize: fs.body, color: "#6b7280", fontWeight: 600, marginTop: "1px" }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#374151", lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "5px", width: "8px", height: "8px", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </MonoSection>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <MonoSection key="skills" sectionKey="skills">
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {config.skillCategories.map((cat) => (
+              <div key={cat.id}>
+                <div style={{ fontSize: fs.small, fontWeight: 900, color: "#000000", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "3px" }}>{cat.name}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                  {cat.skills.map((skill, i) => (
+                    <span key={i} style={{ fontSize: fs.small, padding: "2px 10px", backgroundColor: "#000000", color: "#ffffff", fontWeight: 700 }}>{skill}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </MonoSection>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <MonoSection key="projects" sectionKey="projects">
+          {enabledProjects.map((proj) => (
+            <div key={proj.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 900, color: "#000000", textTransform: "uppercase" }}>{proj.title}</span>
+                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+              </div>
+              {proj.description && <p style={{ fontSize: fs.body, color: "#374151", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.techStack.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                  {proj.techStack.map((t, i) => (
+                    <span key={i} style={{ fontSize: "9px", padding: "2px 8px", backgroundColor: accent, color: "#ffffff", fontWeight: 700 }}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </MonoSection>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <MonoSection key="certifications" sectionKey="certifications">
+          {enabledCerts.map((cert) => (
+            <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "5px" }}>
+              <div>
+                <span style={{ fontSize: fs.h3, fontWeight: 900, color: "#000000" }}>{cert.name}</span>
+                {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280", fontWeight: 600 }}> // {cert.issuer}</span>}
+                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} /></>}
+              </div>
+              {cert.date && <span style={{ fontSize: fs.small, color: "#000000", fontWeight: 700 }}>{formatDisplayDate(cert.date)}</span>}
+            </div>
+          ))}
+        </MonoSection>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <MonoSection key={section.id} sectionKey="custom">
+              <div style={{ fontSize: "16px", fontWeight: 900, color: "#000000", textTransform: "uppercase", letterSpacing: "3px", marginBottom: "10px", marginTop: "-32px" }}>
+                {section.title}
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: "#374151", lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: 0, top: "5px", width: "8px", height: "8px", backgroundColor: accent }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </MonoSection>
+          ))
+        : null,
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, padding: 0 }}>
+      {/* Hard-edge header */}
+      <div style={{ backgroundColor: "#000000", color: "#ffffff", padding: `${pad}px ${pad + 8}px ${pad - 6}px` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {config.showProfileImage && p.profileImage && (
+            <div style={{ width: "60px", height: "60px", border: `3px solid ${accent}`, overflow: "hidden", flexShrink: 0 }}>
+              <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: "32px", fontWeight: 900, margin: 0, lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "2px" }}>
+              {p.fullName || "YOUR NAME"}
+            </h1>
+            {p.title && <div style={{ fontSize: fs.h2, color: accent, fontWeight: 700, marginTop: "4px", textTransform: "uppercase", letterSpacing: "3px" }}>{p.title}</div>}
+          </div>
+        </div>
+        {contacts.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 18px", marginTop: "14px" }}>
+            {contacts.map((c, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: fs.small, color: "#ffffff" }}>
+                {contactIcon(c.type, accent, 11)}
+                <LinkText href={contactHref(c.type, c.value)} style={{ color: "#ffffff" }}>{c.value}</LinkText>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* Accent bar */}
+      <div style={{ height: "4px", backgroundColor: accent }} />
+
+      <div style={{ padding: `${pad - 4}px ${pad + 8}px ${pad}px` }}>
+        {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   24. TIMELINE PRO TEMPLATE
+   Professional centered vertical timeline
+   ═══════════════════════════════════════════════ */
+function TimelineProTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 32
+
+  const dotColors: Record<string, string> = {
+    summary: "#6366f1",
+    experience: accent,
+    education: "#10b981",
+    skills: "#f59e0b",
+    projects: "#8b5cf6",
+    certifications: "#ef4444",
+    custom: "#6b7280",
+  }
+
+  let cardIndex = 0
+
+  function TimelineCard({ sectionKey, children }: { sectionKey: string; children: React.ReactNode }) {
+    const isLeft = cardIndex % 2 === 0
+    const dotColor = dotColors[sectionKey] || accent
+    cardIndex++
+    return (
+      <div style={{ display: "flex", alignItems: "flex-start", marginBottom: "16px", position: "relative" }}>
+        {/* Left content or spacer */}
+        <div style={{ width: "calc(50% - 16px)", paddingRight: isLeft ? "20px" : "0", textAlign: isLeft ? "right" : "left" }}>
+          {isLeft && children}
+        </div>
+        {/* Center dot + connector */}
+        <div style={{ width: "32px", display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, position: "relative", zIndex: 1 }}>
+          <div style={{ width: "14px", height: "14px", borderRadius: "50%", backgroundColor: dotColor, border: "3px solid white", boxShadow: `0 0 0 2px ${dotColor}40` }} />
+        </div>
+        {/* Right content or spacer */}
+        <div style={{ width: "calc(50% - 16px)", paddingLeft: isLeft ? "0" : "20px" }}>
+          {!isLeft && children}
+        </div>
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <TimelineCard key="summary" sectionKey="summary">
+          <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "12px 14px", border: "1px solid #e5e7eb" }}>
+            <div style={{ fontSize: fs.small, fontWeight: 700, color: dotColors.summary, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>Summary</div>
+            <p style={{ fontSize: fs.body, lineHeight: 1.6, color: "#374151", margin: 0 }}>{p.summary}</p>
+          </div>
+        </TimelineCard>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <div key="experience">
+          {enabledExp.map((exp) => (
+            <TimelineCard key={exp.id} sectionKey="experience">
+              <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "12px 14px", border: "1px solid #e5e7eb" }}>
+                <div style={{ fontSize: fs.small, fontWeight: 700, color: dotColors.experience, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Experience</div>
+                <div style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{exp.title}</div>
+                {exp.company && <div style={{ fontSize: fs.body, color: accent, fontWeight: 500 }}>{exp.company}</div>}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "2px" }}>
+                  <span style={{ fontSize: fs.small, color: "#9ca3af" }}>
+                    {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                  </span>
+                  {exp.location && <span style={{ fontSize: fs.small, color: "#9ca3af" }}>| {exp.location}</span>}
+                </div>
+                {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+                {exp.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                    {exp.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "12px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </TimelineCard>
+          ))}
+        </div>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <div key="education">
+          {enabledEdu.map((edu) => (
+            <TimelineCard key={edu.id} sectionKey="education">
+              <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "12px 14px", border: "1px solid #e5e7eb" }}>
+                <div style={{ fontSize: fs.small, fontWeight: 700, color: dotColors.education, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Education</div>
+                <div style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{edu.degree}{edu.field && ` in ${edu.field}`}</div>
+                <div style={{ fontSize: fs.body, color: "#6b7280" }}>{edu.institution}</div>
+                <span style={{ fontSize: fs.small, color: "#9ca3af" }}>
+                  {formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}
+                </span>
+                {edu.achievements && edu.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {edu.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "12px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: dotColors.education }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </TimelineCard>
+          ))}
+        </div>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <TimelineCard key="skills" sectionKey="skills">
+          <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "12px 14px", border: "1px solid #e5e7eb" }}>
+            <div style={{ fontSize: fs.small, fontWeight: 700, color: dotColors.skills, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>Skills</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+              {config.skillCategories.flatMap((cat) =>
+                cat.skills.map((skill, i) => (
+                  <span key={`${cat.id}-${i}`} style={{ fontSize: fs.small, padding: "2px 10px", borderRadius: "4px", backgroundColor: `${dotColors.skills}15`, color: "#374151", fontWeight: 500, border: `1px solid ${dotColors.skills}30` }}>{skill}</span>
+                ))
+              )}
+            </div>
+          </div>
+        </TimelineCard>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <div key="projects">
+          {enabledProjects.map((proj) => (
+            <TimelineCard key={proj.id} sectionKey="projects">
+              <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "12px 14px", border: "1px solid #e5e7eb" }}>
+                <div style={{ fontSize: fs.small, fontWeight: 700, color: dotColors.projects, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Project</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
+                  {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+                </div>
+                {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                {proj.techStack.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                    {proj.techStack.map((t, i) => (
+                      <span key={i} style={{ fontSize: "9px", padding: "1px 6px", borderRadius: "3px", border: `1px solid ${dotColors.projects}30`, color: dotColors.projects, fontWeight: 500 }}>{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </TimelineCard>
+          ))}
+        </div>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <TimelineCard key="certifications" sectionKey="certifications">
+          <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "12px 14px", border: "1px solid #e5e7eb" }}>
+            <div style={{ fontSize: fs.small, fontWeight: 700, color: dotColors.certifications, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>Certifications</div>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ marginBottom: "4px" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 600, color: "#111827" }}>{cert.name}</span>
+                {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280" }}> — {cert.issuer}</span>}
+                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} /></>}
+                {cert.date && <span style={{ fontSize: fs.small, color: "#9ca3af" }}> ({formatDisplayDate(cert.date)})</span>}
+              </div>
+            ))}
+          </div>
+        </TimelineCard>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <TimelineCard key={section.id} sectionKey="custom">
+              <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "12px 14px", border: "1px solid #e5e7eb" }}>
+                <div style={{ fontSize: fs.small, fontWeight: 700, color: dotColors.custom, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>{section.title}</div>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {section.items.map((item) => (
+                    <li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "12px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: dotColors.custom }} />
+                      {item.content}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </TimelineCard>
+          ))
+        : null,
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, padding: 0 }}>
+      {/* Header */}
+      <div style={{ textAlign: "center", padding: `${pad}px ${pad + 8}px ${pad - 12}px`, borderBottom: `2px solid ${accent}20` }}>
+        {config.showProfileImage && p.profileImage && (
+          <div style={{ width: "56px", height: "56px", borderRadius: "50%", border: `3px solid ${accent}`, margin: "0 auto 10px", overflow: "hidden" }}>
+            <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+        )}
+        <h1 style={{ fontSize: fs.h1, fontWeight: 800, color: "#111827", margin: 0, lineHeight: 1.2 }}>
+          {p.fullName || "Your Name"}
+        </h1>
+        {p.title && <div style={{ fontSize: fs.h2, color: accent, fontWeight: 500, marginTop: "4px" }}>{p.title}</div>}
+        {contacts.length > 0 && (
+          <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "6px 16px", marginTop: "10px" }}>
+            {contacts.map((c, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: fs.small, color: "#6b7280" }}>
+                {contactIcon(c.type, accent, 11)}
+                <LinkText href={contactHref(c.type, c.value)}>{c.value}</LinkText>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Timeline body */}
+      <div style={{ padding: `${pad - 8}px ${pad - 16}px ${pad}px`, position: "relative" }}>
+        {/* Center line */}
+        <div style={{ position: "absolute", left: "50%", top: `${pad - 8}px`, bottom: `${pad}px`, width: "2px", backgroundColor: `${accent}20`, transform: "translateX(-50%)" }} />
+        {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   25. CARD DECK TEMPLATE
+   Elevated card sections with accent top borders
+   ═══════════════════════════════════════════════ */
+function CardDeckTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 32
+
+  function DeckCard({ icon, title, large, children }: { icon?: React.ReactNode; title?: string; large?: boolean; children: React.ReactNode }) {
+    return (
+      <div style={{
+        borderRadius: "12px",
+        backgroundColor: "#ffffff",
+        border: "1px solid #e5e7eb",
+        borderTop: `3px solid ${accent}`,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
+        padding: large ? "20px 22px" : "14px 16px",
+        marginBottom: "12px",
+      }}>
+        {title && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+            {icon && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "24px", height: "24px", borderRadius: "6px", backgroundColor: `${accent}10`, flexShrink: 0 }}>
+                {icon}
+              </div>
+            )}
+            <span style={{ fontSize: fs.h2, fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "1px" }}>{title}</span>
+          </div>
+        )}
+        {children}
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <DeckCard key="summary" icon={<IconUser color={accent} size={12} />} title="Summary">
+          <p style={{ fontSize: fs.body, lineHeight: 1.7, color: "#374151", margin: 0 }}>{p.summary}</p>
+        </DeckCard>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <DeckCard key="experience" icon={<IconBriefcase color={accent} size={12} />} title="Experience">
+          {enabledExp.map((exp, idx) => (
+            <div key={exp.id} style={{ marginBottom: "12px", paddingBottom: idx < enabledExp.length - 1 ? "10px" : "0", borderBottom: idx < enabledExp.length - 1 ? "1px solid #f3f4f6" : "none" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{exp.title}</span>
+                  {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 500 }}> — {exp.company}</span>}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+                  <IconCalendar color="#9ca3af" size={10} />
+                  <span style={{ fontSize: fs.small, color: "#9ca3af" }}>
+                    {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                  </span>
+                </div>
+              </div>
+              {exp.location && (
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}>
+                  <IconMapPin color="#9ca3af" size={10} />
+                  <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{exp.location}</span>
+                </div>
+              )}
+              {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </DeckCard>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <DeckCard key="education" icon={<IconGradCap color={accent} size={12} />} title="Education">
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>
+                  {edu.degree}{edu.field && ` in ${edu.field}`}
+                </span>
+                <span style={{ fontSize: fs.small, color: "#9ca3af" }}>
+                  {formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}
+                </span>
+              </div>
+              <div style={{ fontSize: fs.body, color: "#6b7280", marginTop: "1px" }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </DeckCard>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <DeckCard key="skills" icon={<IconLayers color={accent} size={12} />} title="Skills">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px" }}>
+            {config.skillCategories.flatMap((cat) =>
+              cat.skills.map((skill, i) => (
+                <span key={`${cat.id}-${i}`} style={{
+                  fontSize: fs.small,
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  backgroundColor: `${accent}08`,
+                  border: `1px solid ${accent}20`,
+                  color: "#374151",
+                  fontWeight: 500,
+                  textAlign: "center",
+                }}>{skill}</span>
+              ))
+            )}
+          </div>
+        </DeckCard>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <DeckCard key="projects" icon={<IconFolder color={accent} size={12} />} title="Projects">
+          {enabledProjects.map((proj, idx) => (
+            <div key={proj.id} style={{ marginBottom: "10px", paddingBottom: idx < enabledProjects.length - 1 ? "8px" : "0", borderBottom: idx < enabledProjects.length - 1 ? "1px solid #f3f4f6" : "none" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
+                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+              </div>
+              {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.techStack.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                  {proj.techStack.map((t, i) => (
+                    <span key={i} style={{ fontSize: "9px", padding: "2px 8px", borderRadius: "4px", backgroundColor: `${accent}10`, color: accent, fontWeight: 500 }}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </DeckCard>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <DeckCard key="certifications" icon={<IconAward color={accent} size={12} />} title="Certifications">
+          {enabledCerts.map((cert) => (
+            <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "5px" }}>
+              <div>
+                <span style={{ fontSize: fs.h3, fontWeight: 600, color: "#111827" }}>{cert.name}</span>
+                {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280" }}> — {cert.issuer}</span>}
+                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} /></>}
+              </div>
+              {cert.date && <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{formatDisplayDate(cert.date)}</span>}
+            </div>
+          ))}
+        </DeckCard>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <DeckCard key={section.id} icon={<IconStar color={accent} size={12} />} title={section.title}>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </DeckCard>
+          ))
+        : null,
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, padding: 0, backgroundColor: "#f8f9fa" }}>
+      {/* Header card */}
+      <div style={{
+        margin: `${pad - 8}px ${pad - 8}px 12px`,
+        borderRadius: "12px",
+        backgroundColor: "#ffffff",
+        border: "1px solid #e5e7eb",
+        borderTop: `4px solid ${accent}`,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
+        padding: "22px 24px",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {config.showProfileImage && p.profileImage && (
+            <div style={{ width: "56px", height: "56px", borderRadius: "12px", border: `2px solid ${accent}30`, overflow: "hidden", flexShrink: 0 }}>
+              <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: fs.h1, fontWeight: 800, color: "#111827", margin: 0, lineHeight: 1.2 }}>
+              {p.fullName || "Your Name"}
+            </h1>
+            {p.title && <div style={{ fontSize: fs.h2, color: accent, fontWeight: 500, marginTop: "4px" }}>{p.title}</div>}
+          </div>
+        </div>
+        {contacts.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: "12px", paddingTop: "10px", borderTop: "1px solid #f3f4f6" }}>
+            {contacts.map((c, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: fs.small, color: "#6b7280" }}>
+                {contactIcon(c.type, accent, 11)}
+                <LinkText href={contactHref(c.type, c.value)}>{c.value}</LinkText>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Section cards */}
+      <div style={{ padding: `0 ${pad - 8}px ${pad - 8}px` }}>
+        {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   DUAL TONE TEMPLATE
+   Split-screen: dark left 40% / white right 60%
+   ═══════════════════════════════════════════════ */
+function DualToneTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+
+  const darkBg = "#111827"
+  const lightText = "#f9fafb"
+  const mutedLight = "#d1d5db"
+
+  /* ── left-side section header ── */
+  function LeftSectionHead({ title }: { title: string }) {
+    return (
+      <div style={{ marginBottom: "8px" }}>
+        <div style={{ fontSize: fs.h2, fontWeight: 700, color: accent, textTransform: "uppercase" as const, letterSpacing: "1.5px", marginBottom: "4px" }}>{title}</div>
+        <div style={{ width: "30px", height: "2px", backgroundColor: accent }} />
+      </div>
+    )
+  }
+
+  /* ── right-side section header ── */
+  function RightSectionHead({ title }: { title: string }) {
+    return (
+      <div style={{ marginBottom: "10px" }}>
+        <div style={{ fontSize: fs.h2, fontWeight: 700, color: "#111827", textTransform: "uppercase" as const, letterSpacing: "1.5px", marginBottom: "4px" }}>{title}</div>
+        <div style={{ width: "40px", height: "2px", backgroundColor: accent }} />
+      </div>
+    )
+  }
+
+  /* ── left-side content collectors ── */
+  const leftContent: React.ReactNode[] = []
+  const rightContent: React.ReactNode[] = []
+
+  /* ── section renderers that route to left/right ── */
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () => {
+      if (!p.summary) return null
+      rightContent.push(
+        <div key="summary" style={{ marginBottom: "20px" }}>
+          <RightSectionHead title="Summary" />
+          <p style={{ fontSize: fs.body, lineHeight: 1.7, color: "#374151" }}>{p.summary}</p>
+        </div>
+      )
+      return null
+    },
+
+    experience: () => {
+      if (enabledExp.length === 0) return null
+      rightContent.push(
+        <div key="experience" style={{ marginBottom: "20px" }}>
+          <RightSectionHead title="Experience" />
+          {enabledExp.map((exp) => (
+            <div key={exp.id} style={{ marginBottom: "14px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{exp.title}</span>
+                  {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 500 }}> — {exp.company}</span>}
+                </div>
+                <span style={{ fontSize: fs.small, color: "#9ca3af", flexShrink: 0 }}>
+                  {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                </span>
+              </div>
+              {exp.location && <div style={{ fontSize: fs.small, color: "#9ca3af", marginTop: "2px" }}>{exp.location}</div>}
+              {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "8px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      )
+      return null
+    },
+
+    education: () => {
+      if (enabledEdu.length === 0) return null
+      rightContent.push(
+        <div key="education" style={{ marginBottom: "20px" }}>
+          <RightSectionHead title="Education" />
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+              </div>
+              <div style={{ fontSize: fs.body, color: "#6b7280", marginTop: "1px" }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "8px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      )
+      return null
+    },
+
+    skills: () => {
+      if (config.skillCategories.length === 0) return null
+      leftContent.push(
+        <div key="skills" style={{ marginBottom: "20px" }}>
+          <LeftSectionHead title="Skills" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {config.skillCategories.map((cat) => (
+              <div key={cat.id}>
+                <div style={{ fontSize: fs.small, fontWeight: 600, color: accent, marginBottom: "3px" }}>{cat.name}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                  {cat.skills.map((skill, i) => (
+                    <span key={i} style={{ fontSize: "9px", padding: "2px 7px", borderRadius: "3px", border: `1px solid ${mutedLight}40`, color: mutedLight, fontWeight: 500 }}>{skill}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+      return null
+    },
+
+    projects: () => {
+      if (enabledProjects.length === 0) return null
+      rightContent.push(
+        <div key="projects" style={{ marginBottom: "20px" }}>
+          <RightSectionHead title="Projects" />
+          {enabledProjects.map((proj) => (
+            <div key={proj.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
+                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+              </div>
+              {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.techStack.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                  {proj.techStack.map((t, i) => (
+                    <span key={i} style={{ fontSize: "9px", padding: "1px 6px", borderRadius: "3px", border: `1px solid ${accent}30`, color: accent, fontWeight: 500 }}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )
+      return null
+    },
+
+    certifications: () => {
+      if (enabledCerts.length === 0) return null
+      leftContent.push(
+        <div key="certifications" style={{ marginBottom: "20px" }}>
+          <LeftSectionHead title="Certifications" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id}>
+                <div style={{ fontSize: fs.small, fontWeight: 600, color: lightText }}>{cert.name}</div>
+                {cert.issuer && <div style={{ fontSize: fs.small, color: mutedLight }}>{cert.issuer}</div>}
+                {cert.date && <div style={{ fontSize: fs.small, color: mutedLight, opacity: 0.7 }}>{formatDisplayDate(cert.date)}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+      return null
+    },
+
+    custom: () => {
+      if (config.customSections.length === 0) return null
+      config.customSections.forEach((section) => {
+        rightContent.push(
+          <div key={section.id} style={{ marginBottom: "20px" }}>
+            <RightSectionHead title={section.title} />
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {section.items.map((item) => (
+                <li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                  <span style={{ position: "absolute", left: 0, top: "8px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: accent }} />
+                  {item.content}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      })
+      return null
+    },
+  }
+
+  // Execute section renderers in order to populate left/right content
+  config.sectionOrder.forEach((section) => {
+    if (sectionRenderers[section]) sectionRenderers[section]()
+  })
+
+  return (
+    <div style={{ ...PAGE_BASE, padding: 0, overflow: "hidden", display: "flex" }}>
+      {/* Dark left panel – 40% */}
+      <div style={{ width: "40%", backgroundColor: darkBg, padding: `${pad}px ${pad - 8}px`, display: "flex", flexDirection: "column" }}>
+        {/* Name */}
+        <div style={{ marginBottom: "24px" }}>
+          <div style={{ fontSize: fs.h1, fontWeight: 800, color: lightText, lineHeight: 1.2 }}>{p.fullName || "Your Name"}</div>
+          {p.title && <div style={{ fontSize: fs.h3, color: accent, fontWeight: 500, marginTop: "4px" }}>{p.title}</div>}
+        </div>
+
+        {/* Contact */}
+        {contacts.length > 0 && (
+          <div style={{ marginBottom: "20px" }}>
+            <LeftSectionHead title="Contact" />
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {contacts.map((c, i) => {
+                const href = contactHref(c.type, c.value)
+                return (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    {contactIcon(c.type, accent, 11)}
+                    <LinkText href={href} style={{ fontSize: fs.small, color: mutedLight }}>{c.value}</LinkText>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {leftContent}
+      </div>
+
+      {/* Clean dividing line */}
+      <div style={{ width: "1px", backgroundColor: `${accent}40` }} />
+
+      {/* White right panel – 60% */}
+      <div style={{ width: "60%", backgroundColor: "#ffffff", padding: `${pad}px ${pad - 8}px` }}>
+        {rightContent}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   MAGAZINE TEMPLATE
+   Editorial magazine spread with multi-column layout
+   ═══════════════════════════════════════════════ */
+function MagazineTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+
+  function SectionHead({ title }: { title: string }) {
+    return (
+      <div style={{ marginBottom: "10px" }}>
+        <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h2, fontWeight: 700, color: "#111827", textTransform: "uppercase" as const, letterSpacing: "2px", marginBottom: "4px" }}>{title}</div>
+        <div style={{ height: "1px", backgroundColor: "#d1d5db" }} />
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary" style={{ marginBottom: "22px" }}>
+          <SectionHead title="Profile" />
+          <p style={{ fontSize: fs.body, lineHeight: 1.8, color: "#374151", fontStyle: "italic", borderLeft: `3px solid ${accent}`, paddingLeft: "14px", margin: 0 }}>
+            <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "28px", fontWeight: 700, color: accent, float: "left", lineHeight: 1, marginRight: "6px", marginTop: "2px" }}>
+              {p.summary.charAt(0)}
+            </span>
+            {p.summary.slice(1)}
+          </p>
+        </div>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <div key="experience" style={{ marginBottom: "22px" }}>
+          <SectionHead title="Experience" />
+          <div style={{ columnCount: enabledExp.length > 2 ? 2 : 1, columnGap: "20px", columnRule: "1px solid #e5e7eb" }}>
+            {enabledExp.map((exp) => (
+              <div key={exp.id} style={{ breakInside: "avoid" as const, marginBottom: "14px" }}>
+                <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{exp.title}</div>
+                {exp.company && <div style={{ fontSize: fs.small, color: accent, fontWeight: 600 }}>{exp.company}</div>}
+                <div style={{ fontSize: fs.small, color: "#9ca3af" }}>
+                  {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                  {exp.location && ` | ${exp.location}`}
+                </div>
+                {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.6 }}>{exp.description}</p>}
+                {exp.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "3px 0 0 0" }}>
+                    {exp.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.5, paddingLeft: "12px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "7px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#374151" }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <div key="education" style={{ marginBottom: "22px" }}>
+          <SectionHead title="Education" />
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+              </div>
+              <div style={{ fontSize: fs.body, color: "#6b7280" }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.5, paddingLeft: "12px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "7px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#374151" }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <div key="skills" style={{ marginBottom: "22px" }}>
+          <SectionHead title="Skills" />
+          <div style={{ columnCount: 2, columnGap: "20px", columnRule: "1px solid #e5e7eb" }}>
+            {config.skillCategories.map((cat) => (
+              <div key={cat.id} style={{ breakInside: "avoid" as const, marginBottom: "8px" }}>
+                <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.small, fontWeight: 700, color: "#111827", marginBottom: "2px" }}>{cat.name}</div>
+                <div style={{ fontSize: fs.small, color: "#6b7280", lineHeight: 1.6 }}>{cat.skills.join(" · ")}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <div key="projects" style={{ marginBottom: "22px" }}>
+          <SectionHead title="Projects" />
+          <div style={{ columnCount: enabledProjects.length > 2 ? 2 : 1, columnGap: "20px", columnRule: "1px solid #e5e7eb" }}>
+            {enabledProjects.map((proj) => (
+              <div key={proj.id} style={{ breakInside: "avoid" as const, marginBottom: "10px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
+                  {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+                </div>
+                {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                {proj.techStack.length > 0 && (
+                  <div style={{ fontSize: fs.small, color: "#9ca3af", marginTop: "3px" }}>{proj.techStack.join(" · ")}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <div key="certifications" style={{ marginBottom: "22px" }}>
+          <SectionHead title="Certifications" />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ fontSize: fs.small, padding: "4px 10px", border: "1px solid #d1d5db", borderRadius: "2px" }}>
+                <span style={{ fontWeight: 600, color: "#111827" }}>{cert.name}</span>
+                {cert.issuer && <span style={{ color: "#6b7280" }}> — {cert.issuer}</span>}
+                {cert.date && <span style={{ color: "#9ca3af" }}> ({formatDisplayDate(cert.date)})</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <div key={section.id} style={{ marginBottom: "22px" }}>
+              <SectionHead title={section.title} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "12px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: 0, top: "7px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#374151" }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        : null,
+  }
+
+  return (
+    <div style={{ ...PAGE_BASE, fontFamily: "'Inter', -apple-system, sans-serif", padding: `${pad}px` }}>
+      {/* Masthead */}
+      <div style={{ textAlign: "center", marginBottom: "20px", borderBottom: "3px double #111827", paddingBottom: "16px" }}>
+        <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "32px", fontWeight: 700, color: "#111827", letterSpacing: "4px", textTransform: "uppercase" as const }}>{p.fullName || "Your Name"}</div>
+        {p.title && <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, color: accent, fontStyle: "italic", marginTop: "4px" }}>{p.title}</div>}
+        {contacts.length > 0 && (
+          <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "8px", flexWrap: "wrap" }}>
+            {contacts.map((c, i) => {
+              const href = contactHref(c.type, c.value)
+              return (
+                <LinkText key={i} href={href} style={{ fontSize: fs.small, color: "#6b7280" }}>{c.value}</LinkText>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Sections */}
+      {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+
+      {/* Page number footer */}
+      <div style={{ position: "absolute" as const, bottom: `${pad}px`, left: 0, right: 0, textAlign: "center" }}>
+        <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "10px", color: "#9ca3af" }}>— 1 —</span>
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   NEON TEMPLATE
+   Dark cyberpunk with neon glow effects
+   ═══════════════════════════════════════════════ */
+function NeonTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+
+  const darkBg = "#0a0a0f"
+  const cardBg = "#12121a"
+  const textMain = "#e2e8f0"
+  const textMuted = "#94a3b8"
+  const neonGlow = `0 0 8px ${accent}60, 0 0 20px ${accent}30`
+  const neonGlowText = `0 0 10px ${accent}80, 0 0 30px ${accent}40`
+
+  function SectionHead({ title }: { title: string }) {
+    return (
+      <div style={{ marginBottom: "12px", paddingBottom: "6px", borderBottom: `1px solid ${accent}40`, boxShadow: `0 1px 0 ${accent}20` }}>
+        <div style={{ fontSize: fs.h2, fontWeight: 700, color: accent, textTransform: "uppercase" as const, letterSpacing: "2px", textShadow: `0 0 8px ${accent}60` }}>{title}</div>
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary" style={{ marginBottom: "20px", padding: "14px", backgroundColor: cardBg, borderRadius: "4px", borderLeft: `2px solid ${accent}`, boxShadow: neonGlow }}>
+          <SectionHead title="Profile" />
+          <p style={{ fontSize: fs.body, lineHeight: 1.7, color: textMuted, margin: 0 }}>{p.summary}</p>
+        </div>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <div key="experience" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Experience" />
+          {enabledExp.map((exp) => (
+            <div key={exp.id} style={{ marginBottom: "14px", padding: "12px", backgroundColor: cardBg, borderRadius: "4px", border: `1px solid ${accent}15` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: textMain }}>{exp.title}</span>
+                  {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 500 }}> @ {exp.company}</span>}
+                </div>
+                <span style={{ fontSize: fs.small, color: textMuted, flexShrink: 0 }}>
+                  {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                </span>
+              </div>
+              {exp.location && <div style={{ fontSize: fs.small, color: textMuted, marginTop: "2px" }}>{exp.location}</div>}
+              {exp.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "7px", width: "6px", height: "6px", borderRadius: "50%", backgroundColor: accent, boxShadow: `0 0 6px ${accent}` }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <div key="education" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Education" />
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "10px", padding: "12px", backgroundColor: cardBg, borderRadius: "4px", border: `1px solid ${accent}15` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: textMain }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                <span style={{ fontSize: fs.small, color: textMuted }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+              </div>
+              <div style={{ fontSize: fs.body, color: textMuted, marginTop: "1px" }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "7px", width: "6px", height: "6px", borderRadius: "50%", backgroundColor: accent, boxShadow: `0 0 6px ${accent}` }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <div key="skills" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Skills" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {config.skillCategories.map((cat) => (
+              <div key={cat.id}>
+                <div style={{ fontSize: fs.small, fontWeight: 600, color: textMain, marginBottom: "4px" }}>{cat.name}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {cat.skills.map((skill, i) => (
+                    <span key={i} style={{ fontSize: "9.5px", padding: "3px 10px", borderRadius: "20px", border: `1px solid ${accent}`, color: accent, fontWeight: 500, textShadow: `0 0 6px ${accent}50`, boxShadow: `0 0 4px ${accent}20` }}>{skill}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <div key="projects" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Projects" />
+          {enabledProjects.map((proj) => (
+            <div key={proj.id} style={{ marginBottom: "10px", padding: "12px", backgroundColor: cardBg, borderRadius: "4px", border: `1px solid ${accent}15` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: textMain }}>{proj.title}</span>
+                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+              </div>
+              {proj.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.techStack.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                  {proj.techStack.map((t, i) => (
+                    <span key={i} style={{ fontSize: "9px", padding: "2px 7px", borderRadius: "3px", border: `1px solid ${accent}40`, color: accent, fontWeight: 500 }}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <div key="certifications" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Certifications" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "8px 12px", backgroundColor: cardBg, borderRadius: "4px", border: `1px solid ${accent}15` }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 600, color: textMain }}>{cert.name}</span>
+                  {cert.issuer && <span style={{ fontSize: fs.body, color: textMuted }}> — {cert.issuer}</span>}
+                </div>
+                {cert.date && <span style={{ fontSize: fs.small, color: textMuted }}>{formatDisplayDate(cert.date)}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <div key={section.id} style={{ marginBottom: "20px" }}>
+              <SectionHead title={section.title} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: 0, top: "7px", width: "6px", height: "6px", borderRadius: "50%", backgroundColor: accent, boxShadow: `0 0 6px ${accent}` }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        : null,
+  }
+
+  return (
+    <div style={{ ...PAGE_BASE, backgroundColor: darkBg, color: textMain, padding: `${pad}px`, backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)", backgroundSize: "24px 24px" }}>
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: "24px" }}>
+        <div style={{ fontSize: "34px", fontWeight: 800, color: accent, textShadow: neonGlowText, letterSpacing: "2px" }}>{p.fullName || "Your Name"}</div>
+        {p.title && <div style={{ fontSize: fs.h3, color: textMuted, marginTop: "4px", letterSpacing: "1px" }}>{p.title}</div>}
+        {contacts.length > 0 && (
+          <div style={{ display: "flex", justifyContent: "center", gap: "14px", marginTop: "10px", flexWrap: "wrap" }}>
+            {contacts.map((c, i) => {
+              const href = contactHref(c.type, c.value)
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  {contactIcon(c.type, accent, 10)}
+                  <LinkText href={href} style={{ fontSize: fs.small, color: textMuted }}>{c.value}</LinkText>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Neon divider */}
+      <div style={{ height: "1px", background: `linear-gradient(90deg, transparent, ${accent}, transparent)`, boxShadow: `0 0 8px ${accent}60`, marginBottom: "20px" }} />
+
+      {/* Sections */}
+      {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   PAPER TEMPLATE
+   Warm parchment with classic typography
+   ═══════════════════════════════════════════════ */
+function PaperTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = "#8b6914"
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+
+  const paperBg = "#faf8f5"
+  const textDark = "#2c2416"
+  const textBody = "#4a3f30"
+  const textMuted = "#8a7e6b"
+
+  function SectionHead({ title }: { title: string }) {
+    return (
+      <div style={{ marginBottom: "10px" }}>
+        <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h2, fontWeight: 700, color: textDark, textTransform: "uppercase" as const, letterSpacing: "2px", marginBottom: "4px" }}>{title}</div>
+        <div style={{ height: "1px", background: `linear-gradient(90deg, ${accent}, ${accent}20)` }} />
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Summary" />
+          <p style={{ fontSize: fs.body, lineHeight: 1.8, color: textBody, fontFamily: "Georgia, 'Times New Roman', serif", margin: 0 }}>{p.summary}</p>
+        </div>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <div key="experience" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Professional Experience" />
+          {enabledExp.map((exp) => (
+            <div key={exp.id} style={{ marginBottom: "14px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, fontWeight: 700, color: textDark }}>{exp.title}</span>
+                  {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 500 }}> — {exp.company}</span>}
+                </div>
+                <span style={{ fontSize: fs.small, color: textMuted, fontStyle: "italic", flexShrink: 0 }}>
+                  {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                </span>
+              </div>
+              {exp.location && <div style={{ fontSize: fs.small, color: textMuted, fontStyle: "italic", marginTop: "1px" }}>{exp.location}</div>}
+              {exp.description && <p style={{ fontSize: fs.body, color: textBody, marginTop: "4px", lineHeight: 1.7 }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: textBody, lineHeight: 1.7, paddingLeft: "16px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: "2px", top: "6px", fontSize: "8px", color: accent }}>&#9830;</span>
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <div key="education" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Education" />
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, fontWeight: 700, color: textDark }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                <span style={{ fontSize: fs.small, color: textMuted, fontStyle: "italic" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+              </div>
+              <div style={{ fontSize: fs.body, color: textMuted }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: textBody, lineHeight: 1.7, paddingLeft: "16px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: "2px", top: "6px", fontSize: "8px", color: accent }}>&#9830;</span>
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <div key="skills" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Skills & Expertise" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            {config.skillCategories.map((cat) => (
+              <div key={cat.id} style={{ display: "flex", gap: "8px", fontSize: fs.body }}>
+                <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 600, color: textDark, minWidth: "110px" }}>{cat.name}:</span>
+                <span style={{ color: textBody }}>{cat.skills.join(" · ")}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <div key="projects" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Selected Projects" />
+          {enabledProjects.map((proj) => (
+            <div key={proj.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, fontWeight: 700, color: textDark }}>{proj.title}</span>
+                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+              </div>
+              {proj.description && <p style={{ fontSize: fs.body, color: textBody, marginTop: "3px", lineHeight: 1.6 }}>{proj.description}</p>}
+              {proj.techStack.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                  {proj.techStack.map((t, i) => (
+                    <span key={i} style={{ fontSize: "9px", padding: "2px 7px", borderRadius: "2px", border: `1px solid ${accent}40`, color: accent, fontWeight: 500 }}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <div key="certifications" style={{ marginBottom: "20px" }}>
+          <SectionHead title="Certifications" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, fontWeight: 600, color: textDark }}>{cert.name}</span>
+                  {cert.issuer && <span style={{ fontSize: fs.body, color: textMuted }}> — {cert.issuer}</span>}
+                </div>
+                {cert.date && <span style={{ fontSize: fs.small, color: textMuted, fontStyle: "italic" }}>{formatDisplayDate(cert.date)}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <div key={section.id} style={{ marginBottom: "20px" }}>
+              <SectionHead title={section.title} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: textBody, lineHeight: 1.7, paddingLeft: "16px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: "2px", top: "6px", fontSize: "8px", color: accent }}>&#9830;</span>
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        : null,
+  }
+
+  return (
+    <div style={{ ...PAGE_BASE, backgroundColor: paperBg, color: textBody, padding: `${pad}px`, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E\")" }}>
+      {/* Elegant border frame */}
+      <div style={{ border: `1px solid ${accent}30`, padding: `${pad - 10}px`, minHeight: "calc(297mm - 80px)" }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "22px", paddingBottom: "14px", borderBottom: `1px solid ${accent}40` }}>
+          <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "30px", fontWeight: 700, color: textDark, letterSpacing: "3px" }}>{p.fullName || "Your Name"}</div>
+          {p.title && <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, color: accent, fontStyle: "italic", marginTop: "4px" }}>{p.title}</div>}
+          {contacts.length > 0 && (
+            <div style={{ display: "flex", justifyContent: "center", gap: "14px", marginTop: "8px", flexWrap: "wrap" }}>
+              {contacts.map((c, i) => {
+                const href = contactHref(c.type, c.value)
+                return (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                    {contactIcon(c.type, accent, 10)}
+                    <LinkText href={href} style={{ fontSize: fs.small, color: textMuted }}>{c.value}</LinkText>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Sections */}
+        {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   STACKED TEMPLATE
+   Full-width horizontal bands stacked vertically
+   ═══════════════════════════════════════════════ */
+function StackedTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+
+  const bandLight = "#ffffff"
+  const bandDark = "#f8fafc"
+  const textDark = "#111827"
+  const textBody = "#4b5563"
+  const textMuted = "#9ca3af"
+  let bandIndex = 0
+
+  function getBandBg() {
+    return (bandIndex++) % 2 === 0 ? bandLight : bandDark
+  }
+
+  function BandSection({ title, children }: { title: string; children: React.ReactNode }) {
+    const bg = getBandBg()
+    return (
+      <div style={{ backgroundColor: bg, padding: `18px ${pad}px`, borderBottom: "1px solid #e5e7eb" }}>
+        <div style={{ fontSize: fs.h2, fontWeight: 700, color: accent, textTransform: "uppercase" as const, letterSpacing: "1.5px", marginBottom: "10px" }}>{title}</div>
+        {children}
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <BandSection key="summary" title="Summary">
+          <p style={{ fontSize: fs.body, lineHeight: 1.7, color: textBody, margin: 0, maxWidth: "700px" }}>{p.summary}</p>
+        </BandSection>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <BandSection key="experience" title="Experience">
+          {enabledExp.map((exp) => (
+            <div key={exp.id} style={{ marginBottom: "14px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: textDark }}>{exp.title}</span>
+                  {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 500 }}> — {exp.company}</span>}
+                </div>
+                <span style={{ fontSize: fs.small, color: textMuted, flexShrink: 0 }}>
+                  {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                </span>
+              </div>
+              {exp.location && <div style={{ fontSize: fs.small, color: textMuted, marginTop: "2px" }}>{exp.location}</div>}
+              {exp.description && <p style={{ fontSize: fs.body, color: textBody, marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: textBody, lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </BandSection>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <BandSection key="education" title="Education">
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: textDark }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                <span style={{ fontSize: fs.small, color: textMuted }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+              </div>
+              <div style={{ fontSize: fs.body, color: "#6b7280", marginTop: "1px" }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: textBody, lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </BandSection>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <BandSection key="skills" title="Skills">
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {config.skillCategories.map((cat) => (
+              <div key={cat.id}>
+                <div style={{ fontSize: fs.small, fontWeight: 600, color: textDark, marginBottom: "4px" }}>{cat.name}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {cat.skills.map((skill, i) => (
+                    <span key={i} style={{ fontSize: fs.small, padding: "3px 12px", borderRadius: "20px", backgroundColor: `${accent}10`, color: accent, fontWeight: 500, whiteSpace: "nowrap" as const }}>{skill}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </BandSection>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <BandSection key="projects" title="Projects">
+          {enabledProjects.map((proj) => (
+            <div key={proj.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 700, color: textDark }}>{proj.title}</span>
+                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+              </div>
+              {proj.description && <p style={{ fontSize: fs.body, color: textBody, marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.techStack.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                  {proj.techStack.map((t, i) => (
+                    <span key={i} style={{ fontSize: "9px", padding: "2px 7px", borderRadius: "3px", border: `1px solid ${accent}30`, color: accent, fontWeight: 500 }}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </BandSection>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <BandSection key="certifications" title="Certifications">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ padding: "6px 12px", border: `1px solid ${accent}20`, borderRadius: "4px", backgroundColor: `${accent}05` }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 600, color: textDark }}>{cert.name}</span>
+                {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280" }}> — {cert.issuer}</span>}
+                {cert.date && <div style={{ fontSize: fs.small, color: textMuted }}>{formatDisplayDate(cert.date)}</div>}
+              </div>
+            ))}
+          </div>
+        </BandSection>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <BandSection key={section.id} title={section.title}>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: textBody, lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </BandSection>
+          ))
+        : null,
+  }
+
+  return (
+    <div style={{ ...PAGE_BASE, padding: 0, overflow: "hidden" }}>
+      {/* Name band — tallest */}
+      <div style={{ backgroundColor: accent, padding: `${pad}px ${pad}px`, textAlign: "center" }}>
+        <div style={{ fontSize: "36px", fontWeight: 800, color: "#ffffff", letterSpacing: "2px" }}>{p.fullName || "Your Name"}</div>
+        {p.title && <div style={{ fontSize: fs.h3, color: "rgba(255,255,255,0.85)", marginTop: "4px", letterSpacing: "1px" }}>{p.title}</div>}
+      </div>
+
+      {/* Contact band */}
+      {contacts.length > 0 && (
+        <div style={{ backgroundColor: "#f1f5f9", padding: `10px ${pad}px`, borderBottom: "1px solid #e5e7eb", display: "flex", justifyContent: "center", gap: "16px", flexWrap: "wrap" }}>
+          {contacts.map((c, i) => {
+            const href = contactHref(c.type, c.value)
+            return (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                {contactIcon(c.type, accent, 11)}
+                <LinkText href={href} style={{ fontSize: fs.small, color: textBody }}>{c.value}</LinkText>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Section bands */}
+      {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   31. RETRO TEMPLATE
+   1970s vintage design — warm earthy tones, pill headers, retro badges
+   ═══════════════════════════════════════════════ */
+function RetroTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+
+  const brown = "#6d4c2e"
+  const orange = "#d97706"
+  const cream = "#fdf6ec"
+  const warmGray = "#78716c"
+
+  function SectionPill({ title }: { title: string }) {
+    return (
+      <div style={{ display: "inline-block", backgroundColor: orange, color: "#fff", fontSize: fs.h2, fontWeight: 700, padding: "5px 18px", borderRadius: "999px", marginBottom: "14px", letterSpacing: "1px", textTransform: "uppercase" }}>
+        {title}
+      </div>
+    )
+  }
+
+  function GroovyLine() {
+    return (
+      <div style={{ height: "3px", background: `repeating-linear-gradient(90deg, ${orange} 0px, ${orange} 8px, transparent 8px, transparent 14px)`, margin: "18px 0", borderRadius: "2px" }} />
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary" style={{ marginBottom: "24px" }}>
+          <SectionPill title="About Me" />
+          <p style={{ fontSize: fs.body, color: brown, lineHeight: 1.8, margin: 0, fontStyle: "italic" }}>{p.summary}</p>
+        </div>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <div key="experience" style={{ marginBottom: "24px" }}>
+          <SectionPill title="Experience" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+            {enabledExp.map((exp) => (
+              <div key={exp.id} style={{ backgroundColor: "#fff", border: `2px solid ${orange}`, borderRadius: "16px", padding: "14px 18px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <div>
+                    <span style={{ fontSize: fs.h3, fontWeight: 700, color: brown }}>{exp.title}</span>
+                    {exp.company && <span style={{ fontSize: fs.h3, color: orange, fontWeight: 600 }}> @ {exp.company}</span>}
+                  </div>
+                  <span style={{ fontSize: fs.small, color: warmGray, fontWeight: 600, flexShrink: 0, backgroundColor: cream, padding: "2px 10px", borderRadius: "999px" }}>
+                    {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` \u2013 ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                  </span>
+                </div>
+                {exp.location && <div style={{ fontSize: fs.small, color: warmGray, marginTop: "2px" }}>{exp.location}</div>}
+                {exp.description && <p style={{ fontSize: fs.body, color: brown, marginTop: "6px", lineHeight: 1.7, margin: "6px 0 0 0" }}>{exp.description}</p>}
+                {exp.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "6px 0 0 0" }}>
+                    {exp.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: brown, lineHeight: 1.7, paddingLeft: "18px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: "2px", top: "8px", width: "8px", height: "8px", backgroundColor: orange, borderRadius: "50%" }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <div key="education" style={{ marginBottom: "24px" }}>
+          <SectionPill title="Education" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {enabledEdu.map((edu) => (
+              <div key={edu.id} style={{ backgroundColor: "#fff", border: `2px solid ${orange}`, borderRadius: "16px", padding: "12px 18px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: brown }}>
+                    {edu.degree}{edu.field && ` in ${edu.field}`}
+                  </span>
+                  <span style={{ fontSize: fs.small, color: warmGray, fontWeight: 600, flexShrink: 0 }}>
+                    {formatDisplayDate(edu.startDate)}{edu.endDate && ` \u2013 ${formatDisplayDate(edu.endDate)}`}
+                  </span>
+                </div>
+                <div style={{ fontSize: fs.body, color: orange, fontWeight: 600, marginTop: "2px" }}>{edu.institution}</div>
+                {edu.achievements && edu.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {edu.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: brown, lineHeight: 1.7, paddingLeft: "18px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: "2px", top: "8px", width: "8px", height: "8px", backgroundColor: orange, borderRadius: "50%" }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <div key="skills" style={{ marginBottom: "24px" }}>
+          <SectionPill title="Skills" />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            {config.skillCategories.map((cat) =>
+              cat.skills.map((skill, i) => (
+                <span key={`${cat.id}-${i}`} style={{ display: "inline-block", backgroundColor: cream, color: brown, border: `2px solid ${orange}`, borderRadius: "999px", padding: "4px 14px", fontSize: fs.small, fontWeight: 700, letterSpacing: "0.5px" }}>
+                  {skill}
+                </span>
+              ))
+            )}
+          </div>
+        </div>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <div key="projects" style={{ marginBottom: "24px" }}>
+          <SectionPill title="Projects" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {enabledProjects.map((proj) => (
+              <div key={proj.id} style={{ backgroundColor: "#fff", border: `2px solid ${orange}`, borderRadius: "16px", padding: "12px 18px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: brown }}>{proj.title}</span>
+                  {proj.url && (
+                    <a href={proj.url.startsWith("http") ? proj.url : `https://${proj.url}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: fs.small, color: orange, textDecoration: "none", fontWeight: 600 }}>
+                      {proj.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                    </a>
+                  )}
+                </div>
+                {proj.description && <p style={{ fontSize: fs.body, color: brown, marginTop: "4px", lineHeight: 1.7, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.techStack.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}>
+                    {proj.techStack.map((t, i) => (
+                      <span key={i} style={{ fontSize: fs.small, backgroundColor: cream, color: orange, padding: "1px 8px", borderRadius: "999px", fontWeight: 600 }}>{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <div key="certifications" style={{ marginBottom: "24px" }}>
+          <SectionPill title="Certifications" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  {cert.url ? (
+                    <a href={cert.url.startsWith("http") ? cert.url : `https://${cert.url}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: fs.h3, fontWeight: 700, color: orange, textDecoration: "none" }}>{cert.name}</a>
+                  ) : (
+                    <span style={{ fontSize: fs.h3, fontWeight: 700, color: brown }}>{cert.name}</span>
+                  )}
+                  {cert.issuer && <span style={{ fontSize: fs.body, color: warmGray, fontWeight: 500 }}> \u2014 {cert.issuer}</span>}
+                </div>
+                {cert.date && <span style={{ fontSize: fs.small, color: warmGray, fontWeight: 600, flexShrink: 0 }}>{formatDisplayDate(cert.date)}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <div key={section.id} style={{ marginBottom: "24px" }}>
+              <SectionPill title={section.title} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: brown, lineHeight: 1.7, paddingLeft: "18px", position: "relative", marginBottom: "2px" }}>
+                    <span style={{ position: "absolute", left: "2px", top: "8px", width: "8px", height: "8px", backgroundColor: orange, borderRadius: "50%" }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        : null,
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, backgroundColor: cream, padding: `${pad}px ${pad + 4}px` }}>
+      {/* Retro Header */}
+      <div style={{ textAlign: "center", marginBottom: "8px" }}>
+        {config.showProfileImage && p.profileImage && (
+          <div style={{ width: "72px", height: "72px", borderRadius: "50%", overflow: "hidden", margin: "0 auto 10px", border: `4px solid ${orange}` }}>
+            <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+        )}
+        <h1 style={{ fontSize: "30px", fontWeight: 900, color: brown, margin: 0, letterSpacing: "2px", textTransform: "uppercase" }}>
+          {p.fullName || "Your Name"}
+        </h1>
+        {p.title && <div style={{ fontSize: fs.h2, color: orange, fontWeight: 700, marginTop: "4px", letterSpacing: "1px" }}>{p.title}</div>}
+
+        {contacts.length > 0 && (
+          <div style={{ marginTop: "10px", display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "6px" }}>
+            {contacts.map((c, i) => {
+              const href = contactHref(c.type, c.value)
+              return (
+                <span key={i} style={{ fontSize: fs.small, backgroundColor: brown, color: "#fff", padding: "3px 12px", borderRadius: "999px", fontWeight: 600 }}>
+                  {href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "none" }}>{c.value}</a>
+                  ) : (
+                    c.value
+                  )}
+                </span>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      <GroovyLine />
+
+      {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   32. ORIGAMI TEMPLATE
+   Folded paper panels with CSS triangle corners, alternating rotations
+   ═══════════════════════════════════════════════ */
+function OrigamiTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+
+  const foldSize = "12px"
+  const paperBg = "#fafafa"
+  const foldColor = "#e5e7eb"
+  const textMain = "#1f2937"
+  const textMuted = "#6b7280"
+
+  function PaperCard({ children, index = 0 }: { children: React.ReactNode; index?: number }) {
+    const rotation = index % 2 === 0 ? "0.5deg" : "-0.5deg"
+    return (
+      <div style={{ position: "relative", backgroundColor: paperBg, border: `1px solid ${foldColor}`, padding: "16px 18px", marginBottom: "14px", transform: `rotate(${rotation})`, boxShadow: "2px 3px 8px rgba(0,0,0,0.06)" }}>
+        {/* Top-right fold triangle */}
+        <div style={{ position: "absolute", top: 0, right: 0, width: 0, height: 0, borderStyle: "solid", borderWidth: `0 ${foldSize} ${foldSize} 0`, borderColor: "transparent #fff transparent transparent" }} />
+        <div style={{ position: "absolute", top: 0, right: 0, width: 0, height: 0, borderStyle: "solid", borderWidth: `0 ${foldSize} ${foldSize} 0`, borderColor: `transparent ${foldColor} transparent transparent`, opacity: 0.5 }} />
+        {/* Fold shadow line */}
+        <div style={{ position: "absolute", top: "1px", right: foldSize, width: "1px", height: foldSize, backgroundColor: foldColor }} />
+        <div style={{ position: "absolute", top: foldSize, right: "1px", width: foldSize, height: "1px", backgroundColor: foldColor }} />
+        {children}
+      </div>
+    )
+  }
+
+  function SectionTitle({ title }: { title: string }) {
+    return (
+      <div style={{ fontSize: fs.h2, fontWeight: 600, color: accent, textTransform: "uppercase", letterSpacing: "2px", marginBottom: "12px", borderBottom: `1px dashed ${foldColor}`, paddingBottom: "6px" }}>
+        {title}
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary" style={{ marginBottom: "18px" }}>
+          <SectionTitle title="About" />
+          <PaperCard index={0}>
+            <p style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.8, margin: 0 }}>{p.summary}</p>
+          </PaperCard>
+        </div>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <div key="experience" style={{ marginBottom: "18px" }}>
+          <SectionTitle title="Experience" />
+          {enabledExp.map((exp, idx) => (
+            <PaperCard key={exp.id} index={idx}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 600, color: textMain }}>{exp.title}</span>
+                  {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 500 }}> \u2014 {exp.company}</span>}
+                </div>
+                <span style={{ fontSize: fs.small, color: textMuted, flexShrink: 0 }}>
+                  {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` \u2013 ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                </span>
+              </div>
+              {exp.location && <div style={{ fontSize: fs.small, color: textMuted, marginTop: "2px" }}>{exp.location}</div>}
+              {exp.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "6px", lineHeight: 1.7, margin: "6px 0 0 0" }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "6px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.7, paddingLeft: "16px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: "4px", top: "9px", width: "5px", height: "5px", border: `1px solid ${accent}`, transform: "rotate(45deg)" }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </PaperCard>
+          ))}
+        </div>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <div key="education" style={{ marginBottom: "18px" }}>
+          <SectionTitle title="Education" />
+          {enabledEdu.map((edu, idx) => (
+            <PaperCard key={edu.id} index={idx + 3}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 600, color: textMain }}>
+                  {edu.degree}{edu.field && ` in ${edu.field}`}
+                </span>
+                <span style={{ fontSize: fs.small, color: textMuted, flexShrink: 0 }}>
+                  {formatDisplayDate(edu.startDate)}{edu.endDate && ` \u2013 ${formatDisplayDate(edu.endDate)}`}
+                </span>
+              </div>
+              <div style={{ fontSize: fs.body, color: accent, marginTop: "2px" }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.7, paddingLeft: "16px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: "4px", top: "9px", width: "5px", height: "5px", border: `1px solid ${accent}`, transform: "rotate(45deg)" }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </PaperCard>
+          ))}
+        </div>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <div key="skills" style={{ marginBottom: "18px" }}>
+          <SectionTitle title="Skills" />
+          <PaperCard index={5}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {config.skillCategories.map((cat) => (
+                <div key={cat.id} style={{ fontSize: fs.body }}>
+                  <span style={{ fontWeight: 600, color: textMain }}>{cat.name}: </span>
+                  <span style={{ color: textMuted }}>{cat.skills.join(" \u00b7 ")}</span>
+                </div>
+              ))}
+            </div>
+          </PaperCard>
+        </div>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <div key="projects" style={{ marginBottom: "18px" }}>
+          <SectionTitle title="Projects" />
+          {enabledProjects.map((proj, idx) => (
+            <PaperCard key={proj.id} index={idx + 7}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: fs.h3, fontWeight: 600, color: textMain }}>{proj.title}</span>
+                {proj.url && (
+                  <a href={proj.url.startsWith("http") ? proj.url : `https://${proj.url}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: fs.small, color: accent, textDecoration: "none" }}>
+                    {proj.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                  </a>
+                )}
+              </div>
+              {proj.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "4px", lineHeight: 1.7, margin: "4px 0 0 0" }}>{proj.description}</p>}
+              {proj.techStack.length > 0 && (
+                <div style={{ fontSize: fs.small, color: textMuted, marginTop: "4px", fontStyle: "italic" }}>
+                  {proj.techStack.join(" / ")}
+                </div>
+              )}
+            </PaperCard>
+          ))}
+        </div>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <div key="certifications" style={{ marginBottom: "18px" }}>
+          <SectionTitle title="Certifications" />
+          <PaperCard index={10}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {enabledCerts.map((cert) => (
+                <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <div>
+                    {cert.url ? (
+                      <a href={cert.url.startsWith("http") ? cert.url : `https://${cert.url}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: fs.h3, fontWeight: 600, color: accent, textDecoration: "none" }}>{cert.name}</a>
+                    ) : (
+                      <span style={{ fontSize: fs.h3, fontWeight: 600, color: textMain }}>{cert.name}</span>
+                    )}
+                    {cert.issuer && <span style={{ fontSize: fs.body, color: textMuted }}> \u2014 {cert.issuer}</span>}
+                  </div>
+                  {cert.date && <span style={{ fontSize: fs.small, color: textMuted, flexShrink: 0 }}>{formatDisplayDate(cert.date)}</span>}
+                </div>
+              ))}
+            </div>
+          </PaperCard>
+        </div>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section, sIdx) => (
+            <div key={section.id} style={{ marginBottom: "18px" }}>
+              <SectionTitle title={section.title} />
+              <PaperCard index={sIdx + 12}>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {section.items.map((item) => (
+                    <li key={item.id} style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.7, paddingLeft: "16px", position: "relative", marginBottom: "2px" }}>
+                      <span style={{ position: "absolute", left: "4px", top: "9px", width: "5px", height: "5px", border: `1px solid ${accent}`, transform: "rotate(45deg)" }} />
+                      {item.content}
+                    </li>
+                  ))}
+                </ul>
+              </PaperCard>
+            </div>
+          ))
+        : null,
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, padding: `${pad}px ${pad + 4}px`, backgroundColor: "#fff" }}>
+      {/* Header as a paper card */}
+      <PaperCard index={0}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          {config.showProfileImage && p.profileImage && (
+            <div style={{ width: "56px", height: "56px", overflow: "hidden", flexShrink: 0, border: `1px solid ${foldColor}`, transform: "rotate(-2deg)" }}>
+              <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: "26px", fontWeight: 700, color: textMain, margin: 0 }}>{p.fullName || "Your Name"}</h1>
+            {p.title && <div style={{ fontSize: fs.h2, color: accent, fontWeight: 500, marginTop: "2px" }}>{p.title}</div>}
+          </div>
+        </div>
+        {contacts.length > 0 && (
+          <div style={{ marginTop: "10px", fontSize: fs.small, color: textMuted, borderTop: `1px dashed ${foldColor}`, paddingTop: "8px" }}>
+            {contacts.map((c, i) => {
+              const href = contactHref(c.type, c.value)
+              return (
+                <span key={i}>
+                  {i > 0 && <span style={{ margin: "0 8px", color: foldColor }}>|</span>}
+                  {href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: accent, textDecoration: "none" }}>{c.value}</a>
+                  ) : (
+                    <span>{c.value}</span>
+                  )}
+                </span>
+              )
+            })}
+          </div>
+        )}
+      </PaperCard>
+
+      <div style={{ marginTop: "18px" }}>
+        {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   33. TERMINAL TEMPLATE
+   Command-line / hacker aesthetic — black bg, green text, monospace
+   ═══════════════════════════════════════════════ */
+function TerminalTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+
+  const bg = "#0d1117"
+  const green = "#00ff41"
+  const dimGreen = "#238636"
+  const textBody = "#c9d1d9"
+  const textMuted = "#8b949e"
+  const mono = "'Courier New', 'Consolas', 'Liberation Mono', monospace"
+
+  function TermHeader({ title }: { title: string }) {
+    return (
+      <div style={{ fontSize: fs.h2, fontFamily: mono, fontWeight: 700, color: green, marginBottom: "10px", letterSpacing: "1px" }}>
+        <span style={{ color: dimGreen }}>$ </span>{title.toLowerCase().replace(/\s+/g, "_")}
+      </div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary" style={{ marginBottom: "22px" }}>
+          <TermHeader title="cat about.txt" />
+          <p style={{ fontSize: fs.body, fontFamily: mono, color: textBody, lineHeight: 1.8, margin: 0, paddingLeft: "18px", borderLeft: `2px solid ${dimGreen}` }}>{p.summary}</p>
+        </div>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <div key="experience" style={{ marginBottom: "22px" }}>
+          <TermHeader title="ls ./experience" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", paddingLeft: "18px", borderLeft: `2px solid ${dimGreen}` }}>
+            {enabledExp.map((exp) => (
+              <div key={exp.id}>
+                <div style={{ fontFamily: mono }}>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: green }}>{exp.title}</span>
+                  {exp.company && <span style={{ fontSize: fs.h3, color: textMuted }}> @ {exp.company}</span>}
+                </div>
+                <div style={{ fontFamily: mono, fontSize: fs.small, color: textMuted, marginTop: "2px" }}>
+                  <span style={{ color: dimGreen }}>&gt; </span>
+                  {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` \u2013 ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                  {exp.location && <span> | {exp.location}</span>}
+                </div>
+                {exp.description && <p style={{ fontSize: fs.body, fontFamily: mono, color: textBody, marginTop: "6px", lineHeight: 1.7, margin: "6px 0 0 0" }}>{exp.description}</p>}
+                {exp.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "6px 0 0 0" }}>
+                    {exp.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, fontFamily: mono, color: textBody, lineHeight: 1.7, paddingLeft: "20px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, color: dimGreen }}>{"->"}</span>
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <div key="education" style={{ marginBottom: "22px" }}>
+          <TermHeader title="cat education.log" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", paddingLeft: "18px", borderLeft: `2px solid ${dimGreen}` }}>
+            {enabledEdu.map((edu) => (
+              <div key={edu.id} style={{ fontFamily: mono }}>
+                <div>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: green }}>
+                    {edu.degree}{edu.field && ` in ${edu.field}`}
+                  </span>
+                </div>
+                <div style={{ fontSize: fs.body, color: textMuted, marginTop: "1px" }}>
+                  <span style={{ color: dimGreen }}>&gt; </span>{edu.institution} | {formatDisplayDate(edu.startDate)}{edu.endDate && ` \u2013 ${formatDisplayDate(edu.endDate)}`}
+                </div>
+                {edu.achievements && edu.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {edu.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: textBody, lineHeight: 1.7, paddingLeft: "20px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, color: dimGreen }}>{"->"}</span>
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <div key="skills" style={{ marginBottom: "22px" }}>
+          <TermHeader title="apt list --installed" />
+          <div style={{ paddingLeft: "18px", borderLeft: `2px solid ${dimGreen}`, fontFamily: mono }}>
+            {config.skillCategories.map((cat) => (
+              <div key={cat.id} style={{ marginBottom: "6px" }}>
+                <div style={{ fontSize: fs.small, color: textMuted, marginBottom: "2px" }}>
+                  <span style={{ color: dimGreen }}># </span>{cat.name}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 12px" }}>
+                  {cat.skills.map((skill, i) => (
+                    <span key={i} style={{ fontSize: fs.body, color: green }}>
+                      {skill}<span style={{ color: textMuted }}>/installed</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <div key="projects" style={{ marginBottom: "22px" }}>
+          <TermHeader title="ls ./projects" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", paddingLeft: "18px", borderLeft: `2px solid ${dimGreen}` }}>
+            {enabledProjects.map((proj) => (
+              <div key={proj.id} style={{ fontFamily: mono }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <span style={{ fontSize: fs.h3, fontWeight: 700, color: green }}>{proj.title}</span>
+                  {proj.url && (
+                    <a href={proj.url.startsWith("http") ? proj.url : `https://${proj.url}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: fs.small, color: dimGreen, textDecoration: "none" }}>
+                      {proj.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                    </a>
+                  )}
+                </div>
+                {proj.description && <p style={{ fontSize: fs.body, color: textBody, marginTop: "4px", lineHeight: 1.7, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.techStack.length > 0 && (
+                  <div style={{ fontSize: fs.small, color: textMuted, marginTop: "4px" }}>
+                    {"stack: ["}{proj.techStack.join(", ")}{"]"}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <div key="certifications" style={{ marginBottom: "22px" }}>
+          <TermHeader title="cat certifications.txt" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", paddingLeft: "18px", borderLeft: `2px solid ${dimGreen}`, fontFamily: mono }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ fontSize: fs.body, color: textBody }}>
+                <span style={{ color: dimGreen }}>&gt; </span>
+                {cert.url ? (
+                  <a href={cert.url.startsWith("http") ? cert.url : `https://${cert.url}`} target="_blank" rel="noopener noreferrer" style={{ color: green, textDecoration: "none" }}>{cert.name}</a>
+                ) : (
+                  <span style={{ color: green }}>{cert.name}</span>
+                )}
+                {cert.issuer && <span style={{ color: textMuted }}> [{cert.issuer}]</span>}
+                {cert.date && <span style={{ color: textMuted }}> ({formatDisplayDate(cert.date)})</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <div key={section.id} style={{ marginBottom: "22px" }}>
+              <TermHeader title={`cat ${section.title.toLowerCase().replace(/\s+/g, "_")}.txt`} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, paddingLeft: "18px", borderLeft: `2px solid ${dimGreen}`, fontFamily: mono }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: textBody, lineHeight: 1.7, paddingLeft: "20px", position: "relative", marginBottom: "2px" }}>
+                    <span style={{ position: "absolute", left: 0, color: dimGreen }}>{"->"}</span>
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        : null,
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, backgroundColor: bg, color: textBody, fontFamily: mono, padding: `${pad}px ${pad + 4}px` }}>
+      {/* Terminal title bar */}
+      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+        <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#ff5f57" }} />
+        <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#febc2e" }} />
+        <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#28c840" }} />
+        <span style={{ fontSize: fs.small, color: textMuted, marginLeft: "8px" }}>resume@{(p.fullName || "user").toLowerCase().replace(/\s+/g, "-")}:~</span>
+      </div>
+
+      {/* Header */}
+      <div style={{ marginBottom: "24px", paddingTop: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          {config.showProfileImage && p.profileImage && (
+            <div style={{ width: "52px", height: "52px", borderRadius: "4px", overflow: "hidden", flexShrink: 0, border: `1px solid ${dimGreen}` }}>
+              <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: "26px", fontWeight: 700, fontFamily: mono, color: green, margin: 0, letterSpacing: "1px" }}>
+              {p.fullName || "Your Name"}<span style={{ display: "inline-block", width: "8px", height: "18px", backgroundColor: green, marginLeft: "4px", verticalAlign: "middle" }} />
+            </h1>
+            {p.title && <div style={{ fontSize: fs.h2, color: textMuted, fontFamily: mono, marginTop: "2px" }}>{p.title}</div>}
+          </div>
+        </div>
+
+        {contacts.length > 0 && (
+          <div style={{ marginTop: "10px", fontSize: fs.small, fontFamily: mono, color: textMuted }}>
+            {contacts.map((c, i) => {
+              const href = contactHref(c.type, c.value)
+              return (
+                <span key={i}>
+                  {i > 0 && <span style={{ margin: "0 8px", color: dimGreen }}>|</span>}
+                  {href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: green, textDecoration: "none" }}>{c.value}</a>
+                  ) : (
+                    <span style={{ color: textBody }}>{c.value}</span>
+                  )}
+                </span>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      <div style={{ height: "1px", backgroundColor: dimGreen, marginBottom: "20px" }} />
+
+      {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   34. RIBBON TEMPLATE
+   Ribbon/banner design elements — folded ribbon headers, ribbon date labels
+   ═══════════════════════════════════════════════ */
+function RibbonTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+
+  const textMain = "#1f2937"
+  const textMuted = "#6b7280"
+
+  function darkenAccent(hex: string): string {
+    const r = Math.max(0, parseInt(hex.slice(1, 3), 16) - 40)
+    const g = Math.max(0, parseInt(hex.slice(3, 5), 16) - 40)
+    const b = Math.max(0, parseInt(hex.slice(5, 7), 16) - 40)
+    return `rgb(${r},${g},${b})`
+  }
+
+  function RibbonBanner({ title }: { title: string }) {
+    const foldShadow = darkenAccent(accent)
+    return (
+      <div style={{ position: "relative", display: "inline-block", marginBottom: "14px", marginLeft: "-8px" }}>
+        {/* Left fold */}
+        <div style={{ position: "absolute", left: "-6px", bottom: "-6px", width: 0, height: 0, borderStyle: "solid", borderWidth: "0 6px 6px 0", borderColor: `transparent ${foldShadow} transparent transparent` }} />
+        {/* Main ribbon */}
+        <div style={{ backgroundColor: accent, color: "#fff", fontSize: fs.h2, fontWeight: 700, padding: "5px 22px 5px 14px", textTransform: "uppercase", letterSpacing: "1.5px", position: "relative" }}>
+          {title}
+          {/* Right notch */}
+          <div style={{ position: "absolute", right: 0, top: 0, width: 0, height: 0, borderStyle: "solid", borderWidth: "12px 8px 12px 0", borderColor: "transparent #fff transparent transparent" }} />
+        </div>
+      </div>
+    )
+  }
+
+  function DateRibbon({ text }: { text: string }) {
+    return (
+      <span style={{ display: "inline-block", backgroundColor: accent, color: "#fff", fontSize: fs.small, fontWeight: 600, padding: "2px 12px 2px 8px", position: "relative", flexShrink: 0 }}>
+        {text}
+        <span style={{ position: "absolute", right: "-6px", top: 0, width: 0, height: 0, borderStyle: "solid", borderWidth: "10px 6px 10px 0", borderColor: `transparent transparent transparent ${accent}` }} />
+      </span>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary" style={{ marginBottom: "24px" }}>
+          <RibbonBanner title="About" />
+          <p style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.8, margin: 0 }}>{p.summary}</p>
+        </div>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <div key="experience" style={{ marginBottom: "24px" }}>
+          <RibbonBanner title="Experience" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+            {enabledExp.map((exp) => (
+              <div key={exp.id} style={{ paddingLeft: "12px", borderLeft: `3px solid ${accent}20` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+                  <div>
+                    <span style={{ fontSize: fs.h3, fontWeight: 600, color: textMain }}>{exp.title}</span>
+                    {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 500 }}> \u2014 {exp.company}</span>}
+                  </div>
+                  <DateRibbon text={`${formatDisplayDate(exp.startDate)}${(exp.endDate || exp.isCurrent) ? ` \u2013 ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}` : ""}`} />
+                </div>
+                {exp.location && <div style={{ fontSize: fs.small, color: textMuted, marginTop: "2px" }}>{exp.location}</div>}
+                {exp.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "6px", lineHeight: 1.7, margin: "6px 0 0 0" }}>{exp.description}</p>}
+                {exp.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "6px 0 0 0" }}>
+                    {exp.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.7, paddingLeft: "16px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "8px", width: "8px", height: "8px", backgroundColor: `${accent}30`, border: `2px solid ${accent}`, borderRadius: "2px" }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <div key="education" style={{ marginBottom: "24px" }}>
+          <RibbonBanner title="Education" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {enabledEdu.map((edu) => (
+              <div key={edu.id} style={{ paddingLeft: "12px", borderLeft: `3px solid ${accent}20` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: fs.h3, fontWeight: 600, color: textMain }}>
+                    {edu.degree}{edu.field && ` in ${edu.field}`}
+                  </span>
+                  <DateRibbon text={`${formatDisplayDate(edu.startDate)}${edu.endDate ? ` \u2013 ${formatDisplayDate(edu.endDate)}` : ""}`} />
+                </div>
+                <div style={{ fontSize: fs.body, color: accent, marginTop: "2px" }}>{edu.institution}</div>
+                {edu.achievements && edu.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {edu.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.7, paddingLeft: "16px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "8px", width: "8px", height: "8px", backgroundColor: `${accent}30`, border: `2px solid ${accent}`, borderRadius: "2px" }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <div key="skills" style={{ marginBottom: "24px" }}>
+          <RibbonBanner title="Skills" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {config.skillCategories.map((cat) => (
+              <div key={cat.id} style={{ position: "relative", padding: "10px 14px", border: `1px solid ${accent}25`, borderRadius: "4px" }}>
+                {/* Decorative ribbon corner */}
+                <div style={{ position: "absolute", top: 0, right: 0, width: 0, height: 0, borderStyle: "solid", borderWidth: "0 20px 20px 0", borderColor: `transparent ${accent}20 transparent transparent` }} />
+                <div style={{ fontSize: fs.small, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>{cat.name}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {cat.skills.map((skill, i) => (
+                    <span key={i} style={{ fontSize: fs.body, color: textMain, backgroundColor: `${accent}10`, padding: "2px 10px", borderRadius: "3px" }}>{skill}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <div key="projects" style={{ marginBottom: "24px" }}>
+          <RibbonBanner title="Projects" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {enabledProjects.map((proj) => (
+              <div key={proj.id} style={{ paddingLeft: "12px", borderLeft: `3px solid ${accent}20` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <span style={{ fontSize: fs.h3, fontWeight: 600, color: textMain }}>{proj.title}</span>
+                  {proj.url && (
+                    <a href={proj.url.startsWith("http") ? proj.url : `https://${proj.url}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: fs.small, color: accent, textDecoration: "none" }}>
+                      {proj.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                    </a>
+                  )}
+                </div>
+                {proj.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "4px", lineHeight: 1.7, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.techStack.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}>
+                    {proj.techStack.map((t, i) => (
+                      <span key={i} style={{ fontSize: fs.small, color: accent, backgroundColor: `${accent}10`, padding: "1px 8px", borderRadius: "3px" }}>{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <div key="certifications" style={{ marginBottom: "24px" }}>
+          <RibbonBanner title="Certifications" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", paddingLeft: "12px", borderLeft: `3px solid ${accent}20` }}>
+                <div>
+                  {cert.url ? (
+                    <a href={cert.url.startsWith("http") ? cert.url : `https://${cert.url}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: fs.h3, fontWeight: 600, color: accent, textDecoration: "none" }}>{cert.name}</a>
+                  ) : (
+                    <span style={{ fontSize: fs.h3, fontWeight: 600, color: textMain }}>{cert.name}</span>
+                  )}
+                  {cert.issuer && <span style={{ fontSize: fs.body, color: textMuted }}> \u2014 {cert.issuer}</span>}
+                </div>
+                {cert.date && <span style={{ fontSize: fs.small, color: textMuted, flexShrink: 0 }}>{formatDisplayDate(cert.date)}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <div key={section.id} style={{ marginBottom: "24px" }}>
+              <RibbonBanner title={section.title} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: textMuted, lineHeight: 1.7, paddingLeft: "16px", position: "relative", marginBottom: "2px" }}>
+                    <span style={{ position: "absolute", left: 0, top: "8px", width: "8px", height: "8px", backgroundColor: `${accent}30`, border: `2px solid ${accent}`, borderRadius: "2px" }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        : null,
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, padding: `${pad}px ${pad + 4}px` }}>
+      {/* Ribbon Header Banner */}
+      <div style={{ position: "relative", backgroundColor: accent, margin: `-${pad}px -${pad + 4}px ${24}px`, padding: "24px 32px", color: "#fff" }}>
+        {/* Left fold shadow */}
+        <div style={{ position: "absolute", bottom: "-8px", left: 0, width: 0, height: 0, borderStyle: "solid", borderWidth: "8px 8px 0 0", borderColor: `${darkenAccent(accent)} transparent transparent transparent` }} />
+        {/* Right fold shadow */}
+        <div style={{ position: "absolute", bottom: "-8px", right: 0, width: 0, height: 0, borderStyle: "solid", borderWidth: "0 8px 8px 0", borderColor: `transparent transparent transparent ${darkenAccent(accent)}`, transform: "scaleX(-1)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          {config.showProfileImage && p.profileImage && (
+            <div style={{ width: "60px", height: "60px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "3px solid rgba(255,255,255,0.4)" }}>
+              <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: "28px", fontWeight: 800, color: "#fff", margin: 0 }}>{p.fullName || "Your Name"}</h1>
+            {p.title && <div style={{ fontSize: fs.h2, color: "rgba(255,255,255,0.85)", fontWeight: 500, marginTop: "2px" }}>{p.title}</div>}
+          </div>
+        </div>
+        {contacts.length > 0 && (
+          <div style={{ marginTop: "10px", fontSize: fs.small, color: "rgba(255,255,255,0.8)" }}>
+            {contacts.map((c, i) => {
+              const href = contactHref(c.type, c.value)
+              return (
+                <span key={i}>
+                  {i > 0 && <span style={{ margin: "0 8px", opacity: 0.5 }}>|</span>}
+                  {href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "none" }}>{c.value}</a>
+                  ) : (
+                    <span>{c.value}</span>
+                  )}
+                </span>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   35. ZEN TEMPLATE
+   Japanese zen minimalism — extreme whitespace, subtle dot separators, muted tones
+   ═══════════════════════════════════════════════ */
+function ZenTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+
+  const textMain = "#374151"
+  const textMuted = "#9ca3af"
+  const textLight = "#d1d5db"
+  const dotSep = "\u00b7   \u00b7   \u00b7   \u00b7   \u00b7   \u00b7   \u00b7"
+
+  function ZenDivider() {
+    return (
+      <div style={{ textAlign: "center", fontSize: fs.small, color: textLight, letterSpacing: "4px", margin: "28px 0", userSelect: "none" }}>
+        {dotSep}
+      </div>
+    )
+  }
+
+  function SectionLabel({ title }: { title: string }) {
+    return (
+      <div style={{ fontSize: fs.h2, fontWeight: 200, color: textMuted, textTransform: "lowercase", letterSpacing: "4px", marginBottom: "18px" }}>{title}</div>
+    )
+  }
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary">
+          <SectionLabel title="about" />
+          <p style={{ fontSize: fs.body, color: textMain, lineHeight: 2.0, margin: 0, fontWeight: 300, maxWidth: "520px" }}>{p.summary}</p>
+          <ZenDivider />
+        </div>
+      ) : null,
+
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <div key="experience">
+          <SectionLabel title="experience" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            {enabledExp.map((exp) => (
+              <div key={exp.id}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <div>
+                    <span style={{ fontSize: fs.h3, fontWeight: 400, color: textMain }}>{exp.title}</span>
+                    {exp.company && <span style={{ fontSize: fs.h3, color: textMuted, fontWeight: 200 }}>{"  "}{exp.company}</span>}
+                  </div>
+                  <span style={{ fontSize: fs.small, color: textLight, fontWeight: 200, flexShrink: 0 }}>
+                    {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` \u2014 ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+                  </span>
+                </div>
+                {exp.location && <div style={{ fontSize: fs.small, color: textLight, marginTop: "3px", fontWeight: 200 }}>{exp.location}</div>}
+                {exp.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "8px", lineHeight: 1.9, margin: "8px 0 0 0", fontWeight: 300 }}>{exp.description}</p>}
+                {exp.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0 0" }}>
+                    {exp.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: textMuted, lineHeight: 2.0, paddingLeft: "16px", position: "relative", fontWeight: 300 }}>
+                        <span style={{ position: "absolute", left: "4px", top: "12px", width: "4px", height: "4px", borderRadius: "50%", border: `1px solid ${textLight}`, backgroundColor: "transparent" }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+          <ZenDivider />
+        </div>
+      ) : null,
+
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <div key="education">
+          <SectionLabel title="education" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            {enabledEdu.map((edu) => (
+              <div key={edu.id}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <span style={{ fontSize: fs.h3, fontWeight: 400, color: textMain }}>
+                    {edu.degree}{edu.field && ` in ${edu.field}`}
+                  </span>
+                  <span style={{ fontSize: fs.small, color: textLight, fontWeight: 200, flexShrink: 0 }}>
+                    {formatDisplayDate(edu.startDate)}{edu.endDate && ` \u2014 ${formatDisplayDate(edu.endDate)}`}
+                  </span>
+                </div>
+                <div style={{ fontSize: fs.body, color: textMuted, fontWeight: 200, marginTop: "3px" }}>{edu.institution}</div>
+                {edu.achievements && edu.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "6px 0 0 0" }}>
+                    {edu.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: textMuted, lineHeight: 2.0, paddingLeft: "16px", position: "relative", fontWeight: 300 }}>
+                        <span style={{ position: "absolute", left: "4px", top: "12px", width: "4px", height: "4px", borderRadius: "50%", border: `1px solid ${textLight}`, backgroundColor: "transparent" }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+          <ZenDivider />
+        </div>
+      ) : null,
+
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <div key="skills">
+          <SectionLabel title="skills" />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            {config.skillCategories.map((cat) =>
+              cat.skills.map((skill, i) => (
+                <span key={`${cat.id}-${i}`} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "4px 14px", fontSize: fs.small, color: textMuted, fontWeight: 300, border: `1px solid ${textLight}`, borderRadius: "999px" }}>
+                  {skill}
+                </span>
+              ))
+            )}
+          </div>
+          <ZenDivider />
+        </div>
+      ) : null,
+
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <div key="projects">
+          <SectionLabel title="projects" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            {enabledProjects.map((proj) => (
+              <div key={proj.id}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <span style={{ fontSize: fs.h3, fontWeight: 400, color: textMain }}>{proj.title}</span>
+                  {proj.url && (
+                    <a href={proj.url.startsWith("http") ? proj.url : `https://${proj.url}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: fs.small, color: textMuted, textDecoration: "none", fontWeight: 200 }}>
+                      {proj.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                    </a>
+                  )}
+                </div>
+                {proj.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "6px", lineHeight: 1.9, margin: "6px 0 0 0", fontWeight: 300 }}>{proj.description}</p>}
+                {proj.techStack.length > 0 && (
+                  <div style={{ fontSize: fs.small, color: textLight, marginTop: "4px", fontWeight: 200 }}>
+                    {proj.techStack.join("  \u00b7  ")}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <ZenDivider />
+        </div>
+      ) : null,
+
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <div key="certifications">
+          <SectionLabel title="certifications" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  {cert.url ? (
+                    <a href={cert.url.startsWith("http") ? cert.url : `https://${cert.url}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: fs.h3, fontWeight: 400, color: accent, textDecoration: "none" }}>{cert.name}</a>
+                  ) : (
+                    <span style={{ fontSize: fs.h3, fontWeight: 400, color: textMain }}>{cert.name}</span>
+                  )}
+                  {cert.issuer && <span style={{ fontSize: fs.body, color: textLight, fontWeight: 200 }}>{"  "}{cert.issuer}</span>}
+                </div>
+                {cert.date && <span style={{ fontSize: fs.small, color: textLight, fontWeight: 200, flexShrink: 0 }}>{formatDisplayDate(cert.date)}</span>}
+              </div>
+            ))}
+          </div>
+          <ZenDivider />
+        </div>
+      ) : null,
+
+    custom: () =>
+      config.customSections.length > 0
+        ? config.customSections.map((section) => (
+            <div key={section.id}>
+              <SectionLabel title={section.title} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: textMuted, lineHeight: 2.0, paddingLeft: "16px", position: "relative", fontWeight: 300, marginBottom: "2px" }}>
+                    <span style={{ position: "absolute", left: "4px", top: "12px", width: "4px", height: "4px", borderRadius: "50%", border: `1px solid ${textLight}`, backgroundColor: "transparent" }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+              <ZenDivider />
+            </div>
+          ))
+        : null,
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, padding: `${pad + 16}px ${pad + 12}px` }}>
+      {/* Thin ink-brush accent line */}
+      <div style={{ height: "1px", backgroundColor: accent, marginBottom: "36px", opacity: 0.6 }} />
+
+      {/* Zen Header */}
+      <div style={{ marginBottom: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {config.showProfileImage && p.profileImage && (
+            <div style={{ width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, opacity: 0.85 }}>
+              <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: "34px", fontWeight: 100, color: textMain, margin: 0, letterSpacing: "3px" }}>
+              {p.fullName || "Your Name"}
+            </h1>
+            {p.title && <div style={{ fontSize: fs.h2, color: textMuted, fontWeight: 200, marginTop: "6px", letterSpacing: "2px" }}>{p.title}</div>}
+          </div>
+        </div>
+
+        {contacts.length > 0 && (
+          <div style={{ marginTop: "14px", fontSize: fs.small, color: textLight, fontWeight: 200, letterSpacing: "0.5px" }}>
+            {contacts.map((c, i) => {
+              const href = contactHref(c.type, c.value)
+              return (
+                <span key={i}>
+                  {i > 0 && <span style={{ margin: "0 12px" }}>{"\u00b7"}</span>}
+                  {href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: textMuted, textDecoration: "none" }}>{c.value}</a>
+                  ) : (
+                    <span>{c.value}</span>
+                  )}
+                </span>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      <ZenDivider />
+
+      {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   31. DIAGONAL TEMPLATE
+   Dynamic angled accents with diagonal stripes,
+   skewed section markers and slanted date badges
+   ═══════════════════════════════════════════════ */
+function DiagonalTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const pad = config.pagePadding ?? 32
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+
+  function SectionHead({ icon, title }: { icon: React.ReactNode; title: string }) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          width: "28px", height: "28px", backgroundColor: accent,
+          transform: "rotate(-3deg)", borderRadius: "3px", flexShrink: 0,
+        }}>
+          {icon}
+        </div>
+        <span style={{ fontSize: fs.h2, fontWeight: 800, color: "#1a1a2e", textTransform: "uppercase", letterSpacing: "1.5px" }}>{title}</span>
+        <div style={{ flex: 1, height: "3px", background: `linear-gradient(135deg, ${accent}, transparent)`, transform: "skewX(-20deg)" }} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, overflow: "hidden" }}>
+      <div style={{ position: "relative", padding: `${pad + 14}px ${pad + 8}px ${pad}px`, backgroundColor: "#ffffff" }}>
+        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden", zIndex: 0 }}>
+          <div style={{ position: "absolute", top: "-30px", left: "-40px", width: "55%", height: "140%", backgroundColor: accent, opacity: 0.08, transform: "skewX(-15deg)" }} />
+          <div style={{ position: "absolute", top: "-20px", right: "-30px", width: "35%", height: "140%", backgroundColor: accent, opacity: 0.05, transform: "skewX(-15deg)" }} />
+        </div>
+        <div style={{ position: "absolute", top: "12px", left: "-20px", width: "70%", height: "48px", backgroundColor: accent, clipPath: "polygon(3% 0, 100% 0, 97% 100%, 0% 100%)", opacity: 0.9, zIndex: 0 }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            {config.showProfileImage && p.profileImage && (
+              <div style={{ width: "68px", height: "68px", borderRadius: "6px", border: `3px solid ${accent}`, overflow: "hidden", flexShrink: 0, transform: "rotate(-3deg)", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+                <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            )}
+            <div>
+              <h1 style={{ fontSize: "30px", fontWeight: 900, color: "white", margin: 0, lineHeight: 1.2, letterSpacing: "1px", textTransform: "uppercase", textShadow: "0 1px 3px rgba(0,0,0,0.2)" }}>
+                {p.fullName || "Your Name"}
+              </h1>
+              {p.title && (
+                <div style={{ fontSize: "13px", color: "#1a1a2e", fontWeight: 600, marginTop: "8px", letterSpacing: "2px", textTransform: "uppercase" }}>{p.title}</div>
+              )}
+            </div>
+          </div>
+          {contacts.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: "16px", paddingTop: "10px", borderTop: `2px solid ${accent}20` }}>
+              {contacts.map((c, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: fs.small, color: "#4b5563" }}>
+                  {contactIcon(c.type, accent, 11)}
+                  <LinkText href={contactHref(c.type, c.value)}>{c.value}</LinkText>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ padding: `${pad - 8}px ${pad + 8}px` }}>
+        {(() => {
+          const sectionRenderers: Record<string, () => React.ReactNode> = {
+            summary: () =>
+              p.summary ? (
+                <div key="summary" style={{ marginBottom: "20px", padding: "12px 16px", position: "relative", backgroundColor: `${accent}06`, borderRadius: "4px" }}>
+                  <div style={{ position: "absolute", left: 0, top: 0, width: "5px", height: "100%", backgroundColor: accent, transform: "skewY(-2deg)", borderRadius: "3px" }} />
+                  <p style={{ fontSize: fs.body, lineHeight: 1.7, color: "#374151", margin: 0, paddingLeft: "8px" }}>{p.summary}</p>
+                </div>
+              ) : null,
+            experience: () =>
+              enabledExp.length > 0 ? (
+                <div key="experience" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconBriefcase color="white" size={13} />} title="Experience" />
+                  {enabledExp.map((exp) => (
+                    <div key={exp.id} style={{ marginBottom: "16px", paddingLeft: "18px", position: "relative" }}>
+                      <div style={{ position: "absolute", left: 0, top: "3px", width: "8px", height: "18px", backgroundColor: accent, transform: "skewY(-15deg)", borderRadius: "2px", opacity: 0.7 }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "6px" }}>
+                        <div>
+                          <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#1a1a2e" }}>{exp.title}</span>
+                          {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 600 }}> — {exp.company}</span>}
+                        </div>
+                        <div style={{ fontSize: fs.small, fontWeight: 600, color: "white", backgroundColor: accent, padding: "2px 12px", clipPath: "polygon(6% 0, 100% 0, 94% 100%, 0% 100%)", minWidth: "120px", textAlign: "center" }}>
+                          {formatDisplayDate(exp.startDate)} – {exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}
+                        </div>
+                      </div>
+                      {exp.location && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}>
+                          <IconMapPin color="#9ca3af" size={10} />
+                          <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{exp.location}</span>
+                        </div>
+                      )}
+                      {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+                      {exp.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                          {exp.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, top: "6px", width: "8px", height: "8px", backgroundColor: `${accent}30`, transform: "rotate(45deg)", borderRadius: "1px" }} />
+                              {a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            education: () =>
+              enabledEdu.length > 0 ? (
+                <div key="education" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconGradCap color="white" size={13} />} title="Education" />
+                  {enabledEdu.map((edu) => (
+                    <div key={edu.id} style={{ marginBottom: "10px", paddingLeft: "18px", position: "relative" }}>
+                      <div style={{ position: "absolute", left: 0, top: "3px", width: "8px", height: "18px", backgroundColor: accent, transform: "skewY(-15deg)", borderRadius: "2px", opacity: 0.7 }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                        <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#1a1a2e" }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                        <span style={{ fontSize: fs.small, color: "#6b7280", fontWeight: 600 }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+                      </div>
+                      <div style={{ fontSize: fs.body, color: accent, fontWeight: 600 }}>{edu.institution}</div>
+                      {edu.achievements && edu.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                          {edu.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.5, paddingLeft: "14px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, top: "6px", width: "6px", height: "6px", backgroundColor: `${accent}40`, transform: "rotate(45deg)" }} />{a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            skills: () =>
+              config.skillCategories.length > 0 ? (
+                <div key="skills" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconLayers color="white" size={13} />} title="Skills" />
+                  {config.skillCategories.map((cat) => (
+                    <div key={cat.id} style={{ marginBottom: "8px" }}>
+                      <div style={{ fontSize: fs.small, fontWeight: 700, color: "#1a1a2e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>{cat.name}</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                        {cat.skills.map((skill, i) => (
+                          <span key={i} style={{ fontSize: fs.small, padding: "3px 12px", backgroundColor: `${accent}12`, color: "#374151", clipPath: "polygon(5% 0, 100% 0, 95% 100%, 0% 100%)", fontWeight: 500 }}>{skill}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            projects: () =>
+              enabledProjects.length > 0 ? (
+                <div key="projects" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconFolder color="white" size={13} />} title="Projects" />
+                  {enabledProjects.map((proj) => (
+                    <div key={proj.id} style={{ marginBottom: "12px", paddingLeft: "18px", position: "relative" }}>
+                      <div style={{ position: "absolute", left: 0, top: "3px", width: "8px", height: "18px", backgroundColor: accent, transform: "skewY(-15deg)", borderRadius: "2px", opacity: 0.7 }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                        <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#1a1a2e" }}>{proj.title}</span>
+                        {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+                      </div>
+                      {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.techStack.length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "5px" }}>
+                          {proj.techStack.map((t, i) => (
+                            <span key={i} style={{ fontSize: "9px", padding: "2px 8px", backgroundColor: `${accent}15`, color: accent, fontWeight: 600, borderRadius: "2px" }}>{t}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            certifications: () =>
+              enabledCerts.length > 0 ? (
+                <div key="certifications" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconAward color="white" size={13} />} title="Certifications" />
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    {enabledCerts.map((cert) => (
+                      <div key={cert.id} style={{ padding: "8px 16px", backgroundColor: `${accent}08`, clipPath: "polygon(4% 0, 100% 0, 96% 100%, 0% 100%)", minWidth: "140px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                          <IconShield color={accent} size={11} />
+                          <span style={{ fontSize: fs.small, fontWeight: 700, color: "#1a1a2e" }}>{cert.name}</span>
+                        </div>
+                        <div style={{ fontSize: "9.5px", color: "#6b7280", marginTop: "2px", marginLeft: "16px" }}>{cert.issuer}{cert.date && ` · ${formatDisplayDate(cert.date)}`}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null,
+            custom: () =>
+              config.customSections.length > 0
+                ? <>{config.customSections.map((section) => (
+                    <div key={section.id} style={{ marginBottom: "22px" }}>
+                      <SectionHead icon={<IconStar color="white" size={13} />} title={section.title} />
+                      <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                        {section.items.map((item) => (
+                          <li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}>
+                            <span style={{ position: "absolute", left: 0, top: "6px", width: "8px", height: "8px", backgroundColor: `${accent}30`, transform: "rotate(45deg)" }} />
+                            {item.content}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}</>
+                : null,
+          }
+          return config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)
+        })()}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   32. CIRCUIT TEMPLATE
+   Tech/circuit board inspired with PCB traces,
+   IC chip skill shapes and monospace accents
+   ═══════════════════════════════════════════════ */
+function CircuitTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const pad = config.pagePadding ?? 32
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const darkBg = "#1a1a2e"
+  const bodyBg = "#f8f9fc"
+
+  function SectionHead({ icon, title }: { icon: React.ReactNode; title: string }) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+        <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: accent, boxShadow: `0 0 0 3px ${accent}30`, flexShrink: 0 }} />
+        <div style={{ width: "20px", height: "0px", borderTop: `2px dotted ${accent}60` }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 14px", borderRadius: "16px", border: `2px solid ${accent}`, backgroundColor: `${accent}08` }}>
+          {icon}
+          <span style={{ fontSize: fs.h2, fontWeight: 700, color: darkBg, fontFamily: "'Courier New', monospace", textTransform: "uppercase", letterSpacing: "1.5px" }}>{title}</span>
+        </div>
+        <div style={{ flex: 1, height: "0px", borderTop: `2px dotted ${accent}40` }} />
+        <div style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: `${accent}50`, flexShrink: 0 }} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, overflow: "hidden", backgroundColor: bodyBg }}>
+      <div style={{ position: "relative", padding: `${pad + 10}px ${pad + 8}px ${pad}px`, backgroundColor: darkBg, color: "white" }}>
+        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundImage: `radial-gradient(circle, ${accent}15 1px, transparent 1px)`, backgroundSize: "20px 20px", opacity: 0.5 }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            {config.showProfileImage && p.profileImage && (
+              <div style={{ width: "65px", height: "65px", borderRadius: "50%", border: `3px solid ${accent}`, overflow: "hidden", flexShrink: 0, boxShadow: `0 0 0 4px ${darkBg}, 0 0 0 6px ${accent}40` }}>
+                <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            )}
+            <div>
+              <h1 style={{ fontSize: "28px", fontWeight: 800, color: "white", margin: 0, lineHeight: 1.2, fontFamily: "'Courier New', monospace", letterSpacing: "1px" }}>
+                {p.fullName || "Your Name"}
+              </h1>
+              {p.title && <div style={{ fontSize: "12px", color: accent, fontWeight: 500, marginTop: "4px", fontFamily: "'Courier New', monospace", letterSpacing: "2px" }}>{">"} {p.title}</div>}
+            </div>
+          </div>
+          {contacts.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 18px", marginTop: "14px", paddingTop: "10px", borderTop: `1px dotted ${accent}40` }}>
+              {contacts.map((c, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: fs.small, color: "rgba(255,255,255,0.8)", fontFamily: "'Courier New', monospace" }}>
+                  {contactIcon(c.type, accent, 11)}
+                  <LinkText href={contactHref(c.type, c.value)}>{c.value}</LinkText>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      <div style={{ padding: `${pad - 8}px ${pad + 8}px`, backgroundColor: bodyBg }}>
+        {(() => {
+          const sectionRenderers: Record<string, () => React.ReactNode> = {
+            summary: () =>
+              p.summary ? (
+                <div key="summary" style={{ marginBottom: "20px", padding: "12px 16px", backgroundColor: "white", border: `1px solid ${accent}25`, borderRadius: "8px", position: "relative" }}>
+                  <div style={{ position: "absolute", top: "-4px", left: "20px", width: "8px", height: "8px", borderRadius: "50%", backgroundColor: accent }} />
+                  <div style={{ position: "absolute", top: "-4px", right: "20px", width: "8px", height: "8px", borderRadius: "50%", backgroundColor: `${accent}50` }} />
+                  <p style={{ fontSize: fs.body, lineHeight: 1.7, color: "#374151", margin: 0 }}>{p.summary}</p>
+                </div>
+              ) : null,
+            experience: () =>
+              enabledExp.length > 0 ? (
+                <div key="experience" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconBriefcase color={accent} size={13} />} title="Experience" />
+                  {enabledExp.map((exp) => (
+                    <div key={exp.id} style={{ marginBottom: "14px", paddingLeft: "22px", position: "relative" }}>
+                      <div style={{ position: "absolute", left: "4px", top: "0", bottom: "0", borderLeft: `2px dotted ${accent}30` }} />
+                      <div style={{ position: "absolute", left: "0", top: "5px", width: "10px", height: "10px", borderRadius: "50%", backgroundColor: accent, border: `2px solid ${bodyBg}` }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "6px" }}>
+                        <div>
+                          <span style={{ fontSize: fs.h3, fontWeight: 700, color: darkBg }}>{exp.title}</span>
+                          {exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 600 }}> @ {exp.company}</span>}
+                        </div>
+                        <span style={{ fontSize: fs.small, color: "#6b7280", fontFamily: "'Courier New', monospace", fontWeight: 500 }}>[{formatDisplayDate(exp.startDate)} – {exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}]</span>
+                      </div>
+                      {exp.location && <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}><IconMapPin color="#9ca3af" size={10} /><span style={{ fontSize: fs.small, color: "#9ca3af" }}>{exp.location}</span></div>}
+                      {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+                      {exp.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                          {exp.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: "2px", top: "8px", width: "6px", height: "6px", borderRadius: "50%", border: `1.5px solid ${accent}` }} />{a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            education: () =>
+              enabledEdu.length > 0 ? (
+                <div key="education" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconGradCap color={accent} size={13} />} title="Education" />
+                  {enabledEdu.map((edu) => (
+                    <div key={edu.id} style={{ marginBottom: "10px", padding: "8px 14px", backgroundColor: "white", borderRadius: "6px", border: `1px solid ${accent}15` }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                        <span style={{ fontSize: fs.h3, fontWeight: 700, color: darkBg }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                        <span style={{ fontSize: fs.small, color: "#6b7280", fontFamily: "'Courier New', monospace" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+                      </div>
+                      <div style={{ fontSize: fs.body, color: accent, fontWeight: 600 }}>{edu.institution}</div>
+                      {edu.achievements && edu.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                          {edu.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.5, paddingLeft: "14px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: "2px", top: "8px", width: "5px", height: "5px", borderRadius: "50%", border: `1.5px solid ${accent}` }} />{a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            skills: () =>
+              config.skillCategories.length > 0 ? (
+                <div key="skills" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconLayers color={accent} size={13} />} title="Skills" />
+                  {config.skillCategories.map((cat) => (
+                    <div key={cat.id} style={{ marginBottom: "10px" }}>
+                      <div style={{ fontSize: fs.small, fontWeight: 700, color: darkBg, marginBottom: "5px", fontFamily: "'Courier New', monospace", textTransform: "uppercase", letterSpacing: "1px" }}>{cat.name}</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                        {cat.skills.map((skill, i) => (
+                          <div key={i} style={{ fontSize: fs.small, padding: "4px 14px", backgroundColor: "white", color: darkBg, border: `1.5px solid ${accent}`, borderRadius: "3px", fontWeight: 500, fontFamily: "'Courier New', monospace", position: "relative" }}>
+                            <div style={{ position: "absolute", top: "-3px", left: "25%", width: "3px", height: "3px", backgroundColor: accent, borderRadius: "50%" }} />
+                            <div style={{ position: "absolute", top: "-3px", right: "25%", width: "3px", height: "3px", backgroundColor: accent, borderRadius: "50%" }} />
+                            <div style={{ position: "absolute", bottom: "-3px", left: "25%", width: "3px", height: "3px", backgroundColor: accent, borderRadius: "50%" }} />
+                            <div style={{ position: "absolute", bottom: "-3px", right: "25%", width: "3px", height: "3px", backgroundColor: accent, borderRadius: "50%" }} />
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            projects: () =>
+              enabledProjects.length > 0 ? (
+                <div key="projects" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconFolder color={accent} size={13} />} title="Projects" />
+                  {enabledProjects.map((proj) => (
+                    <div key={proj.id} style={{ marginBottom: "12px", padding: "10px 14px", backgroundColor: "white", border: `1px solid ${accent}20`, borderRadius: "6px", position: "relative" }}>
+                      <div style={{ position: "absolute", top: "-4px", left: "14px", width: "8px", height: "8px", borderRadius: "50%", backgroundColor: accent }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                        <span style={{ fontSize: fs.h3, fontWeight: 700, color: darkBg }}>{proj.title}</span>
+                        {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+                      </div>
+                      {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.techStack.length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "5px" }}>
+                          {proj.techStack.map((t, i) => (
+                            <span key={i} style={{ fontSize: "9px", padding: "2px 8px", backgroundColor: darkBg, color: accent, fontWeight: 600, borderRadius: "2px", fontFamily: "'Courier New', monospace" }}>{t}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            certifications: () =>
+              enabledCerts.length > 0 ? (
+                <div key="certifications" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconAward color={accent} size={13} />} title="Certifications" />
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    {enabledCerts.map((cert) => (
+                      <div key={cert.id} style={{ padding: "8px 14px", backgroundColor: "white", borderRadius: "6px", border: `1.5px solid ${accent}30` }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><IconShield color={accent} size={11} /><span style={{ fontSize: fs.small, fontWeight: 700, color: darkBg }}>{cert.name}</span></div>
+                        <div style={{ fontSize: "9.5px", color: "#6b7280", marginTop: "2px", marginLeft: "16px", fontFamily: "'Courier New', monospace" }}>{cert.issuer}{cert.date && ` · ${formatDisplayDate(cert.date)}`}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null,
+            custom: () =>
+              config.customSections.length > 0
+                ? <>{config.customSections.map((section) => (
+                    <div key={section.id} style={{ marginBottom: "22px" }}>
+                      <SectionHead icon={<IconStar color={accent} size={13} />} title={section.title} />
+                      <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                        {section.items.map((item) => (
+                          <li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}>
+                            <span style={{ position: "absolute", left: "2px", top: "8px", width: "6px", height: "6px", borderRadius: "50%", border: `1.5px solid ${accent}` }} />{item.content}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}</>
+                : null,
+          }
+          return config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)
+        })()}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   33. WATERFALL TEMPLATE
+   Content cascades with increasing indentation,
+   vertical connecting lines, progressive disclosure
+   ═══════════════════════════════════════════════ */
+function WaterfallTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const pad = config.pagePadding ?? 32
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+
+  function SectionHead({ icon, title }: { icon: React.ReactNode; title: string }) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "26px", height: "26px", borderRadius: "50%", backgroundColor: accent, flexShrink: 0 }}>{icon}</div>
+        <span style={{ fontSize: fs.h2, fontWeight: 700, color: "#1f2937", letterSpacing: "0.5px" }}>{title}</span>
+        <div style={{ flex: 1, height: "1px", backgroundColor: `${accent}30` }} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, overflow: "hidden" }}>
+      <div style={{ padding: `${pad + 8}px ${pad + 8}px ${pad - 4}px`, borderBottom: `3px solid ${accent}` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {config.showProfileImage && p.profileImage && (
+            <div style={{ width: "64px", height: "64px", borderRadius: "50%", border: `3px solid ${accent}`, overflow: "hidden", flexShrink: 0 }}>
+              <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: fs.h1, fontWeight: 800, color: "#111827", margin: 0, lineHeight: 1.2 }}>{p.fullName || "Your Name"}</h1>
+            {p.title && <div style={{ fontSize: "13px", color: accent, fontWeight: 600, marginTop: "3px" }}>{p.title}</div>}
+          </div>
+        </div>
+        {contacts.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: "12px" }}>
+            {contacts.map((c, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: fs.small, color: "#4b5563" }}>
+                {contactIcon(c.type, accent, 11)}
+                <LinkText href={contactHref(c.type, c.value)}>{c.value}</LinkText>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div style={{ padding: `${pad - 8}px ${pad}px` }}>
+        {(() => {
+          let sectionIndex = 0
+          function WaterfallSection({ children }: { children: React.ReactNode }) {
+            const indent = sectionIndex * 16
+            sectionIndex++
+            return (
+              <div style={{ marginLeft: `${indent}px`, position: "relative", marginBottom: "18px" }}>
+                <div style={{ position: "absolute", left: "-8px", top: "0", bottom: "0", width: "2px", backgroundColor: `${accent}25`, borderRadius: "1px" }} />
+                {indent > 0 && <div style={{ position: "absolute", left: `-${indent + 8}px`, top: "13px", width: `${indent}px`, height: "2px", backgroundColor: `${accent}20` }} />}
+                {children}
+              </div>
+            )
+          }
+          const sectionRenderers: Record<string, () => React.ReactNode> = {
+            summary: () => p.summary ? (<WaterfallSection key="summary"><div style={{ padding: "10px 14px", backgroundColor: `${accent}06`, borderRadius: "6px", borderLeft: `3px solid ${accent}` }}><p style={{ fontSize: fs.body, lineHeight: 1.7, color: "#374151", margin: 0 }}>{p.summary}</p></div></WaterfallSection>) : null,
+            experience: () =>
+              enabledExp.length > 0 ? (
+                <WaterfallSection key="experience">
+                  <SectionHead icon={<IconBriefcase color="white" size={12} />} title="Experience" />
+                  {enabledExp.map((exp) => (
+                    <div key={exp.id} style={{ marginBottom: "14px", paddingLeft: "14px", borderLeft: `2px solid ${accent}20` }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "6px" }}>
+                        <div><span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{exp.title}</span>{exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 600 }}> — {exp.company}</span>}</div>
+                        <span style={{ fontSize: fs.small, color: "#6b7280", fontWeight: 500 }}>{formatDisplayDate(exp.startDate)} – {exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}</span>
+                      </div>
+                      {exp.location && <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}><IconMapPin color="#9ca3af" size={10} /><span style={{ fontSize: fs.small, color: "#9ca3af" }}>{exp.location}</span></div>}
+                      {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+                      {exp.achievements.length > 0 && (<ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>{exp.achievements.map((a, i) => (<li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}><span style={{ position: "absolute", left: 0, top: "8px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />{a}</li>))}</ul>)}
+                    </div>
+                  ))}
+                </WaterfallSection>
+              ) : null,
+            education: () =>
+              enabledEdu.length > 0 ? (
+                <WaterfallSection key="education">
+                  <SectionHead icon={<IconGradCap color="white" size={12} />} title="Education" />
+                  {enabledEdu.map((edu) => (
+                    <div key={edu.id} style={{ marginBottom: "10px", paddingLeft: "14px", borderLeft: `2px solid ${accent}20` }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                        <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                        <span style={{ fontSize: fs.small, color: "#6b7280" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+                      </div>
+                      <div style={{ fontSize: fs.body, color: accent, fontWeight: 600 }}>{edu.institution}</div>
+                      {edu.achievements && edu.achievements.length > 0 && (<ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>{edu.achievements.map((a, i) => (<li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.5, paddingLeft: "14px", position: "relative" }}><span style={{ position: "absolute", left: 0, top: "8px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />{a}</li>))}</ul>)}
+                    </div>
+                  ))}
+                </WaterfallSection>
+              ) : null,
+            skills: () =>
+              config.skillCategories.length > 0 ? (
+                <WaterfallSection key="skills">
+                  <SectionHead icon={<IconLayers color="white" size={12} />} title="Skills" />
+                  {config.skillCategories.map((cat) => (<div key={cat.id} style={{ marginBottom: "8px" }}><div style={{ fontSize: fs.small, fontWeight: 700, color: "#111827", marginBottom: "4px" }}>{cat.name}</div><div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>{cat.skills.map((skill, i) => (<span key={i} style={{ fontSize: fs.small, padding: "2px 10px", borderRadius: "12px", backgroundColor: `${accent}10`, color: "#374151", fontWeight: 500, border: `1px solid ${accent}20` }}>{skill}</span>))}</div></div>))}
+                </WaterfallSection>
+              ) : null,
+            projects: () =>
+              enabledProjects.length > 0 ? (
+                <WaterfallSection key="projects">
+                  <SectionHead icon={<IconFolder color="white" size={12} />} title="Projects" />
+                  {enabledProjects.map((proj) => (
+                    <div key={proj.id} style={{ marginBottom: "12px", paddingLeft: "14px", borderLeft: `2px solid ${accent}20` }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}><span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>{proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}</div>
+                      {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.techStack.length > 0 && (<div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "5px" }}>{proj.techStack.map((t, i) => (<span key={i} style={{ fontSize: "9px", padding: "2px 8px", backgroundColor: `${accent}12`, color: accent, fontWeight: 600, borderRadius: "10px" }}>{t}</span>))}</div>)}
+                    </div>
+                  ))}
+                </WaterfallSection>
+              ) : null,
+            certifications: () =>
+              enabledCerts.length > 0 ? (
+                <WaterfallSection key="certifications">
+                  <SectionHead icon={<IconAward color="white" size={12} />} title="Certifications" />
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>{enabledCerts.map((cert) => (<div key={cert.id} style={{ padding: "6px 12px", backgroundColor: `${accent}06`, borderRadius: "8px", border: `1px solid ${accent}15` }}><div style={{ display: "flex", alignItems: "center", gap: "5px" }}><IconShield color={accent} size={11} /><span style={{ fontSize: fs.small, fontWeight: 700, color: "#111827" }}>{cert.name}</span></div><div style={{ fontSize: "9.5px", color: "#6b7280", marginTop: "2px", marginLeft: "16px" }}>{cert.issuer}{cert.date && ` · ${formatDisplayDate(cert.date)}`}</div></div>))}</div>
+                </WaterfallSection>
+              ) : null,
+            custom: () =>
+              config.customSections.length > 0
+                ? <>{config.customSections.map((section) => (<WaterfallSection key={section.id}><SectionHead icon={<IconStar color="white" size={12} />} title={section.title} /><ul style={{ listStyle: "none", padding: 0, margin: 0 }}>{section.items.map((item) => (<li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}><span style={{ position: "absolute", left: 0, top: "8px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />{item.content}</li>))}</ul></WaterfallSection>))}</>
+                : null,
+          }
+          return config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)
+        })()}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   34. POLAROID TEMPLATE
+   Photo/polaroid aesthetic with frame-style header,
+   mini-polaroid experience cards and label-maker tags
+   ═══════════════════════════════════════════════ */
+function PolaroidTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const pad = config.pagePadding ?? 32
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+
+  function SectionHead({ icon, title }: { icon: React.ReactNode; title: string }) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "26px", height: "26px", borderRadius: "4px", backgroundColor: accent, flexShrink: 0 }}>{icon}</div>
+        <span style={{ fontSize: fs.h2, fontWeight: 700, color: "#1f2937", letterSpacing: "0.5px" }}>{title}</span>
+        <div style={{ flex: 1, height: "1px", backgroundColor: "#e5e7eb" }} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, overflow: "hidden", backgroundColor: "#fafaf8" }}>
+      <div style={{ padding: `${pad + 4}px ${pad + 8}px`, display: "flex", justifyContent: "center" }}>
+        <div style={{ padding: "20px 28px 28px", backgroundColor: "white", boxShadow: "0 3px 16px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06)", borderRadius: "3px", transform: "rotate(-1deg)", maxWidth: "92%", width: "100%", position: "relative" }}>
+          <div style={{ position: "absolute", top: "-8px", left: "50%", transform: "translateX(-50%) rotate(2deg)", width: "60px", height: "16px", backgroundColor: `${accent}30`, borderRadius: "2px", opacity: 0.7 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            {config.showProfileImage && p.profileImage && (
+              <div style={{ width: "72px", height: "72px", borderRadius: "3px", border: "4px solid white", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", overflow: "hidden", flexShrink: 0 }}>
+                <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            )}
+            <div>
+              <h1 style={{ fontSize: fs.h1, fontWeight: 800, color: "#111827", margin: 0, lineHeight: 1.2 }}>{p.fullName || "Your Name"}</h1>
+              {p.title && <div style={{ fontSize: "13px", color: accent, fontWeight: 600, marginTop: "4px", fontStyle: "italic" }}>{p.title}</div>}
+            </div>
+          </div>
+          {contacts.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 14px", marginTop: "14px", paddingTop: "10px", borderTop: "1px solid #e5e7eb" }}>
+              {contacts.map((c, i) => (<div key={i} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: fs.small, color: "#4b5563" }}>{contactIcon(c.type, accent, 11)}<LinkText href={contactHref(c.type, c.value)}>{c.value}</LinkText></div>))}
+            </div>
+          )}
+          <div style={{ position: "absolute", bottom: "6px", right: "14px", fontSize: "9px", color: "#9ca3af", fontStyle: "italic" }}>resume</div>
+        </div>
+      </div>
+      <div style={{ padding: `${pad - 16}px ${pad + 8}px` }}>
+        {(() => {
+          const sectionRenderers: Record<string, () => React.ReactNode> = {
+            summary: () => p.summary ? (<div key="summary" style={{ marginBottom: "20px", padding: "14px 18px", backgroundColor: "white", borderRadius: "3px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", transform: "rotate(0.3deg)", borderBottom: `3px solid ${accent}20` }}><p style={{ fontSize: fs.body, lineHeight: 1.7, color: "#374151", margin: 0, fontStyle: "italic" }}>{p.summary}</p></div>) : null,
+            experience: () =>
+              enabledExp.length > 0 ? (
+                <div key="experience" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconBriefcase color="white" size={12} />} title="Experience" />
+                  {enabledExp.map((exp, idx) => (
+                    <div key={exp.id} style={{ marginBottom: "14px", padding: "12px 16px 16px", backgroundColor: "white", borderRadius: "3px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", transform: `rotate(${idx % 2 === 0 ? "0.4" : "-0.3"}deg)`, position: "relative" }}>
+                      <div style={{ position: "absolute", top: "-6px", right: "16px", width: "12px", height: "12px", borderRadius: "50%", backgroundColor: accent, boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "6px" }}>
+                        <div><span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{exp.title}</span>{exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 600 }}> at {exp.company}</span>}</div>
+                        <span style={{ fontSize: fs.small, color: "#6b7280", fontStyle: "italic" }}>{formatDisplayDate(exp.startDate)} – {exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}</span>
+                      </div>
+                      {exp.location && <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}><IconMapPin color="#9ca3af" size={10} /><span style={{ fontSize: fs.small, color: "#9ca3af" }}>{exp.location}</span></div>}
+                      {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+                      {exp.achievements.length > 0 && (<ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>{exp.achievements.map((a, i) => (<li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}><span style={{ position: "absolute", left: 0, top: "8px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />{a}</li>))}</ul>)}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            education: () =>
+              enabledEdu.length > 0 ? (
+                <div key="education" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconGradCap color="white" size={12} />} title="Education" />
+                  {enabledEdu.map((edu, idx) => (
+                    <div key={edu.id} style={{ marginBottom: "10px", padding: "10px 14px", backgroundColor: "white", borderRadius: "3px", boxShadow: "0 1px 6px rgba(0,0,0,0.05)", transform: `rotate(${idx % 2 === 0 ? "-0.3" : "0.3"}deg)` }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                        <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                        <span style={{ fontSize: fs.small, color: "#6b7280", fontStyle: "italic" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+                      </div>
+                      <div style={{ fontSize: fs.body, color: accent, fontWeight: 600 }}>{edu.institution}</div>
+                      {edu.achievements && edu.achievements.length > 0 && (<ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>{edu.achievements.map((a, i) => (<li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.5, paddingLeft: "14px", position: "relative" }}><span style={{ position: "absolute", left: 0, top: "8px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />{a}</li>))}</ul>)}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            skills: () =>
+              config.skillCategories.length > 0 ? (
+                <div key="skills" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconLayers color="white" size={12} />} title="Skills" />
+                  {config.skillCategories.map((cat) => (<div key={cat.id} style={{ marginBottom: "8px" }}><div style={{ fontSize: fs.small, fontWeight: 700, color: "#111827", marginBottom: "5px" }}>{cat.name}</div><div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>{cat.skills.map((skill, i) => (<span key={i} style={{ fontSize: fs.small, padding: "3px 10px", backgroundColor: "white", border: `1.5px solid ${accent}40`, borderRadius: "2px", fontWeight: 600, color: "#374151", letterSpacing: "0.5px", textTransform: "uppercase", boxShadow: "0 1px 3px rgba(0,0,0,0.05)", fontFamily: "'Courier New', monospace" }}>{skill}</span>))}</div></div>))}
+                </div>
+              ) : null,
+            projects: () =>
+              enabledProjects.length > 0 ? (
+                <div key="projects" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconFolder color="white" size={12} />} title="Projects" />
+                  {enabledProjects.map((proj, idx) => (
+                    <div key={proj.id} style={{ marginBottom: "12px", padding: "10px 14px", backgroundColor: "white", borderRadius: "3px", boxShadow: "0 2px 6px rgba(0,0,0,0.05)", transform: `rotate(${idx % 2 === 0 ? "0.3" : "-0.2"}deg)`, position: "relative" }}>
+                      <div style={{ position: "absolute", top: "-6px", left: "14px", width: "40px", height: "12px", backgroundColor: `${accent}25`, borderRadius: "2px" }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}><span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>{proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}</div>
+                      {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.techStack.length > 0 && (<div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "5px" }}>{proj.techStack.map((t, i) => (<span key={i} style={{ fontSize: "9px", padding: "2px 8px", backgroundColor: `${accent}10`, color: accent, fontWeight: 600, borderRadius: "2px" }}>{t}</span>))}</div>)}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            certifications: () =>
+              enabledCerts.length > 0 ? (
+                <div key="certifications" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconAward color="white" size={12} />} title="Certifications" />
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>{enabledCerts.map((cert, idx) => (<div key={cert.id} style={{ padding: "8px 14px", backgroundColor: "white", borderRadius: "3px", boxShadow: "0 1px 5px rgba(0,0,0,0.06)", transform: `rotate(${idx % 2 === 0 ? "0.5" : "-0.4"}deg)`, borderBottom: `2px solid ${accent}30` }}><div style={{ display: "flex", alignItems: "center", gap: "5px" }}><IconShield color={accent} size={11} /><span style={{ fontSize: fs.small, fontWeight: 700, color: "#111827" }}>{cert.name}</span></div><div style={{ fontSize: "9.5px", color: "#6b7280", marginTop: "2px", marginLeft: "16px" }}>{cert.issuer}{cert.date && ` · ${formatDisplayDate(cert.date)}`}</div></div>))}</div>
+                </div>
+              ) : null,
+            custom: () =>
+              config.customSections.length > 0
+                ? <>{config.customSections.map((section) => (<div key={section.id} style={{ marginBottom: "22px" }}><SectionHead icon={<IconStar color="white" size={12} />} title={section.title} /><ul style={{ listStyle: "none", padding: 0, margin: 0 }}>{section.items.map((item) => (<li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}><span style={{ position: "absolute", left: 0, top: "8px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />{item.content}</li>))}</ul></div>))}</>
+                : null,
+          }
+          return config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)
+        })()}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   35. ARCHITECT TEMPLATE
+   Blueprint/architecture inspired with light blue bg,
+   ruler marks, grid overlay, technical drawing aesthetic
+   ═══════════════════════════════════════════════ */
+function ArchitectTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const pad = config.pagePadding ?? 32
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const blueprintBg = "#f0f7ff"
+  const navy = "#1e3a5f"
+
+  function SectionHead({ icon, title }: { icon: React.ReactNode; title: string }) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", position: "relative" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "24px", height: "24px", border: `2px solid ${navy}`, borderRadius: "2px", flexShrink: 0 }}>{icon}</div>
+        <span style={{ fontSize: fs.h2, fontWeight: 700, color: navy, textTransform: "uppercase", letterSpacing: "2px", fontFamily: "'Courier New', monospace" }}>{title}</span>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", height: "12px", position: "relative" }}>
+          <div style={{ width: "100%", height: "1px", backgroundColor: navy }} />
+          {[0, 20, 40, 60, 80, 100].map((pct) => (<div key={pct} style={{ position: "absolute", left: `${pct}%`, top: "0", width: "1px", height: pct % 40 === 0 ? "10px" : "6px", backgroundColor: `${navy}60` }} />))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, overflow: "hidden", backgroundColor: blueprintBg, position: "relative" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundImage: `linear-gradient(${navy}08 1px, transparent 1px), linear-gradient(90deg, ${navy}08 1px, transparent 1px)`, backgroundSize: "24px 24px", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "relative", zIndex: 1, padding: `${pad + 8}px ${pad + 8}px ${pad - 4}px`, borderBottom: `2px solid ${navy}` }}>
+        <div style={{ position: "absolute", top: "8px", left: "8px", width: "16px", height: "16px", borderTop: `2px solid ${navy}`, borderLeft: `2px solid ${navy}` }} />
+        <div style={{ position: "absolute", top: "8px", right: "8px", width: "16px", height: "16px", borderTop: `2px solid ${navy}`, borderRight: `2px solid ${navy}` }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {config.showProfileImage && p.profileImage && (
+            <div style={{ width: "64px", height: "64px", borderRadius: "2px", border: `2px solid ${navy}`, overflow: "hidden", flexShrink: 0 }}>
+              <img src={p.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: fs.h1, fontWeight: 800, color: navy, margin: 0, lineHeight: 1.2, fontFamily: "'Courier New', monospace", letterSpacing: "1px", textTransform: "uppercase" }}>{p.fullName || "Your Name"}</h1>
+            {p.title && <div style={{ fontSize: "12px", color: accent, fontWeight: 600, marginTop: "4px", fontFamily: "'Courier New', monospace", letterSpacing: "2px" }}>// {p.title}</div>}
+          </div>
+        </div>
+        {contacts.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: "12px", paddingTop: "8px", borderTop: `1px solid ${navy}30` }}>
+            {contacts.map((c, i) => (<div key={i} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: fs.small, color: navy, fontFamily: "'Courier New', monospace" }}>{contactIcon(c.type, navy, 11)}<LinkText href={contactHref(c.type, c.value)}>{c.value}</LinkText></div>))}
+          </div>
+        )}
+      </div>
+      <div style={{ position: "relative", zIndex: 1, padding: `${pad - 8}px ${pad + 8}px` }}>
+        {(() => {
+          const sectionRenderers: Record<string, () => React.ReactNode> = {
+            summary: () => p.summary ? (<div key="summary" style={{ marginBottom: "20px", padding: "12px 16px", backgroundColor: "rgba(255,255,255,0.7)", border: `1px solid ${navy}20`, borderRadius: "2px", borderLeft: `3px solid ${navy}` }}><p style={{ fontSize: fs.body, lineHeight: 1.7, color: "#374151", margin: 0 }}>{p.summary}</p></div>) : null,
+            experience: () =>
+              enabledExp.length > 0 ? (
+                <div key="experience" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconBriefcase color={navy} size={12} />} title="Experience" />
+                  {enabledExp.map((exp) => (
+                    <div key={exp.id} style={{ marginBottom: "14px", paddingLeft: "16px", borderLeft: `1px solid ${navy}30`, position: "relative" }}>
+                      <div style={{ position: "absolute", left: "-4px", top: "5px", width: "8px", height: "1px", backgroundColor: navy }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "6px" }}>
+                        <div><span style={{ fontSize: fs.h3, fontWeight: 700, color: navy }}>{exp.title}</span>{exp.company && <span style={{ fontSize: fs.h3, color: accent, fontWeight: 600 }}> — {exp.company}</span>}</div>
+                        <span style={{ fontSize: fs.small, color: navy, fontStyle: "italic", fontFamily: "'Courier New', monospace", padding: "1px 8px", border: `1px solid ${navy}30`, borderRadius: "2px", backgroundColor: "rgba(255,255,255,0.8)" }}>{formatDisplayDate(exp.startDate)} – {exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}</span>
+                      </div>
+                      {exp.location && <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}><IconMapPin color={`${navy}80`} size={10} /><span style={{ fontSize: fs.small, color: `${navy}80` }}>{exp.location}</span></div>}
+                      {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.6 }}>{exp.description}</p>}
+                      {exp.achievements.length > 0 && (<ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>{exp.achievements.map((a, i) => (<li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}><span style={{ position: "absolute", left: "2px", top: "8px", width: "6px", height: "1px", backgroundColor: navy }} /><span style={{ position: "absolute", left: "2px", top: "5px", width: "1px", height: "6px", backgroundColor: navy }} />{a}</li>))}</ul>)}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            education: () =>
+              enabledEdu.length > 0 ? (
+                <div key="education" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconGradCap color={navy} size={12} />} title="Education" />
+                  {enabledEdu.map((edu) => (
+                    <div key={edu.id} style={{ marginBottom: "10px", paddingLeft: "16px", borderLeft: `1px solid ${navy}30`, position: "relative" }}>
+                      <div style={{ position: "absolute", left: "-4px", top: "5px", width: "8px", height: "1px", backgroundColor: navy }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                        <span style={{ fontSize: fs.h3, fontWeight: 700, color: navy }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                        <span style={{ fontSize: fs.small, color: navy, fontStyle: "italic", fontFamily: "'Courier New', monospace" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+                      </div>
+                      <div style={{ fontSize: fs.body, color: accent, fontWeight: 600 }}>{edu.institution}</div>
+                      {edu.achievements && edu.achievements.length > 0 && (<ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>{edu.achievements.map((a, i) => (<li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.5, paddingLeft: "14px", position: "relative" }}><span style={{ position: "absolute", left: "2px", top: "8px", width: "5px", height: "1px", backgroundColor: navy }} />{a}</li>))}</ul>)}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            skills: () =>
+              config.skillCategories.length > 0 ? (
+                <div key="skills" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconLayers color={navy} size={12} />} title="Skills" />
+                  {config.skillCategories.map((cat) => (<div key={cat.id} style={{ marginBottom: "8px" }}><div style={{ fontSize: fs.small, fontWeight: 700, color: navy, marginBottom: "5px", fontFamily: "'Courier New', monospace", textTransform: "uppercase", letterSpacing: "1px" }}>{cat.name}</div><div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>{cat.skills.map((skill, i) => (<span key={i} style={{ fontSize: fs.small, padding: "3px 10px", backgroundColor: "rgba(255,255,255,0.8)", border: `1px solid ${navy}30`, borderRadius: "1px", fontWeight: 500, color: navy, fontFamily: "'Courier New', monospace" }}>{skill}</span>))}</div></div>))}
+                </div>
+              ) : null,
+            projects: () =>
+              enabledProjects.length > 0 ? (
+                <div key="projects" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconFolder color={navy} size={12} />} title="Projects" />
+                  {enabledProjects.map((proj) => (
+                    <div key={proj.id} style={{ marginBottom: "12px", paddingLeft: "16px", borderLeft: `1px solid ${navy}30`, position: "relative" }}>
+                      <div style={{ position: "absolute", left: "-4px", top: "5px", width: "8px", height: "1px", backgroundColor: navy }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}><span style={{ fontSize: fs.h3, fontWeight: 700, color: navy }}>{proj.title}</span>{proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}</div>
+                      {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.techStack.length > 0 && (<div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "5px" }}>{proj.techStack.map((t, i) => (<span key={i} style={{ fontSize: "9px", padding: "2px 8px", backgroundColor: navy, color: blueprintBg, fontWeight: 600, borderRadius: "1px", fontFamily: "'Courier New', monospace" }}>{t}</span>))}</div>)}
+                    </div>
+                  ))}
+                </div>
+              ) : null,
+            certifications: () =>
+              enabledCerts.length > 0 ? (
+                <div key="certifications" style={{ marginBottom: "22px" }}>
+                  <SectionHead icon={<IconAward color={navy} size={12} />} title="Certifications" />
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>{enabledCerts.map((cert) => (<div key={cert.id} style={{ padding: "6px 12px", backgroundColor: "rgba(255,255,255,0.8)", border: `1px solid ${navy}25`, borderRadius: "2px" }}><div style={{ display: "flex", alignItems: "center", gap: "5px" }}><IconShield color={navy} size={11} /><span style={{ fontSize: fs.small, fontWeight: 700, color: navy }}>{cert.name}</span></div><div style={{ fontSize: "9.5px", color: `${navy}80`, marginTop: "2px", marginLeft: "16px", fontFamily: "'Courier New', monospace", fontStyle: "italic" }}>{cert.issuer}{cert.date && ` · ${formatDisplayDate(cert.date)}`}</div></div>))}</div>
+                </div>
+              ) : null,
+            custom: () =>
+              config.customSections.length > 0
+                ? <>{config.customSections.map((section) => (<div key={section.id} style={{ marginBottom: "22px" }}><SectionHead icon={<IconStar color={navy} size={12} />} title={section.title} /><ul style={{ listStyle: "none", padding: 0, margin: 0 }}>{section.items.map((item) => (<li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "16px", position: "relative" }}><span style={{ position: "absolute", left: "2px", top: "8px", width: "6px", height: "1px", backgroundColor: navy }} />{item.content}</li>))}</ul></div>))}</>
+                : null,
+          }
+          return config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)
+        })()}
+      </div>
+      <div style={{ position: "absolute", bottom: "8px", left: "8px", width: "16px", height: "16px", borderBottom: `2px solid ${navy}`, borderLeft: `2px solid ${navy}`, zIndex: 1 }} />
+      <div style={{ position: "absolute", bottom: "8px", right: "8px", width: "16px", height: "16px", borderBottom: `2px solid ${navy}`, borderRight: `2px solid ${navy}`, zIndex: 1 }} />
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
    MAIN PREVIEW COMPONENT
    ═══════════════════════════════════════════════ */
 export function ResumePreview({ config }: { config: ResumeConfig }) {
@@ -4852,6 +9147,46 @@ export function ResumePreview({ config }: { config: ResumeConfig }) {
       return <ApexTemplate config={config} />
     case "slate":
       return <SlateTemplate config={config} />
+    case "glass":
+      return <GlassTemplate config={config} />
+    case "gradient":
+      return <GradientTemplate config={config} />
+    case "mono":
+      return <MonoTemplate config={config} />
+    case "timelinepro":
+      return <TimelineProTemplate config={config} />
+    case "carddeck":
+      return <CardDeckTemplate config={config} />
+    case "dualtone":
+      return <DualToneTemplate config={config} />
+    case "magazine":
+      return <MagazineTemplate config={config} />
+    case "neon":
+      return <NeonTemplate config={config} />
+    case "paper":
+      return <PaperTemplate config={config} />
+    case "stacked":
+      return <StackedTemplate config={config} />
+    case "retro":
+      return <RetroTemplate config={config} />
+    case "origami":
+      return <OrigamiTemplate config={config} />
+    case "terminal":
+      return <TerminalTemplate config={config} />
+    case "ribbon":
+      return <RibbonTemplate config={config} />
+    case "zen":
+      return <ZenTemplate config={config} />
+    case "diagonal":
+      return <DiagonalTemplate config={config} />
+    case "circuit":
+      return <CircuitTemplate config={config} />
+    case "waterfall":
+      return <WaterfallTemplate config={config} />
+    case "polaroid":
+      return <PolaroidTemplate config={config} />
+    case "architect":
+      return <ArchitectTemplate config={config} />
     case "classic":
     default:
       return <ClassicTemplate config={config} />
