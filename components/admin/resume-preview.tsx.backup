@@ -9109,12 +9109,154 @@ function ArchitectTemplate({ config }: { config: ResumeConfig }) {
    ═══════════════════════════════════════════════ */
 
 // 1-4. Premium template stubs (using existing templates as base)
-// 1-4. Premium template stubs (using existing templates as base)
-function AuroraTemplate({ config }: { config: ResumeConfig }) { return <ModernTemplate config={config} /> }
-function VibrantTemplate({ config }: { config: ResumeConfig }) { return <CreativeTemplate config={config} /> }
-function SunsetTemplate({ config }: { config: ResumeConfig }) { return <EloquentTemplate config={config} /> }
-function CodeStackTemplate({ config }: { config: ResumeConfig }) { return <TechnicalTemplate config={config} /> }
+function AuroraTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const pad = config.pagePadding ?? 32
 
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () => p.summary ? <div key="summary" style={{marginBottom:"16px",padding:"12px",backgroundColor:`${accent}08`,borderLeft:`4px solid ${accent}`,borderRadius:"4px"}}><p style={{fontSize:fs.body,lineHeight:1.7,color:"#555",margin:0}}>{p.summary}</p></div> : null,
+    experience: () => enabledExp.length > 0 ? <div key="experience" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"1px"}}>Experience</h2>{enabledExp.map((exp)=>(<div key={exp.id} style={{marginBottom:"12px",paddingLeft:"16px",borderLeft:`2px solid ${accent}40`}}><span style={{fontWeight:700,color:"#111"}}>{exp.title}</span><span style={{color:accent,fontWeight:600}}> — {exp.company}</span><p style={{fontSize:fs.small,color:"#666",margin:"4px 0 0 0"}}>{exp.startDate}</p></div>))}</div> : null,
+    education: () => enabledEdu.length > 0 ? <div key="education" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"1px"}}>Education</h2>{enabledEdu.map((edu)=>(<div key={edu.id} style={{marginBottom:"10px"}}><span style={{fontWeight:700,color:"#111"}}>{edu.degree}{edu.field?` in ${edu.field}`:""}</span><p style={{fontSize:fs.small,color:accent,margin:"2px 0",fontWeight:500}}>{edu.institution}</p></div>))}</div> : null,
+    skills: () => config.skillCategories.length > 0 ? <div key="skills" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"1px"}}>Skills</h2>{config.skillCategories.map((cat)=>(<div key={cat.id} style={{marginBottom:"8px"}}><p style={{fontSize:fs.small,fontWeight:700,color:"#111",marginBottom:"4px"}}>{cat.name}</p><div style={{display:"flex",flexWrap:"wrap",gap:"6px"}}>{cat.skills.map((s,i)=>(<span key={i} style={{padding:"4px 10px",backgroundColor:`${accent}15`,color:accent,fontSize:"0.85em",borderRadius:"3px",fontWeight:500}}>{s}</span>))}</div></div>))}</div> : null,
+    projects: () => enabledProjects.length > 0 ? <div key="projects" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"1px"}}>Projects</h2>{enabledProjects.map((proj)=>(<div key={proj.id} style={{marginBottom:"10px"}}><span style={{fontWeight:700,color:"#111"}}>{proj.title}</span>{proj.url&&<a href={proj.url} style={{marginLeft:"8px",fontSize:fs.small,color:accent}}>→ View</a>}<p style={{fontSize:fs.small,color:"#666",margin:"4px 0",lineHeight:1.6}}>{proj.description}</p></div>))}</div> : null,
+    certifications: () => enabledCerts.length > 0 ? <div key="certifications" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"1px"}}>Certifications</h2><div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>{enabledCerts.map((c)=>(<div key={c.id} style={{padding:"6px 12px",backgroundColor:`${accent}10`,border:`1px solid ${accent}30`,borderRadius:"3px",fontSize:fs.small}}><span style={{fontWeight:600,color:"#111"}}>{c.name}</span>{c.issuer&&<p style={{margin:"2px 0 0",color:"#666",fontSize:"0.85em"}}>{c.issuer}</p>}</div>))}</div></div> : null,
+    custom: () => config.customSections.length > 0 ? config.customSections.map((s)=>(<div key={s.id} style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"1px"}}>{s.title}</h2><ul style={{listStyle:"none",padding:0,margin:0}}>{s.items.map((it)=>(<li key={it.id} style={{fontSize:fs.body,color:"#555",marginBottom:"6px",paddingLeft:"16px",position:"relative"}}><span style={{position:"absolute",left:"0",color:accent}}>•</span>{it.content}</li>))}</ul></div>)) : null,
+  }
+
+  return (
+    <div className="resume-page" style={{...PAGE_BASE,display:"flex",padding:0}}>
+      <div style={{flex:"0 0 30%",background:`linear-gradient(135deg,${accent}20 0%,${accent}40 100%)`,padding:`${pad}px`,borderRight:`3px solid ${accent}`}}>
+        {config.showProfileImage && p.profileImage && <div style={{width:"80px",height:"80px",borderRadius:"50%",overflow:"hidden",marginBottom:"16px",border:`3px solid ${accent}`,backgroundImage:`url(${p.profileImage})`,backgroundSize:"cover",backgroundPosition:"center"}}></div>}
+        <h1 style={{fontSize:"1.6em",fontWeight:800,color:"#111",margin:"0 0 4px"}>{p.fullName}</h1>
+        <p style={{fontSize:"0.95em",color:accent,fontWeight:600,margin:"0 0 16px"}}>{p.title}</p>
+        <div style={{fontSize:fs.small,lineHeight:1.8,color:"#666"}}>
+          {p.email && <div>✉ {p.email}</div>}
+          {p.phone && <div>☎ {p.phone}</div>}
+          {p.location && <div>📍 {p.location}</div>}
+        </div>
+      </div>
+      <div style={{flex:1,padding:`${pad}px`}}>
+        {config.sectionOrder.map((s)=>sectionRenderers[s]?.() || null)}
+      </div>
+    </div>
+  )
+}
+
+// 2. VIBRANT TEMPLATE — Bold color blocks and high-contrast design
+function VibrantTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const pad = config.pagePadding ?? 32
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () => p.summary ? <div key="summary" style={{marginBottom:"16px",padding:"14px",backgroundColor:`${accent}12`,borderLeft:`6px solid ${accent}`,borderRadius:"0",fontStyle:"italic"}}><p style={{fontSize:fs.body,lineHeight:1.8,color:"#444",margin:0}}>{p.summary}</p></div> : null,
+    experience: () => enabledExp.length > 0 ? <div key="experience" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:800,color:accent,marginBottom:"12px",textTransform:"uppercase",letterSpacing:"2px",borderBottom:`3px solid ${accent}`,paddingBottom:"6px"}}>Experience</h2>{enabledExp.map((exp)=>(<div key={exp.id} style={{marginBottom:"14px",paddingLeft:"0"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><span style={{fontWeight:800,fontSize:"1.05em",color:"#111"}}>{exp.title}</span><span style={{fontSize:fs.small,color:"#666",fontWeight:600}}>{exp.startDate}</span></div><p style={{fontSize:fs.body,color:accent,fontWeight:700,margin:"2px 0 6px"}}>@ {exp.company}</p><p style={{fontSize:fs.small,color:"#555",margin:0,lineHeight:1.6}}>{exp.description}</p></div>))}</div> : null,
+    education: () => enabledEdu.length > 0 ? <div key="education" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:800,color:accent,marginBottom:"12px",textTransform:"uppercase",letterSpacing:"2px",borderBottom:`3px solid ${accent}`,paddingBottom:"6px"}}>Education</h2>{enabledEdu.map((edu)=>(<div key={edu.id} style={{marginBottom:"10px",padding:"10px",backgroundColor:"#f8f9fa",borderRadius:"4px"}}><span style={{fontWeight:800,color:"#111"}}>{edu.degree}{edu.field?` in ${edu.field}`:""}</span><p style={{fontSize:fs.small,color:accent,margin:"2px 0",fontWeight:700}}>{edu.institution}</p></div>))}</div> : null,
+    skills: () => config.skillCategories.length > 0 ? <div key="skills" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:800,color:accent,marginBottom:"12px",textTransform:"uppercase",letterSpacing:"2px",borderBottom:`3px solid ${accent}`,paddingBottom:"6px"}}>Skills</h2>{config.skillCategories.map((cat)=>(<div key={cat.id} style={{marginBottom:"10px"}}><p style={{fontSize:fs.small,fontWeight:800,color:"#111",marginBottom:"6px",textTransform:"uppercase",letterSpacing:"0.5px"}}>{cat.name}</p><div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>{cat.skills.map((s,i)=>(<span key={i} style={{padding:"6px 12px",backgroundColor:accent,color:"white",fontSize:"0.9em",borderRadius:"0",fontWeight:700}}>{s}</span>))}</div></div>))}</div> : null,
+    projects: () => enabledProjects.length > 0 ? <div key="projects" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:800,color:accent,marginBottom:"12px",textTransform:"uppercase",letterSpacing:"2px",borderBottom:`3px solid ${accent}`,paddingBottom:"6px"}}>Projects</h2>{enabledProjects.map((proj)=>(<div key={proj.id} style={{marginBottom:"12px",padding:"10px",backgroundColor:`${accent}08`,borderLeft:`4px solid ${accent}`}}><span style={{fontWeight:800,color:"#111"}}>{proj.title}</span><p style={{fontSize:fs.small,color:"#666",margin:"4px 0",lineHeight:1.6}}>{proj.description}</p></div>))}</div> : null,
+    certifications: () => enabledCerts.length > 0 ? <div key="certifications" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:800,color:accent,marginBottom:"12px",textTransform:"uppercase",letterSpacing:"2px",borderBottom:`3px solid ${accent}`,paddingBottom:"6px"}}>Certifications</h2><div style={{display:"flex",flexWrap:"wrap",gap:"8px"}}>{enabledCerts.map((c)=>(<div key={c.id} style={{padding:"8px 14px",backgroundColor:accent,color:"white",borderRadius:"0",fontWeight:700,fontSize:fs.small}}>{c.name}</div>))}</div></div> : null,
+    custom: () => config.customSections.length > 0 ? config.customSections.map((s)=>(<div key={s.id} style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:800,color:accent,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"2px",borderBottom:`3px solid ${accent}`,paddingBottom:"6px"}}>{s.title}</h2><ul style={{listStyle:"none",padding:0,margin:0}}>{s.items.map((it)=>(<li key={it.id} style={{fontSize:fs.body,color:"#555",marginBottom:"6px",paddingLeft:"16px",position:"relative",fontWeight:600}}><span style={{position:"absolute",left:"0",color:accent,fontWeight:900}}>▪</span>{it.content}</li>))}</ul></div>)) : null,
+  }
+
+  return (
+    <div className="resume-page" style={{...PAGE_BASE,padding:`${pad}px`,paddingTop:`${pad+8}px`}}>
+      <div style={{borderLeft:`8px solid ${accent}`,paddingLeft:"20px",marginBottom:"20px"}}>
+        <h1 style={{fontSize:fs.h1,fontWeight:900,margin:"0 0 4px"}}>{"⟩ " + p.fullName}</h1>
+        <p style={{fontSize:"1.1em",color:accent,fontWeight:700,margin:"0 0 12px"}}>{p.title}</p>
+      </div>
+      {config.sectionOrder.map((s)=>sectionRenderers[s]?.() || null)}
+    </div>
+  )
+}
+
+// 3. SUNSET TEMPLATE — Warm gradient header with serif typography
+function SunsetTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const pad = config.pagePadding ?? 32
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () => p.summary ? <div key="summary" style={{marginBottom:"16px",padding:"14px",backgroundColor:"#faf5f0",borderRadius:"2px"}}><p style={{fontSize:fs.body,lineHeight:1.8,color:"#555",margin:0,fontFamily:"Georgia,serif"}}>{p.summary}</p></div> : null,
+    experience: () => enabledExp.length > 0 ? <div key="experience" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"12px",fontFamily:"Georgia,serif",borderBottom:`2px solid ${accent}`,paddingBottom:"6px"}}>Work Experience</h2>{enabledExp.map((exp)=>(<div key={exp.id} style={{marginBottom:"12px",paddingBottom:"12px",borderBottom:"1px solid #e0d7cc"}}><div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:700,fontSize:"1.05em",color:"#2a2a2a",fontFamily:"Georgia,serif"}}>{exp.title}</span><span style={{fontSize:fs.small,color:accent,fontWeight:600}}>{exp.startDate}</span></div><p style={{fontSize:fs.body,color:accent,margin:"2px 0 6px",fontWeight:600}}>@ {exp.company}</p></div>))}</div> : null,
+    education: () => enabledEdu.length > 0 ? <div key="education" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"12px",fontFamily:"Georgia,serif",borderBottom:`2px solid ${accent}`,paddingBottom:"6px"}}>Education</h2>{enabledEdu.map((edu)=>(<div key={edu.id} style={{marginBottom:"10px"}}><span style={{fontWeight:700,fontSize:"1.05em",color:"#2a2a2a",fontFamily:"Georgia,serif"}}>{edu.degree}</span>{edu.field&&<span style={{color:accent,marginLeft:"8px"}}>in {edu.field}</span>}<p style={{fontSize:fs.small,color:"#666",margin:"2px 0",fontFamily:"Georgia,serif"}}>{edu.institution}</p></div>))}</div> : null,
+    skills: () => config.skillCategories.length > 0 ? <div key="skills" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"12px",fontFamily:"Georgia,serif",borderBottom:`2px solid ${accent}`,paddingBottom:"6px"}}>Skills</h2>{config.skillCategories.map((cat)=>(<div key={cat.id} style={{marginBottom:"8px"}}><p style={{fontSize:fs.small,fontWeight:700,color:"#2a2a2a",marginBottom:"4px",fontFamily:"Georgia,serif"}}>{cat.name}</p><p style={{fontSize:fs.small,color:"#666",margin:0}}>{cat.skills.join(" • ")}</p></div>))}</div> : null,
+    projects: () => enabledProjects.length > 0 ? <div key="projects" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"12px",fontFamily:"Georgia,serif",borderBottom:`2px solid ${accent}`,paddingBottom:"6px"}}>Projects</h2>{enabledProjects.map((proj)=>(<div key={proj.id} style={{marginBottom:"10px"}}><span style={{fontWeight:700,color:"#2a2a2a",fontFamily:"Georgia,serif"}}>{proj.title}</span><p style={{fontSize:fs.small,color:"#666",margin:"4px 0",lineHeight:1.6}}>{proj.description}</p></div>))}</div> : null,
+    certifications: () => enabledCerts.length > 0 ? <div key="certifications" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"12px",fontFamily:"Georgia,serif",borderBottom:`2px solid ${accent}`,paddingBottom:"6px"}}>Certifications</h2>{enabledCerts.map((c)=>(<div key={c.id} style={{marginBottom:"6px",fontSize:fs.small}}><span style={{fontWeight:700,color:"#2a2a2a",fontFamily:"Georgia,serif"}}>{c.name}</span>{c.issuer&&<span style={{marginLeft:"8px",color:"#666"}}>— {c.issuer}</span>}</div>))}</div> : null,
+    custom: () => config.customSections.length > 0 ? config.customSections.map((s)=>(<div key={s.id} style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"10px",fontFamily:"Georgia,serif",borderBottom:`2px solid ${accent}`,paddingBottom:"6px"}}>{s.title}</h2><ul style={{listStyle:"disc",paddingLeft:"24px",margin:0}}>{s.items.map((it)=>(<li key={it.id} style={{fontSize:fs.body,color:"#555",marginBottom:"4px"}}>{it.content}</li>))}</ul></div>)) : null,
+  }
+
+  return (
+    <div className="resume-page" style={{...PAGE_BASE,padding:0}}>
+      <div style={{background:`linear-gradient(135deg,${accent} 0%,${accent}dd 100%)`,color:"white",padding:`${pad+4}px ${pad}px`,textAlign:"center",marginBottom:0}}>
+        <h1 style={{fontSize:fs.h1,fontWeight:400,margin:"0 0 4px",fontFamily:"Georgia,serif",letterSpacing:"1px"}}>{p.fullName}</h1>
+        <p style={{fontSize:"1.1em",margin:"0",fontWeight:300,letterSpacing:"0.5px"}}>{p.title}</p>
+      </div>
+      <div style={{padding:`${pad}px`}}>
+        {config.sectionOrder.map((s)=>sectionRenderers[s]?.() || null)}
+      </div>
+    </div>
+  )
+}
+
+// 4. CODESTACK TEMPLATE — Dark sidebar with green monospace terminal style
+function CodeStackTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const accent="#00d084"
+  const darkBg="#1a1a1e"
+  const pad = config.pagePadding ?? 32
+
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    summary: () => p.summary ? <div key="summary" style={{marginBottom:"16px",padding:"12px",backgroundColor:"#2a2a2e",borderLeft:`3px solid ${accent}`,borderRadius:"2px"}}><p style={{fontSize:fs.body,lineHeight:1.7,color:"#ccc",margin:0,fontFamily:"'Courier New', monospace"}}>{p.summary}</p></div> : null,
+    experience: () => enabledExp.length > 0 ? <div key="experience" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"12px",fontFamily:"'Courier New', monospace",textTransform:"uppercase",letterSpacing:"1px"}}>$ experience</h2>{enabledExp.map((exp)=>(<div key={exp.id} style={{marginBottom:"12px",paddingLeft:"12px",borderLeft:`2px solid ${accent}40`}}><span style={{fontWeight:700,color:accent,fontFamily:"'Courier New', monospace"}}>&gt; {exp.title}</span><p style={{fontSize:fs.small,color:"#aaa",margin:"2px 0",fontFamily:"'Courier New', monospace"}}>@ {exp.company}</p></div>))}</div> : null,
+    education: () => enabledEdu.length > 0 ? <div key="education" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"12px",fontFamily:"'Courier New', monospace",textTransform:"uppercase",letterSpacing:"1px"}}>$ education</h2>{enabledEdu.map((edu)=>(<div key={edu.id} style={{marginBottom:"8px"}}><span style={{fontWeight:700,color:accent,fontFamily:"'Courier New', monospace"}}>{edu.degree}</span><p style={{fontSize:fs.small,color:"#aaa",margin:"2px 0",fontFamily:"'Courier New', monospace"}}>{edu.institution}</p></div>))}</div> : null,
+    skills: () => config.skillCategories.length > 0 ? <div key="skills" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"12px",fontFamily:"'Courier New', monospace",textTransform:"uppercase",letterSpacing:"1px"}}>$ skills</h2>{config.skillCategories.map((cat)=>(<div key={cat.id} style={{marginBottom:"8px"}}><p style={{fontSize:fs.small,fontWeight:700,color:accent,marginBottom:"4px",fontFamily:"'Courier New', monospace"}}>{cat.name}:</p><div style={{display:"flex",flexWrap:"wrap",gap:"6px"}}>{cat.skills.map((s,i)=>(<span key={i} style={{padding:"4px 8px",backgroundColor:`${accent}20`,color:accent,fontSize:"0.85em",borderRadius:"2px",fontWeight:600,fontFamily:"'Courier New', monospace"}}>#{s}</span>))}</div></div>))}</div> : null,
+    projects: () => enabledProjects.length > 0 ? <div key="projects" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"12px",fontFamily:"'Courier New', monospace",textTransform:"uppercase",letterSpacing:"1px"}}>$ projects</h2>{enabledProjects.map((proj)=>(<div key={proj.id} style={{marginBottom:"10px"}}><span style={{fontWeight:700,color:accent,fontFamily:"'Courier New', monospace"}}>&gt; {proj.title}</span><p style={{fontSize:fs.small,color:"#aaa",margin:"4px 0",lineHeight:1.6,fontFamily:"'Courier New', monospace"}}>{proj.description}</p></div>))}</div> : null,
+    certifications: () => enabledCerts.length > 0 ? <div key="certifications" style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"12px",fontFamily:"'Courier New', monospace",textTransform:"uppercase",letterSpacing:"1px"}}>$ certifications</h2>{enabledCerts.map((c)=>(<div key={c.id} style={{marginBottom:"6px",fontSize:fs.small}}><span style={{fontWeight:600,color:accent,fontFamily:"'Courier New', monospace"}}>[✓] {c.name}</span></div>))}</div> : null,
+    custom: () => config.customSections.length > 0 ? config.customSections.map((s)=>(<div key={s.id} style={{marginBottom:"18px"}}><h2 style={{fontSize:fs.h2,fontWeight:700,color:accent,marginBottom:"10px",fontFamily:"'Courier New', monospace",textTransform:"uppercase",letterSpacing:"1px"}}>$ {s.title}</h2><ul style={{listStyle:"none",padding:0,margin:0}}>{s.items.map((it)=>(<li key={it.id} style={{fontSize:fs.body,color:"#ccc",marginBottom:"6px",paddingLeft:"12px",position:"relative",fontFamily:"'Courier New', monospace"}}><span style={{position:"absolute",left:"0",color:accent}}>></span>{it.content}</li>))}</ul></div>)) : null,
+  }
+
+  return (
+    <div className="resume-page" style={{...PAGE_BASE,display:"flex",padding:0,backgroundColor:darkBg,color:"#ccc"}}>
+      <div style={{flex:"0 0 28%",backgroundColor:"#0d0d11",padding:`${pad}px`,borderRight:`2px solid ${accent}`,color:"#ccc"}}>
+        <h1 style={{fontSize:"1.5em",fontWeight:700,color:accent,margin:"0 0 4px",fontFamily:"'Courier New', monospace"}}>{p.fullName}</h1>
+        <p style={{fontSize:"0.95em",color:"#aaa",margin:"0 0 16px",fontFamily:"'Courier New', monospace"}}>{p.title}</p>
+        <div style={{fontSize:fs.small,lineHeight:1.8,color:"#aaa",fontFamily:"'Courier New', monospace"}}>
+          {p.email && <div>➜ {p.email}</div>}
+          {p.github && <div>➜ {p.github}</div>}
+        </div>
+      </div>
+      <div style={{flex:1,padding:`${pad}px`,backgroundColor:darkBg}}>
+        {config.sectionOrder.map((s)=>sectionRenderers[s]?.() || null)}
+      </div>
+    </div>
+  )
+}
+
+// 5-20 TEMPLATE STUBS (Full implementations will be added)
+// Templates 5-20: CloudNative, DevOps, ExecutivePro, CorporateBlue, InvestorReady, UltraModern, GeoModern, GradientPro, StartupSpark, Innovation, Zen, Whitespace, Academic, MedicalPro, Finance, CreativeFinance
+
+// For now, using ModernTemplate as fallback - will implement each fully
 function CloudNativeTemplate({ config }: { config: ResumeConfig }) { return <ModernTemplate config={config} /> }
 function DevOpsTemplate({ config }: { config: ResumeConfig }) { return <MetroTemplate config={config} /> }
 function ExecutiveProTemplate({ config }: { config: ResumeConfig }) { return <ExecutiveTemplate config={config} /> }

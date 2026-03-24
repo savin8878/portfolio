@@ -30,9 +30,10 @@ export async function POST(request: Request) {
 <html>
 <head>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Georgia&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Georgia:wght@400;700&family=Calibri:wght@400;700&family=Monaco&family=Courier+New:wght@400;700&display=swap" rel="stylesheet" />
 <style>
 *, *::before, *::after {
   box-sizing: border-box;
@@ -54,8 +55,37 @@ html, body {
   -webkit-print-color-adjust: exact !important;
   print-color-adjust: exact !important;
   color-adjust: exact !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Typography */
+body {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #333;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+  font-weight: 700;
+}
+
+h1 { font-size: 28px; }
+h2 { font-size: 14px; }
+h3 { font-size: 12px; }
+
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 1.5em; }
+li { margin: 0.25em 0; }
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Resume Page */
 .resume-page {
   width: 210mm !important;
   min-height: 297mm;
@@ -63,10 +93,17 @@ html, body {
   border-radius: 0 !important;
   margin: 0 !important;
   overflow: visible !important;
+  page-break-after: always;
+  padding: 0;
 }
 
-/* ── MULTI-PAGE ── */
-.resume-page div[style*="marginBottom"] {
+.resume-page:last-of-type {
+  page-break-after: auto;
+}
+
+/* ── MULTI-PAGE SUPPORT ── */
+.resume-page div[style*="marginBottom"],
+.resume-page div[style*="margin-bottom"] {
   page-break-inside: avoid;
   break-inside: avoid;
 }
@@ -81,47 +118,93 @@ li {
   break-inside: avoid;
 }
 
-/* ── SIDEBAR FIXES ── */
+/* ── FLEX LAYOUT FIXES ── */
 .resume-page > div[style*="display: flex"],
 .resume-page > div[style*="display:flex"] {
   min-height: auto !important;
   height: auto !important;
 }
 
-.resume-page > div[style*="display: flex"] > div:first-child,
-.resume-page > div[style*="display:flex"] > div:first-child {
+.resume-page > div[style*="display: flex"] > div,
+.resume-page > div[style*="display:flex"] > div {
   min-height: auto !important;
   height: auto !important;
 }
 
-.resume-page > div[style*="display: flex"] > div:last-child,
-.resume-page > div[style*="display:flex"] > div:last-child {
-  break-inside: auto;
-  min-height: auto !important;
-}
-
-/* ── PAGE-TOP SPACER (injected by JS at page-break boundaries) ── */
+/* ── PAGE BREAK SPACER ── */
 .pdf-page-spacer {
   height: 12mm;
   width: 100%;
   page-break-before: always;
   break-before: always;
+  margin: 0;
+  padding: 0;
 }
 
-/* ── VISUAL ── */
+/* ── VISUAL RENDERING ── */
 svg {
   print-color-adjust: exact !important;
   -webkit-print-color-adjust: exact !important;
 }
 
+svg text {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
 img {
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
+  max-width: 100%;
+  height: auto;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
+/* ── SPECIAL FONT SUPPORT ── */
+@font-face {
+  font-family: 'Courier New';
+  src: local('Courier New');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Calibri';
+  src: local('Calibri');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Georgia';
+  src: local('Georgia');
+  font-weight: normal;
+}
+
+/* ── GRADIENT & COLOR SUPPORT ── */
+div[style*="gradient"] {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* ── ENSURE BORDERS PRINT ── */
+border {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* ── SECTION SPACING ── */
+section {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* ── RESPONSIVE CONTENT ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td, th {
+  padding: 0.25em 0.5em;
+  text-align: left;
 }
 </style>
 </head>

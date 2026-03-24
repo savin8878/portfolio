@@ -66,6 +66,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ResumePreview } from "@/components/admin/resume-preview"
+import { ResumePdfPreview } from "@/components/admin/resume-pdf-preview"
 import { downloadPDF, downloadDOCX } from "@/lib/resume-export"
 import { AISettingsPanel, AITailorPanel } from "@/components/admin/resume-ai-panel"
 import { AIWriteButton, AIAchievementsButton } from "@/components/admin/ai-assistant"
@@ -767,6 +768,7 @@ export function ResumeBuilder({ data }: { data: any }) {
   }, [])
 
   const [exporting, setExporting] = useState<"pdf" | "docx" | null>(null)
+  const [showPdfPreview, setShowPdfPreview] = useState(false)
 
   const handleDownloadPDF = useCallback(async () => {
     if (exporting) return
@@ -890,6 +892,10 @@ export function ResumeBuilder({ data }: { data: any }) {
               >
                 <Eye className="h-4 w-4 mr-1" />
                 {activeTab === "edit" ? "Preview" : "Edit"}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setShowPdfPreview(true)}>
+                <Eye className="h-4 w-4 mr-1" />
+                PDF Preview
               </Button>
               <Button size="sm" onClick={handleDownloadPDF} disabled={exporting !== null}>
                 {exporting === "pdf" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
@@ -2164,6 +2170,9 @@ export function ResumeBuilder({ data }: { data: any }) {
       >
         <ResumePreview config={config} />
       </div>
+
+      {/* PDF Preview Modal */}
+      <ResumePdfPreview isOpen={showPdfPreview} onClose={() => setShowPdfPreview(false)} previewRef={previewRef} fileName={config.profile.fullName || "resume"} />
     </div>
   )
 }
