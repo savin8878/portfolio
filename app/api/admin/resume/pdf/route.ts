@@ -44,14 +44,16 @@ export async function POST(request: Request) {
 @page {
   size: 210mm 297mm;
   margin: 0;
+  padding: 0;
 }
 
 html, body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: white;
-  margin: 0;
-  padding: 0;
-  width: 210mm;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  max-width: 210mm;
   -webkit-print-color-adjust: exact !important;
   print-color-adjust: exact !important;
   color-adjust: exact !important;
@@ -87,14 +89,16 @@ a {
 
 /* Resume Page */
 .resume-page {
-  width: 210mm !important;
+  width: 100% !important;
+  max-width: 210mm !important;
   min-height: 297mm;
+  box-sizing: border-box !important;
   box-shadow: none !important;
   border-radius: 0 !important;
   margin: 0 !important;
   overflow: visible !important;
   page-break-after: always;
-  padding: 20px 0 0 0 !important;
+  padding: 40px 32px 20px 32px !important;
 }
 
 .resume-page:last-of-type {
