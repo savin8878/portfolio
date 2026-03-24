@@ -94,7 +94,7 @@ a {
   margin: 0 !important;
   overflow: visible !important;
   page-break-after: always;
-  padding: 0;
+  padding: 20px 0 0 0 !important;
 }
 
 .resume-page:last-of-type {
