@@ -689,6 +689,16 @@ function ModernTemplate({ config }: { config: ResumeConfig }) {
                     <div key={proj.id} style={{ marginBottom: "10px" }}>
                       <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
                       {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "2px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.achievements && proj.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                          {proj.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                              {a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {proj.techStack.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", marginTop: "3px" }}>
                           {proj.techStack.map((t, i) => (
@@ -843,6 +853,16 @@ function MinimalTemplate({ config }: { config: ResumeConfig }) {
                   <div key={proj.id} style={{ marginBottom: "10px", paddingLeft: "12px", borderLeft: `2px solid ${accent}30` }}>
                     <span style={{ fontSize: fs.h3, fontWeight: 600, color: "#111827" }}>{proj.title}</span>
                     {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "2px", lineHeight: 1.5 }}>{proj.description}</p>}
+                    {proj.achievements && proj.achievements.length > 0 && (
+                      <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                        {proj.achievements.map((a, i) => (
+                          <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                            <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                            {a}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 ))}
               </Section>
@@ -1044,6 +1064,16 @@ function ExecutiveTemplate({ config }: { config: ResumeConfig }) {
                       <div key={proj.id} style={{ padding: "10px 14px", borderRadius: "8px", border: `1px solid ${accent}20`, backgroundColor: `${accent}04` }}>
                         <div style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</div>
                         {proj.description && <p style={{ fontSize: fs.small, color: "#4b5563", marginTop: "3px", lineHeight: 1.4 }}>{proj.description}</p>}
+                        {proj.achievements && proj.achievements.length > 0 && (
+                          <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                            {proj.achievements.map((a, i) => (
+                              <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                                <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                                {a}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                         {proj.techStack.length > 0 && <div style={{ fontSize: "9px", color: accent, marginTop: "4px", fontWeight: 500 }}>{proj.techStack.join(" · ")}</div>}
                       </div>
                     ))}
@@ -1274,6 +1304,16 @@ function HealthcareTemplate({ config }: { config: ResumeConfig }) {
                     <div key={proj.id} style={{ marginBottom: "10px" }}>
                       <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
                       {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "2px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.achievements && proj.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                          {proj.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                              {a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {proj.techStack.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", marginTop: "3px" }}>
                           {proj.techStack.map((t, i) => (
@@ -1494,6 +1534,16 @@ function ElegantTemplate({ config }: { config: ResumeConfig }) {
                       <div key={proj.id} style={{ marginBottom: "10px" }}>
                         <span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
                         {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "2px", lineHeight: 1.5 }}>{proj.description}</p>}
+                        {proj.achievements && proj.achievements.length > 0 && (
+                          <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                            {proj.achievements.map((a, i) => (
+                              <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                                <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                                {a}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                         {proj.techStack.length > 0 && (
                           <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", marginTop: "3px" }}>
                             {proj.techStack.map((t, i) => (
@@ -1634,6 +1684,16 @@ function CompactTemplate({ config }: { config: ResumeConfig }) {
                       <div key={proj.id}>
                         <div style={{ fontSize: fs.h3, fontWeight: 600, color: "#111827" }}>{proj.title}</div>
                         {proj.description && <p style={{ fontSize: fs.small, color: "#4b5563", marginTop: "1px", lineHeight: 1.4 }}>{proj.description}</p>}
+                        {proj.achievements && proj.achievements.length > 0 && (
+                          <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                            {proj.achievements.map((a, i) => (
+                              <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                                <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                                {a}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                         {proj.techStack.length > 0 && (
                           <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", marginTop: "2px" }}>
                             {proj.techStack.map((t, i) => (
@@ -1925,6 +1985,16 @@ function BoldTemplate({ config }: { config: ResumeConfig }) {
                         {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
                       </div>
                       {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.achievements && proj.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                          {proj.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                              {a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {proj.techStack.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}>
                           {proj.techStack.map((t, i) => (
@@ -2117,6 +2187,16 @@ function CreativeTemplate({ config }: { config: ResumeConfig }) {
                         <div style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</div>
                         {proj.url && <div style={{ fontSize: "9px", color: accent, marginTop: "1px" }}><UrlLink url={proj.url} color={accent} fontSize="9px" /></div>}
                         {proj.description && <p style={{ fontSize: fs.small, color: "#4b5563", marginTop: "4px", lineHeight: 1.4 }}>{proj.description}</p>}
+                        {proj.achievements && proj.achievements.length > 0 && (
+                          <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                            {proj.achievements.map((a, i) => (
+                              <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                                <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                                {a}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                         {proj.techStack.length > 0 && (
                           <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", marginTop: "5px" }}>
                             {proj.techStack.map((t, i) => (
@@ -2814,6 +2894,16 @@ function MetroTemplate({ config }: { config: ResumeConfig }) {
                   </a>
                 )}
                 {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "4px", lineHeight: 1.5, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", marginTop: "6px" }}>
                     {proj.techStack.map((t, i) => (
@@ -2985,6 +3075,16 @@ function NewspaperTemplate({ config }: { config: ResumeConfig }) {
                 )}
               </div>
               {proj.description && <p style={{ fontSize: fs.body, color: "#374151", marginTop: "3px", lineHeight: 1.7, textAlign: "justify", fontFamily: serif, margin: "3px 0 0 0" }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {proj.techStack.length > 0 && (
                 <div style={{ fontSize: fs.small, color: "#6b7280", marginTop: "3px", fontStyle: "italic" }}>
                   Tech: {proj.techStack.join(", ")}
@@ -3320,6 +3420,16 @@ function InfographicTemplate({ config }: { config: ResumeConfig }) {
                   </a>
                 )}
                 {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5, margin: "3px 0 0 0" }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", marginTop: "4px" }}>
                     {proj.techStack.map((t, i) => (
@@ -3552,6 +3662,16 @@ function NordicTemplate({ config }: { config: ResumeConfig }) {
                   )}
                 </div>
                 {proj.description && <p style={{ fontSize: fs.body, color: "#6b7280", marginTop: "4px", lineHeight: 1.8, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ fontSize: fs.small, color: "#9ca3af", marginTop: "4px", fontWeight: 300 }}>
                     {proj.techStack.join(" / ")}
@@ -3778,6 +3898,16 @@ function CascadeTemplate({ config }: { config: ResumeConfig }) {
                   )}
                 </div>
                 {proj.description && <p style={{ fontSize: fs.body, color: "#6b7280", marginTop: "4px", lineHeight: 1.6, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}>
                     {proj.techStack.map((t, i) => (
@@ -3996,6 +4126,16 @@ function HorizonTemplate({ config }: { config: ResumeConfig }) {
                   )}
                 </div>
                 {proj.description && <p style={{ fontSize: fs.body, color: "#6b7280", marginTop: "4px", lineHeight: 1.6, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ fontSize: fs.small, color: "#9ca3af", marginTop: "4px" }}>{proj.techStack.join(" · ")}</div>
                 )}
@@ -4456,6 +4596,16 @@ function ApexTemplate({ config }: { config: ResumeConfig }) {
                   )}
                 </div>
                 {proj.description && <p style={{ fontSize: fs.body, color: "#6b7280", marginTop: "4px", lineHeight: 1.6, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
                     {proj.techStack.map((t, i) => (
@@ -4982,6 +5132,16 @@ function GlassTemplate({ config }: { config: ResumeConfig }) {
                 {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
               </div>
               {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {proj.techStack.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
                   {proj.techStack.map((t, i) => (
@@ -5215,6 +5375,16 @@ function GradientTemplate({ config }: { config: ResumeConfig }) {
                 {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
               </div>
               {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {proj.techStack.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
                   {proj.techStack.map((t, i) => (
@@ -5440,6 +5610,16 @@ function MonoTemplate({ config }: { config: ResumeConfig }) {
                 {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
               </div>
               {proj.description && <p style={{ fontSize: fs.body, color: "#374151", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {proj.techStack.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
                   {proj.techStack.map((t, i) => (
@@ -5674,6 +5854,16 @@ function TimelineProTemplate({ config }: { config: ResumeConfig }) {
                   {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
                 </div>
                 {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
                     {proj.techStack.map((t, i) => (
@@ -5908,6 +6098,16 @@ function CardDeckTemplate({ config }: { config: ResumeConfig }) {
                 {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
               </div>
               {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {proj.techStack.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
                   {proj.techStack.map((t, i) => (
@@ -6374,6 +6574,16 @@ function MagazineTemplate({ config }: { config: ResumeConfig }) {
                   {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
                 </div>
                 {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ fontSize: fs.small, color: "#9ca3af", marginTop: "3px" }}>{proj.techStack.join(" · ")}</div>
                 )}
@@ -6573,6 +6783,16 @@ function NeonTemplate({ config }: { config: ResumeConfig }) {
                 {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
               </div>
               {proj.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {proj.techStack.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
                   {proj.techStack.map((t, i) => (
@@ -6773,6 +6993,16 @@ function PaperTemplate({ config }: { config: ResumeConfig }) {
                 {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
               </div>
               {proj.description && <p style={{ fontSize: fs.body, color: textBody, marginTop: "3px", lineHeight: 1.6 }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {proj.techStack.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
                   {proj.techStack.map((t, i) => (
@@ -6979,6 +7209,16 @@ function StackedTemplate({ config }: { config: ResumeConfig }) {
                 {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
               </div>
               {proj.description && <p style={{ fontSize: fs.body, color: textBody, marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {proj.techStack.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
                   {proj.techStack.map((t, i) => (
@@ -7192,6 +7432,16 @@ function RetroTemplate({ config }: { config: ResumeConfig }) {
                   )}
                 </div>
                 {proj.description && <p style={{ fontSize: fs.body, color: brown, marginTop: "4px", lineHeight: 1.7, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: brown, lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: orange }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}>
                     {proj.techStack.map((t, i) => (
@@ -7433,6 +7683,16 @@ function OrigamiTemplate({ config }: { config: ResumeConfig }) {
                 )}
               </div>
               {proj.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "4px", lineHeight: 1.7, margin: "4px 0 0 0" }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {proj.techStack.length > 0 && (
                 <div style={{ fontSize: fs.small, color: textMuted, marginTop: "4px", fontStyle: "italic" }}>
                   {proj.techStack.join(" / ")}
@@ -7669,6 +7929,16 @@ function TerminalTemplate({ config }: { config: ResumeConfig }) {
                   )}
                 </div>
                 {proj.description && <p style={{ fontSize: fs.body, color: textBody, marginTop: "4px", lineHeight: 1.7, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: textBody, lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: dimGreen }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ fontSize: fs.small, color: textMuted, marginTop: "4px" }}>
                     {"stack: ["}{proj.techStack.join(", ")}{"]"}
@@ -7929,6 +8199,16 @@ function RibbonTemplate({ config }: { config: ResumeConfig }) {
                   )}
                 </div>
                 {proj.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "4px", lineHeight: 1.7, margin: "4px 0 0 0" }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}>
                     {proj.techStack.map((t, i) => (
@@ -8170,6 +8450,16 @@ function ZenTemplate({ config }: { config: ResumeConfig }) {
                   )}
                 </div>
                 {proj.description && <p style={{ fontSize: fs.body, color: textMuted, marginTop: "6px", lineHeight: 1.9, margin: "6px 0 0 0", fontWeight: 300 }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {proj.techStack.length > 0 && (
                   <div style={{ fontSize: fs.small, color: textLight, marginTop: "4px", fontWeight: 200 }}>
                     {proj.techStack.join("  \u00b7  ")}
@@ -8440,6 +8730,16 @@ function DiagonalTemplate({ config }: { config: ResumeConfig }) {
                         {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
                       </div>
                       {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.achievements && proj.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                          {proj.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                              {a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {proj.techStack.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "5px" }}>
                           {proj.techStack.map((t, i) => (
@@ -8654,6 +8954,16 @@ function CircuitTemplate({ config }: { config: ResumeConfig }) {
                         {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
                       </div>
                       {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.achievements && proj.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                          {proj.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                              {a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {proj.techStack.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "5px" }}>
                           {proj.techStack.map((t, i) => (
@@ -8817,6 +9127,16 @@ function WaterfallTemplate({ config }: { config: ResumeConfig }) {
                     <div key={proj.id} style={{ marginBottom: "12px", paddingLeft: "14px", borderLeft: `2px solid ${accent}20` }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}><span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>{proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}</div>
                       {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.achievements && proj.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                          {proj.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                              {a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {proj.techStack.length > 0 && (<div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "5px" }}>{proj.techStack.map((t, i) => (<span key={i} style={{ fontSize: "9px", padding: "2px 8px", backgroundColor: `${accent}12`, color: accent, fontWeight: 600, borderRadius: "10px" }}>{t}</span>))}</div>)}
                     </div>
                   ))}
@@ -8945,6 +9265,16 @@ function PolaroidTemplate({ config }: { config: ResumeConfig }) {
                       <div style={{ position: "absolute", top: "-6px", left: "14px", width: "40px", height: "12px", backgroundColor: `${accent}25`, borderRadius: "2px" }} />
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}><span style={{ fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>{proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}</div>
                       {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.achievements && proj.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                          {proj.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                              {a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {proj.techStack.length > 0 && (<div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "5px" }}>{proj.techStack.map((t, i) => (<span key={i} style={{ fontSize: "9px", padding: "2px 8px", backgroundColor: `${accent}10`, color: accent, fontWeight: 600, borderRadius: "2px" }}>{t}</span>))}</div>)}
                     </div>
                   ))}
@@ -9078,6 +9408,16 @@ function ArchitectTemplate({ config }: { config: ResumeConfig }) {
                       <div style={{ position: "absolute", left: "-4px", top: "5px", width: "8px", height: "1px", backgroundColor: navy }} />
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}><span style={{ fontSize: fs.h3, fontWeight: 700, color: navy }}>{proj.title}</span>{proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}</div>
                       {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                      {proj.achievements && proj.achievements.length > 0 && (
+                        <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                          {proj.achievements.map((a, i) => (
+                            <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                              {a}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {proj.techStack.length > 0 && (<div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "5px" }}>{proj.techStack.map((t, i) => (<span key={i} style={{ fontSize: "9px", padding: "2px 8px", backgroundColor: navy, color: blueprintBg, fontWeight: 600, borderRadius: "1px", fontFamily: "'Courier New', monospace" }}>{t}</span>))}</div>)}
                     </div>
                   ))}

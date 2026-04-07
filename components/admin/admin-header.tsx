@@ -1,7 +1,7 @@
 "use client"
 
-import { usePathname } from "next/navigation"
-import { Menu, Moon, Sun, Bell } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Menu, Moon, Sun, Bell, LogOut } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,6 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { AdminSidebar } from "./admin-sidebar"
@@ -32,7 +33,19 @@ const pageTitles: Record<string, string> = {
 
 export function AdminHeader() {
   const pathname = usePathname()
+  const router = useRouter()
   const { theme, setTheme } = useTheme()
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/auth/logout", { method: "POST" })
+      router.push("/admin/login")
+      router.refresh()
+    } catch {
+      // Force redirect even if the API call fails
+      router.push("/admin/login")
+    }
+  }
 
   // Get page title - check for exact match first, then check for edit pages
   const getPageTitle = () => {
@@ -106,7 +119,11 @@ export function AdminHeader() {
           <DropdownMenuContent align="end">
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Log out</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+              <LogOut className="h-4 w-4 mr-2" />
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
