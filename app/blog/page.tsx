@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { BlogGrid } from "@/components/blog/blog-grid"
+import { SketchPageHeader } from "@/components/sketch-page-header"
 import { getBlogPosts, getBlogCategories, getPageVisibility } from "@/lib/data"
 
 export const metadata: Metadata = {
@@ -24,20 +25,18 @@ export default async function BlogPage() {
       <Navbar />
 
       <main className="pt-16">
-        <section className="py-24">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {show("hero") && (
-              <div className="text-center mb-16">
-                <h1 className="text-4xl sm:text-5xl font-bold text-foreground">
-                  Blog & Insights
-                </h1>
-                <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Technical deep-dives, engineering best practices, and lessons
-                  learned from building products at scale.
-                </p>
-              </div>
-            )}
+        {show("hero") && (
+          <SketchPageHeader
+            kicker="Writing"
+            handwritten="— thoughts & notes —"
+            title="Blog & Insights"
+            highlight="Insights"
+            description="Technical deep-dives, engineering best practices, and lessons learned from building products at scale."
+          />
+        )}
 
+        <section className="pb-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {show("blog_grid") && (
               <BlogGrid posts={posts} categories={categories} />
             )}

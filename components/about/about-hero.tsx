@@ -16,6 +16,13 @@ import {
   Rocket,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  SketchUnderline,
+  SketchCircle,
+  SketchStar,
+  SketchSquiggle,
+} from "@/components/sketch-primitives"
+import { SketchDoodles } from "@/components/sketch-doodles"
 
 interface AboutHeroProps {
   name: string
@@ -67,9 +74,10 @@ export function AboutHero({
     (content?.years_experience as string) || "8+ Years Experience"
 
   return (
-    <section ref={containerRef} className="relative overflow-hidden">
+    <section ref={containerRef} className="relative overflow-hidden paper-grain">
       {/* === FULL-WIDTH IMMERSIVE HERO BANNER === */}
       <div className="relative min-h-[60vh] lg:min-h-[70vh] flex items-end">
+        <SketchDoodles density="sparse" className="-z-5 opacity-70" />
         {/* Parallax background */}
         <motion.div style={{ y: backgroundY }} className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/50" />
@@ -120,30 +128,56 @@ export function AboutHero({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-3 mb-2">
                   <span className="h-px w-8 bg-accent" />
                   <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">
                     About Me
                   </span>
                 </div>
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-foreground leading-[0.9]">
+                <motion.span
+                  initial={{ opacity: 0, rotate: -6 }}
+                  animate={{ opacity: 1, rotate: -4 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="font-sketch text-3xl sm:text-4xl text-accent/90 block mb-3"
+                  aria-hidden
+                >
+                  — nice to meet you —
+                </motion.span>
+                <h1 className="relative text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-foreground leading-[0.9]">
                   {name.split(" ").map((word, i) => (
                     <span key={word} className="block">
                       {i === 1 ? (
-                        <span
-                          className="bg-clip-text text-transparent"
-                          style={{
-                            backgroundImage:
-                              "linear-gradient(90deg, hsl(var(--accent)), #818cf8)",
-                          }}
-                        >
-                          {word}
+                        <span className="relative inline-block">
+                          <span
+                            className="bg-clip-text text-transparent relative z-10"
+                            style={{
+                              backgroundImage:
+                                "linear-gradient(90deg, hsl(var(--accent)), #818cf8)",
+                            }}
+                          >
+                            {word}
+                          </span>
+                          <SketchUnderline
+                            color="oklch(0.6 0.2 250)"
+                            strokeWidth={5}
+                            delay={0.9}
+                          />
                         </span>
                       ) : (
                         word
                       )}
                     </span>
                   ))}
+                  <SketchStar
+                    color="oklch(0.6 0.2 320)"
+                    delay={1.3}
+                    className="absolute -top-6 right-[15%] w-8 h-8 hidden md:block"
+                  />
+                  <SketchStar
+                    color="oklch(0.65 0.15 180)"
+                    delay={1.5}
+                    className="absolute bottom-4 -right-8 w-5 h-5 hidden md:block"
+                  />
                 </h1>
               </motion.div>
 
@@ -253,6 +287,15 @@ export function AboutHero({
                 >
                   <Sparkles className="w-full h-full text-accent/30" />
                 </motion.div>
+
+                {/* Hand-drawn circle around the profile image */}
+                <SketchCircle
+                  color="oklch(0.6 0.2 250 / 0.6)"
+                  strokeWidth={2.5}
+                  delay={1.2}
+                  duration={2.2}
+                  className="-inset-6 w-[calc(100%+3rem)] h-[calc(100%+3rem)]"
+                />
               </div>
             </motion.div>
           </div>
@@ -263,9 +306,14 @@ export function AboutHero({
       </div>
 
       {/* === BIO SECTION — bento-inspired layout === */}
-      <div className="relative border-b border-border/40">
+      <div className="relative border-b border-border/40 paper-grain">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-muted/20 to-background -z-10" />
+        <SketchSquiggle
+          color="oklch(0.55 0.2 250 / 0.3)"
+          strokeWidth={2}
+          className="absolute top-6 left-0 right-0 h-5"
+        />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="grid gap-6 lg:grid-cols-3">

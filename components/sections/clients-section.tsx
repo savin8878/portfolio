@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import type { ClientLogo } from "@/lib/db"
-import { FadeIn } from "@/components/scroll-animations"
 
 interface ClientsSectionProps {
   clients: ClientLogo[]
@@ -10,49 +9,40 @@ interface ClientsSectionProps {
 }
 
 export function ClientsSection({ clients, content }: ClientsSectionProps) {
-  const subtitle = (content?.subtitle as string) || "Trusted by innovative companies"
-  const duplicatedClients = [...clients, ...clients]
+  const subtitle = (content?.subtitle as string) || "Trusted by forward-thinking teams"
+  const duplicated = [...clients, ...clients]
 
   return (
-    <section className="py-16 relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-
+    <section className="relative py-20 border-y border-border/40 overflow-hidden bg-muted/20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <FadeIn>
-          <div className="text-center mb-12">
-            <p className="text-sm font-medium text-muted-foreground tracking-wider uppercase">
-              {subtitle}
-            </p>
-          </div>
-        </FadeIn>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-10"
+        >
+          <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+            <span className="h-px w-6 bg-border" />
+            {subtitle}
+            <span className="h-px w-6 bg-border" />
+          </span>
+        </motion.div>
       </div>
 
-      <div className="relative">
-        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-
-        <motion.div
-          animate={{ x: [0, "-50%"] }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="flex gap-16 items-center"
-        >
-          {duplicatedClients.map((client, index) => (
-            <motion.div
-              key={`${client.id}-${index}`}
-              whileHover={{ scale: 1.1 }}
-              className="flex-shrink-0 px-8"
+      <div className="relative mask-fade-x">
+        <div className="flex gap-12 items-center marquee">
+          {duplicated.map((client, i) => (
+            <div
+              key={`${client.id}-${i}`}
+              className="shrink-0 px-6 py-3 group"
             >
-              <span className="text-xl font-semibold text-muted-foreground/40 hover:text-muted-foreground transition-colors duration-300 whitespace-nowrap">
+              <span className="text-2xl font-semibold text-muted-foreground/40 group-hover:text-foreground transition-colors duration-500 whitespace-nowrap tracking-tight">
                 {client.name}
               </span>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )

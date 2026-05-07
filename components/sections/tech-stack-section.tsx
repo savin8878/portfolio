@@ -19,80 +19,87 @@ export function TechStackSection({ techStack }: { techStack: TechStackItem[] }) 
   const categories = CATEGORY_ORDER.filter((c) => grouped[c])
 
   return (
-    <section className="relative py-28 border-t border-border/40">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="relative py-32 border-t border-border/40 overflow-hidden">
+      <div className="absolute inset-0 dot-grid mask-fade-radial opacity-40 -z-10" />
 
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div ref={ref} className="mb-14">
+        <div ref={ref} className="max-w-3xl mb-16">
           <motion.div
-            initial={{ opacity: 0, x: -16 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
+            initial={{ opacity: 0, y: 12 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5 }}
-            className="flex items-center gap-3 mb-4"
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs font-medium text-accent mb-5"
           >
-            <span className="h-px w-8 bg-accent" />
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">Tech Stack</span>
+            Tech Stack
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="text-4xl sm:text-5xl font-black tracking-tight text-foreground"
+            className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-[-0.03em] leading-[1.05] text-foreground"
           >
-            Technologies I{" "}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: "linear-gradient(90deg, hsl(var(--accent)), #818cf8)" }}
-            >
-              Work With
-            </span>
+            Tools that <span className="text-gradient-static">ship fast</span>, scale quiet.
           </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mt-5 text-lg text-muted-foreground leading-relaxed"
+          >
+            Battle-tested picks — the exact stack I reach for when a product has to work on day one and day 1,000.
+          </motion.p>
         </div>
 
         {/* Grid */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {categories.map((category, ci) => (
             <motion.div
               key={category}
               initial={{ opacity: 0, y: 24 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.15 + ci * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, delay: 0.15 + ci * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              className="group relative rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm p-6 hover:border-accent/30 transition-all duration-500"
             >
               {/* Category label */}
-              <div className="flex items-center gap-2 mb-5">
-                <span className="h-px w-5 bg-accent/50" />
-                <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-accent">{category}</span>
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground">
+                  {category}
+                </span>
+                <span className="text-[10px] font-mono text-muted-foreground/50 tabular-nums">
+                  {String(grouped[category].length).padStart(2, "0")}
+                </span>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 {grouped[category].map((tech, ti) => (
                   <motion.div
                     key={tech.id}
-                    initial={{ opacity: 0, x: -12 }}
+                    initial={{ opacity: 0, x: -8 }}
                     animate={inView ? { opacity: 1, x: 0 } : {}}
                     transition={{ duration: 0.4, delay: 0.2 + ci * 0.08 + ti * 0.04 }}
-                    className="group flex items-center justify-between rounded-xl border border-border/50 bg-card px-4 py-3 hover:border-accent/40 hover:bg-accent/3 transition-all duration-300"
+                    className="group/item"
                   >
-                    <span className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors duration-200">
-                      {tech.name}
-                    </span>
-                    {/* Proficiency dots */}
-                    <div className="flex gap-1">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <motion.span
-                          key={i}
-                          initial={{ scale: 0 }}
-                          animate={inView ? { scale: 1 } : {}}
-                          transition={{
-                            delay: 0.25 + ci * 0.08 + ti * 0.04 + i * 0.04,
-                            type: "spring",
-                            stiffness: 400,
-                          }}
-                          className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                            i < tech.proficiency_level ? "bg-accent" : "bg-border"
-                          }`}
-                        />
-                      ))}
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors">
+                        {tech.name}
+                      </span>
+                      <span className="text-[10px] font-mono text-muted-foreground/60 tabular-nums">
+                        {tech.proficiency_level * 20}%
+                      </span>
+                    </div>
+                    {/* Proficiency bar */}
+                    <div className="h-1 rounded-full bg-border/40 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={inView ? { width: `${tech.proficiency_level * 20}%` } : {}}
+                        transition={{
+                          duration: 1.1,
+                          delay: 0.3 + ci * 0.08 + ti * 0.04,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        className="h-full rounded-full bg-linear-to-r from-accent to-accent-2"
+                      />
                     </div>
                   </motion.div>
                 ))}

@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Caveat } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SmoothScrollProvider } from "@/components/scroll-provider"
+import { SketchDefs } from "@/components/sketch-primitives"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -12,6 +13,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
+})
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sketch",
+  display: "swap",
 })
 
 export const metadata: Metadata = {
@@ -59,7 +67,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable} font-sans antialiased`}>
+        <SketchDefs />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

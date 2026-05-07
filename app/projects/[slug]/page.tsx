@@ -7,6 +7,13 @@ import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CtaSection } from "@/components/sections/cta-section"
+import {
+  SketchUnderline,
+  SketchStar,
+  SketchCircle,
+  SketchSquiggle,
+} from "@/components/sketch-primitives"
+import { SketchDoodles } from "@/components/sketch-doodles"
 import { getProjectBySlug, getProjects } from "@/lib/data"
 
 interface ProjectPageProps {
@@ -52,31 +59,54 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="py-16 md:py-24 border-b border-border">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className="relative py-16 md:py-24 border-b border-border overflow-hidden paper-grain">
+          <div className="absolute inset-0 notebook-grid opacity-40 -z-10" />
+          <SketchSquiggle
+            color="oklch(0.55 0.2 250 / 0.3)"
+            strokeWidth={2}
+            className="absolute top-6 left-0 right-0 h-5"
+          />
+          <SketchDoodles density="sparse" className="-z-5 opacity-60" />
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
             <Link
               href="/projects"
-              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-accent mb-8 transition-colors"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Projects
+              <span className="font-sketch text-lg">back to projects</span>
             </Link>
 
             <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
               {/* Project Image */}
-              <div className="aspect-video rounded-2xl bg-muted overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-accent/30 to-accent/10" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-8xl font-bold text-accent/30">
-                    {project.title.charAt(0)}
-                  </span>
+              <div className="relative">
+                <div className="aspect-video rounded-2xl bg-muted overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent/30 to-accent/10" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-8xl font-bold text-accent/30">
+                      {project.title.charAt(0)}
+                    </span>
+                  </div>
                 </div>
+                <SketchCircle
+                  color="oklch(0.6 0.2 250 / 0.55)"
+                  strokeWidth={2.5}
+                  delay={0.8}
+                  className="-inset-4 w-[calc(100%+2rem)] h-[calc(100%+2rem)]"
+                />
               </div>
 
               {/* Project Info */}
               <div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance">
-                  {project.title}
+                <h1 className="relative text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance inline-block">
+                  <span className="relative inline-block">
+                    {project.title}
+                    <SketchUnderline color="oklch(0.6 0.2 250)" strokeWidth={4} delay={0.5} />
+                  </span>
+                  <SketchStar
+                    color="oklch(0.6 0.2 320)"
+                    delay={1.0}
+                    className="absolute -top-4 -right-6 w-6 h-6 hidden sm:block"
+                  />
                 </h1>
 
                 <p className="mt-4 text-lg text-muted-foreground leading-relaxed">

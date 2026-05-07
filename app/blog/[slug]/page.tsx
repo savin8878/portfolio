@@ -5,6 +5,12 @@ import { ArrowLeft, Clock, Calendar, Tag } from "lucide-react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Badge } from "@/components/ui/badge"
+import {
+  SketchUnderline,
+  SketchStar,
+  SketchSquiggle,
+} from "@/components/sketch-primitives"
+import { SketchDoodles } from "@/components/sketch-doodles"
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/data"
 
 interface BlogPostPageProps {
@@ -49,15 +55,22 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <Navbar />
 
       <main className="pt-16">
-        <article className="py-16 md:py-24">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <article className="relative py-16 md:py-24 paper-grain overflow-hidden">
+          <div className="absolute inset-0 notebook-grid opacity-30 -z-10" />
+          <SketchSquiggle
+            color="oklch(0.55 0.2 250 / 0.3)"
+            strokeWidth={2}
+            className="absolute top-6 left-0 right-0 h-5"
+          />
+          <SketchDoodles density="sparse" className="-z-5 opacity-50" />
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 relative">
             {/* Back Link */}
             <Link
               href="/blog"
-              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-accent mb-8 transition-colors"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Blog
+              <span className="font-sketch text-lg">back to blog</span>
             </Link>
 
             {/* Header */}
@@ -89,8 +102,16 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 </div>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance leading-tight">
-                {post.title}
+              <h1 className="relative text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance leading-tight inline-block">
+                <span className="relative inline-block">
+                  {post.title}
+                  <SketchUnderline color="oklch(0.6 0.2 250)" strokeWidth={4} delay={0.5} />
+                </span>
+                <SketchStar
+                  color="oklch(0.6 0.2 320)"
+                  delay={1.0}
+                  className="absolute -top-4 -right-4 w-6 h-6 hidden sm:block"
+                />
               </h1>
 
               {post.excerpt && (

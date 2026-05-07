@@ -3,6 +3,7 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ProjectsGrid } from "@/components/projects/projects-grid"
 import { CtaSection } from "@/components/sections/cta-section"
+import { SketchPageHeader } from "@/components/sketch-page-header"
 import { getProjects, getProjectCategories, getPageVisibility } from "@/lib/data"
 
 export const metadata: Metadata = {
@@ -26,27 +27,17 @@ export default async function ProjectsPage() {
 
       <main className="pt-16">
         {show("hero") && (
-          <section className="py-24">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-16">
-                <h1 className="text-4xl sm:text-5xl font-bold text-foreground">
-                  Projects & Case Studies
-                </h1>
-                <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-                  A showcase of my work building scalable software solutions for
-                  startups and enterprises across various industries.
-                </p>
-              </div>
-
-              {show("projects_grid") && (
-                <ProjectsGrid projects={projects} categories={categories} />
-              )}
-            </div>
-          </section>
+          <SketchPageHeader
+            kicker="Portfolio"
+            handwritten="— selected work —"
+            title="Projects & Case Studies"
+            highlight="Case Studies"
+            description="A showcase of my work building scalable software solutions for startups and enterprises across various industries."
+          />
         )}
 
-        {!show("hero") && show("projects_grid") && (
-          <section className="py-24">
+        {show("projects_grid") && (
+          <section className="pb-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <ProjectsGrid projects={projects} categories={categories} />
             </div>

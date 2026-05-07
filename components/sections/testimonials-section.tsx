@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { motion, useInView, AnimatePresence } from "framer-motion"
-import { Star, ChevronLeft, ChevronRight } from "lucide-react"
+import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react"
 import type { Testimonial } from "@/lib/db"
 
 interface TestimonialsSectionProps {
@@ -17,8 +17,8 @@ export function TestimonialsSection({ testimonials, content }: TestimonialsSecti
   const [dir, setDir] = useState(1)
 
   const label = (content?.label as string) || "Testimonials"
-  const title = (content?.title as string) || "What Clients"
-  const titleHighlight = (content?.title_highlight as string) || "Say"
+  const title = (content?.title as string) || "Good words"
+  const titleHighlight = (content?.title_highlight as string) || "travel fast."
 
   if (!testimonials.length) return null
 
@@ -26,43 +26,38 @@ export function TestimonialsSection({ testimonials, content }: TestimonialsSecti
     setDir(next > active ? 1 : -1)
     setActive(next)
   }
-  function prev() { go((active - 1 + testimonials.length) % testimonials.length) }
-  function next() { go((active + 1) % testimonials.length) }
+  const prev = () => go((active - 1 + testimonials.length) % testimonials.length)
+  const next = () => go((active + 1) % testimonials.length)
 
   const t = testimonials[active]
 
   return (
-    <section className="relative py-28 border-t border-border/40">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="relative py-32 border-t border-border/40 overflow-hidden">
+      <div className="absolute inset-0 aurora opacity-30 -z-10" />
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
-        <div ref={ref} className="mb-16">
+        <div ref={ref} className="max-w-3xl mb-16">
           <motion.div
-            initial={{ opacity: 0, x: -16 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
+            initial={{ opacity: 0, y: 12 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5 }}
-            className="flex items-center gap-3 mb-4"
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs font-medium text-accent mb-5"
           >
-            <span className="h-px w-8 bg-accent" />
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">{label}</span>
+            {label}
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="text-4xl sm:text-5xl font-black tracking-tight text-foreground leading-tight"
+            className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-[-0.03em] leading-[1.05] text-foreground"
           >
-            {title}{" "}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: "linear-gradient(90deg, hsl(var(--accent)), #818cf8)" }}
-            >
-              {titleHighlight}
-            </span>
+            {title} <span className="text-gradient-static">{titleHighlight}</span>
           </motion.h2>
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_400px] gap-12 items-start">
+        <div className="grid lg:grid-cols-[1fr_minmax(0,380px)] gap-8 items-start">
 
           {/* Featured testimonial */}
           <motion.div
@@ -71,12 +66,8 @@ export function TestimonialsSection({ testimonials, content }: TestimonialsSecti
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <div className="absolute -top-4 -left-2 text-[120px] leading-none font-black text-accent/[0.07] select-none pointer-events-none">
-              &ldquo;
-            </div>
-
-            <div className="relative rounded-2xl border border-border/50 bg-card overflow-hidden p-8 md:p-10">
-              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
+            <div className="relative rounded-3xl ring-gradient overflow-hidden bg-card/70 backdrop-blur-sm p-8 md:p-12">
+              <Quote className="absolute top-6 right-6 h-20 w-20 text-accent/10" strokeWidth={1} />
 
               <AnimatePresence mode="wait" custom={dir}>
                 <motion.div
@@ -86,8 +77,9 @@ export function TestimonialsSection({ testimonials, content }: TestimonialsSecti
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: dir * -30 }}
                   transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative"
                 >
-                  <div className="flex gap-1 mb-6">
+                  <div className="flex gap-0.5 mb-8">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
@@ -96,17 +88,19 @@ export function TestimonialsSection({ testimonials, content }: TestimonialsSecti
                     ))}
                   </div>
 
-                  <p className="text-lg md:text-xl text-foreground leading-relaxed font-medium mb-8">
+                  <p className="text-xl md:text-2xl lg:text-3xl text-foreground leading-[1.35] font-medium tracking-[-0.015em] mb-10 text-balance">
                     &ldquo;{t.testimonial_text}&rdquo;
                   </p>
 
                   <div className="flex items-center gap-4">
-                    <div className="w-11 h-11 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
-                      <span className="text-sm font-black text-accent">{t.client_name.charAt(0)}</span>
+                    <div className="relative w-12 h-12 rounded-full bg-linear-to-br from-accent to-accent-2 grid place-items-center shrink-0 shadow-lg shadow-accent/20">
+                      <span className="text-sm font-semibold text-accent-foreground">
+                        {t.client_name.charAt(0)}
+                      </span>
                     </div>
                     <div>
-                      <p className="font-bold text-foreground leading-none mb-1">{t.client_name}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-semibold text-foreground leading-tight">{t.client_name}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">
                         {t.client_title}{t.client_company && ` · ${t.client_company}`}
                       </p>
                     </div>
@@ -114,16 +108,18 @@ export function TestimonialsSection({ testimonials, content }: TestimonialsSecti
                 </motion.div>
               </AnimatePresence>
 
-              <div className="flex items-center gap-3 mt-8 pt-6 border-t border-border/40">
+              <div className="flex items-center gap-3 mt-10 pt-6 border-t border-border/40">
                 <button
                   onClick={prev}
-                  className="w-9 h-9 rounded-full border border-border/60 flex items-center justify-center hover:border-accent/50 hover:bg-accent/5 transition-all"
+                  aria-label="Previous"
+                  className="w-10 h-10 rounded-full border border-border/60 grid place-items-center hover:border-accent/50 hover:bg-accent/5 transition-all"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
                   onClick={next}
-                  className="w-9 h-9 rounded-full border border-border/60 flex items-center justify-center hover:border-accent/50 hover:bg-accent/5 transition-all"
+                  aria-label="Next"
+                  className="w-10 h-10 rounded-full border border-border/60 grid place-items-center hover:border-accent/50 hover:bg-accent/5 transition-all"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -132,13 +128,14 @@ export function TestimonialsSection({ testimonials, content }: TestimonialsSecti
                     <button
                       key={i}
                       onClick={() => go(i)}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        i === active ? "w-6 bg-accent" : "w-1.5 bg-border"
+                      aria-label={`Go to testimonial ${i + 1}`}
+                      className={`h-1.5 rounded-full transition-all duration-400 ${
+                        i === active ? "w-8 bg-linear-to-r from-accent to-accent-2" : "w-1.5 bg-border hover:bg-muted-foreground"
                       }`}
                     />
                   ))}
                 </div>
-                <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+                <span className="ml-auto text-xs font-mono text-muted-foreground tabular-nums">
                   {String(active + 1).padStart(2, "0")} / {String(testimonials.length).padStart(2, "0")}
                 </span>
               </div>
@@ -156,15 +153,15 @@ export function TestimonialsSection({ testimonials, content }: TestimonialsSecti
               <button
                 key={item.id}
                 onClick={() => go(i)}
-                className={`text-left rounded-xl border p-4 transition-all duration-300 ${
+                className={`text-left rounded-2xl border p-4 transition-all duration-400 ${
                   i === active
-                    ? "border-accent/40 bg-accent/5"
-                    : "border-border/40 bg-card hover:border-accent/20 hover:bg-accent/[0.02]"
+                    ? "border-accent/40 bg-accent/5 shadow-lg shadow-accent/5"
+                    : "border-border/50 bg-card/40 hover:border-accent/20 hover:bg-accent/[0.02]"
                 }`}
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-colors ${
-                    i === active ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"
+                  <div className={`w-8 h-8 rounded-full grid place-items-center text-xs font-semibold transition-colors ${
+                    i === active ? "bg-linear-to-br from-accent to-accent-2 text-accent-foreground" : "bg-muted text-muted-foreground"
                   }`}>
                     {item.client_name.charAt(0)}
                   </div>
