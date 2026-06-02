@@ -235,6 +235,18 @@ function contactHref(type: string, value: string): string | undefined {
   }
 }
 
+// Friendly display label for a contact item. Email / phone / location keep
+// their actual value (people need to read them), while URL fields show a clean
+// clickable NAME (Portfolio / LinkedIn / GitHub) with the URL stored in the href.
+function contactLabel(type: string, value: string): string {
+  switch (type) {
+    case "website": return "Portfolio"
+    case "linkedin": return "LinkedIn"
+    case "github": return "GitHub"
+    default: return value
+  }
+}
+
 // Linkable text — renders as <a> if href exists, else <span>
 function LinkText({ href, children, style }: { href?: string; children: React.ReactNode; style?: React.CSSProperties }) {
   if (href) {
@@ -243,13 +255,23 @@ function LinkText({ href, children, style }: { href?: string; children: React.Re
   return <span style={style}>{children}</span>
 }
 
-// URL text — renders a clickable link with accent color
-function UrlLink({ url, color, fontSize }: { url: string; color: string; fontSize: string }) {
+// URL link — renders a clickable PLACEHOLDER ("Live Demo" / "GitHub" / "Verify")
+// instead of exposing the raw URL. The href is still embedded so the text stays
+// clickable in the PDF; only the visible label changes. Pass `label` to override
+// the auto-detected text.
+function UrlLink({ url, color, fontSize, label }: { url: string; color: string; fontSize: string; label?: string }) {
   if (!url) return null
   const href = url.startsWith("http") ? url : `https://${url}`
-  const display = url.replace(/^https?:\/\//, "").replace(/\/$/, "")
+  const auto = /github\.com/i.test(url)
+    ? "GitHub"
+    : /gitlab\.com/i.test(url)
+      ? "GitLab"
+      : /bitbucket\.org/i.test(url)
+        ? "Repository"
+        : "Live Demo"
+  const display = label ?? auto
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" style={{ fontSize, color, textDecoration: "none", fontWeight: 500 }}>
+    <a href={href} target="_blank" rel="noopener noreferrer" style={{ fontSize, color, textDecoration: "none", fontWeight: 600, borderBottom: `1px solid ${color}55`, whiteSpace: "nowrap" }}>
       {display}
     </a>
   )
@@ -5162,7 +5184,7 @@ function GlassTemplate({ config }: { config: ResumeConfig }) {
               <div>
                 <span style={{ fontSize: fs.h3, fontWeight: 600, color: "#111827" }}>{cert.name}</span>
                 {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280" }}> — {cert.issuer}</span>}
-                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} /></>}
+                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} label="Verify" /></>}
               </div>
               {cert.date && <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{formatDisplayDate(cert.date)}</span>}
             </div>
@@ -5406,7 +5428,7 @@ function GradientTemplate({ config }: { config: ResumeConfig }) {
                 <div>
                   <span style={{ fontSize: fs.h3, fontWeight: 600, color: "#111827" }}>{cert.name}</span>
                   {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280" }}> — {cert.issuer}</span>}
-                  {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} /></>}
+                  {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} label="Verify" /></>}
                 </div>
                 {cert.date && <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{formatDisplayDate(cert.date)}</span>}
               </div>
@@ -5640,7 +5662,7 @@ function MonoTemplate({ config }: { config: ResumeConfig }) {
               <div>
                 <span style={{ fontSize: fs.h3, fontWeight: 900, color: "#000000" }}>{cert.name}</span>
                 {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280", fontWeight: 600 }}> // {cert.issuer}</span>}
-                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} /></>}
+                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} label="Verify" /></>}
               </div>
               {cert.date && <span style={{ fontSize: fs.small, color: "#000000", fontWeight: 700 }}>{formatDisplayDate(cert.date)}</span>}
             </div>
@@ -5886,7 +5908,7 @@ function TimelineProTemplate({ config }: { config: ResumeConfig }) {
               <div key={cert.id} style={{ marginBottom: "4px" }}>
                 <span style={{ fontSize: fs.h3, fontWeight: 600, color: "#111827" }}>{cert.name}</span>
                 {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280" }}> — {cert.issuer}</span>}
-                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} /></>}
+                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} label="Verify" /></>}
                 {cert.date && <span style={{ fontSize: fs.small, color: "#9ca3af" }}> ({formatDisplayDate(cert.date)})</span>}
               </div>
             ))}
@@ -6128,7 +6150,7 @@ function CardDeckTemplate({ config }: { config: ResumeConfig }) {
               <div>
                 <span style={{ fontSize: fs.h3, fontWeight: 600, color: "#111827" }}>{cert.name}</span>
                 {cert.issuer && <span style={{ fontSize: fs.body, color: "#6b7280" }}> — {cert.issuer}</span>}
-                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} /></>}
+                {cert.url && <> · <UrlLink url={cert.url} color={accent} fontSize={fs.small} label="Verify" /></>}
               </div>
               {cert.date && <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{formatDisplayDate(cert.date)}</span>}
             </div>
@@ -6455,7 +6477,9 @@ function DualToneTemplate({ config }: { config: ResumeConfig }) {
 
 /* ═══════════════════════════════════════════════
    MAGAZINE TEMPLATE
-   Editorial magazine spread with multi-column layout
+   Editorial magazine spread — masthead with kicker rules,
+   asymmetric two-column hero, drop cap, pull-quote rail,
+   serif heads with leading rules, refined data-rich layout
    ═══════════════════════════════════════════════ */
 function MagazineTemplate({ config }: { config: ResumeConfig }) {
   const fs = getFontSize(config.fontSize)
@@ -6468,11 +6492,41 @@ function MagazineTemplate({ config }: { config: ResumeConfig }) {
   const contacts = getContactItems(p)
   const pad = config.pagePadding ?? 40
 
-  function SectionHead({ title }: { title: string }) {
+  const serif = "Georgia, 'Times New Roman', serif"
+  const ink = "#111827"
+  const body = "#3a3a3a"
+  const muted = "#7a7a7a"
+  const rule = "#1f2937"
+  const hairline = "#d4d4d8"
+  const issueDate = (() => {
+    const d = new Date()
+    return d.toLocaleDateString("en-US", { month: "long", year: "numeric" }).toUpperCase()
+  })()
+
+  // Build a short pull-quote from the summary (first sentence, capped) for the marginalia rail
+  const pullQuote = (() => {
+    if (!p.summary) return ""
+    const firstSentence = p.summary.split(/(?<=[.!?])\s+/)[0] || p.summary
+    return firstSentence.length > 160 ? firstSentence.slice(0, 157) + "…" : firstSentence
+  })()
+
+  function Kicker({ label }: { label: string }) {
     return (
-      <div style={{ marginBottom: "10px" }}>
-        <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h2, fontWeight: 700, color: "#111827", textTransform: "uppercase" as const, letterSpacing: "2px", marginBottom: "4px" }}>{title}</div>
-        <div style={{ height: "1px", backgroundColor: "#d1d5db" }} />
+      <div style={{ fontFamily: serif, fontSize: "9px", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "3px", marginBottom: "4px" }}>
+        {label}
+      </div>
+    )
+  }
+
+  function SectionHead({ title, kicker }: { title: string; kicker?: string }) {
+    return (
+      <div style={{ marginBottom: "7px", marginTop: "2px" }}>
+        {kicker && <Kicker label={kicker} />}
+        <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+          <div style={{ fontFamily: serif, fontSize: fs.h2, fontWeight: 700, color: ink, textTransform: "uppercase" as const, letterSpacing: "2.5px" }}>{title}</div>
+          <div style={{ flex: 1, height: "1px", backgroundColor: rule, alignSelf: "center", marginTop: "2px" }} />
+          <div style={{ width: "6px", height: "6px", backgroundColor: accent, transform: "rotate(45deg)", alignSelf: "center" }} />
+        </div>
       </div>
     )
   }
@@ -6480,68 +6534,78 @@ function MagazineTemplate({ config }: { config: ResumeConfig }) {
   const sectionRenderers: Record<string, () => React.ReactNode> = {
     summary: () =>
       p.summary ? (
-        <div key="summary" style={{ marginBottom: "22px" }}>
-          <SectionHead title="Profile" />
-          <p style={{ fontSize: fs.body, lineHeight: 1.8, color: "#374151", fontStyle: "italic", borderLeft: `3px solid ${accent}`, paddingLeft: "14px", margin: 0 }}>
-            <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "28px", fontWeight: 700, color: accent, float: "left", lineHeight: 1, marginRight: "6px", marginTop: "2px" }}>
-              {p.summary.charAt(0)}
-            </span>
-            {p.summary.slice(1)}
-          </p>
+        <div key="summary" style={{ marginBottom: "14px" }}>
+          <SectionHead title="The Profile" kicker="Lede" />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 170px", gap: "16px", alignItems: "start" }}>
+            <p style={{ fontSize: fs.body, lineHeight: 1.5, color: body, margin: 0, textAlign: "justify", hyphens: "auto" as const }}>
+              <span style={{ fontFamily: serif, fontSize: "32px", fontWeight: 700, color: accent, float: "left", lineHeight: 0.82, marginRight: "6px", marginTop: "1px", paddingTop: "2px" }}>
+                {p.summary.charAt(0)}
+              </span>
+              {p.summary.slice(1)}
+            </p>
+            {pullQuote && (
+              <aside style={{ borderTop: `2px solid ${accent}`, borderBottom: `1px solid ${hairline}`, padding: "7px 0", marginTop: "2px" }}>
+                <div style={{ fontFamily: serif, fontSize: "12px", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "2px", marginBottom: "4px" }}>“ Quote</div>
+                <div style={{ fontFamily: serif, fontStyle: "italic", fontSize: fs.small, color: ink, lineHeight: 1.4 }}>{pullQuote}</div>
+              </aside>
+            )}
+          </div>
         </div>
       ) : null,
 
     experience: () =>
       enabledExp.length > 0 ? (
-        <div key="experience" style={{ marginBottom: "22px" }}>
-          <SectionHead title="Experience" />
-          <div style={{ columnCount: enabledExp.length > 2 ? 2 : 1, columnGap: "20px", columnRule: "1px solid #e5e7eb" }}>
-            {enabledExp.map((exp) => (
-              <div key={exp.id} style={{ breakInside: "avoid" as const, marginBottom: "14px" }}>
-                <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{exp.title}</div>
-                {exp.company && <div style={{ fontSize: fs.small, color: accent, fontWeight: 600 }}>{exp.company}</div>}
-                <div style={{ fontSize: fs.small, color: "#9ca3af" }}>
-                  {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
-                  {exp.location && ` | ${exp.location}`}
-                </div>
-                {exp.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.6 }}>{exp.description}</p>}
-                {exp.achievements.length > 0 && (
-                  <ul style={{ listStyle: "none", padding: 0, margin: "3px 0 0 0" }}>
-                    {exp.achievements.map((a, i) => (
-                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.5, paddingLeft: "12px", position: "relative" }}>
-                        <span style={{ position: "absolute", left: 0, top: "7px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#374151" }} />
-                        {a}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
+        <div key="experience" style={{ marginBottom: "14px" }}>
+          <SectionHead title="Field Notes" kicker="Experience" />
+          <div style={{ columnCount: enabledExp.length > 1 ? 2 : 1, columnGap: "20px", columnRule: `1px solid ${hairline}` }}>
+            {enabledExp.map((exp) => {
+              const dateRange = `${formatDisplayDate(exp.startDate)}${(exp.endDate || exp.isCurrent) ? ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}` : ""}`
+              return (
+                <article key={exp.id} style={{ breakInside: "avoid" as const, marginBottom: "9px", paddingBottom: "7px", borderBottom: `1px dotted ${hairline}` }}>
+                  <div style={{ fontSize: "9px", fontFamily: serif, fontWeight: 700, color: accent, letterSpacing: "2px", textTransform: "uppercase", marginBottom: "2px" }}>
+                    {dateRange}{exp.location && ` · ${exp.location}`}
+                  </div>
+                  <h3 style={{ fontFamily: serif, fontSize: fs.h3, fontWeight: 700, color: ink, margin: "0 0 1px 0", lineHeight: 1.2 }}>{exp.title}</h3>
+                  {exp.company && <div style={{ fontFamily: serif, fontSize: fs.small, fontStyle: "italic", color: muted, marginBottom: "3px" }}>at {exp.company}</div>}
+                  {exp.description && <p style={{ fontSize: fs.body, color: body, marginTop: "3px", marginBottom: 0, lineHeight: 1.45 }}>{exp.description}</p>}
+                  {exp.achievements.length > 0 && (
+                    <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                      {exp.achievements.map((a, i) => (
+                        <li key={i} style={{ fontSize: fs.body, color: body, lineHeight: 1.4, paddingLeft: "14px", position: "relative", marginBottom: "2px" }}>
+                          <span style={{ position: "absolute", left: 0, top: "7px", width: "6px", height: "1px", backgroundColor: accent }} />
+                          {a}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
+              )
+            })}
           </div>
         </div>
       ) : null,
 
     education: () =>
       enabledEdu.length > 0 ? (
-        <div key="education" style={{ marginBottom: "22px" }}>
-          <SectionHead title="Education" />
+        <div key="education" style={{ marginBottom: "14px" }}>
+          <SectionHead title="Education" kicker="Credentials" />
           {enabledEdu.map((edu) => (
-            <div key={edu.id} style={{ marginBottom: "10px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{edu.degree}{edu.field && ` in ${edu.field}`}</span>
-                <span style={{ fontSize: fs.small, color: "#9ca3af" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+            <div key={edu.id} style={{ marginBottom: "6px", paddingBottom: "5px", borderBottom: `1px dotted ${hairline}`, display: "grid", gridTemplateColumns: "1fr auto", gap: "16px", alignItems: "baseline" }}>
+              <div>
+                <div style={{ fontFamily: serif, fontSize: fs.h3, fontWeight: 700, color: ink }}>{edu.degree}{edu.field && <span style={{ fontStyle: "italic", color: muted, fontWeight: 400 }}>{" "}in {edu.field}</span>}</div>
+                <div style={{ fontFamily: serif, fontSize: fs.body, fontStyle: "italic", color: accent }}>{edu.institution}</div>
+                {edu.achievements && edu.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "3px 0 0 0" }}>
+                    {edu.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: body, lineHeight: 1.4, paddingLeft: "14px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "7px", width: "6px", height: "1px", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <div style={{ fontSize: fs.body, color: "#6b7280" }}>{edu.institution}</div>
-              {edu.achievements && edu.achievements.length > 0 && (
-                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
-                  {edu.achievements.map((a, i) => (
-                    <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.5, paddingLeft: "12px", position: "relative" }}>
-                      <span style={{ position: "absolute", left: 0, top: "7px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#374151" }} />
-                      {a}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <div style={{ fontSize: "9.5px", fontFamily: serif, color: muted, letterSpacing: "1.5px", textTransform: "uppercase", whiteSpace: "nowrap" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</div>
             </div>
           ))}
         </div>
@@ -6549,13 +6613,22 @@ function MagazineTemplate({ config }: { config: ResumeConfig }) {
 
     skills: () =>
       config.skillCategories.length > 0 ? (
-        <div key="skills" style={{ marginBottom: "22px" }}>
-          <SectionHead title="Skills" />
-          <div style={{ columnCount: 2, columnGap: "20px", columnRule: "1px solid #e5e7eb" }}>
+        <div key="skills" style={{ marginBottom: "14px" }}>
+          <SectionHead title="Toolkit" kicker="The Index" />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px 24px" }}>
             {config.skillCategories.map((cat) => (
-              <div key={cat.id} style={{ breakInside: "avoid" as const, marginBottom: "8px" }}>
-                <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.small, fontWeight: 700, color: "#111827", marginBottom: "2px" }}>{cat.name}</div>
-                <div style={{ fontSize: fs.small, color: "#6b7280", lineHeight: 1.6 }}>{cat.skills.join(" · ")}</div>
+              <div key={cat.id} style={{ breakInside: "avoid" as const, paddingBottom: "5px", borderBottom: `1px dotted ${hairline}` }}>
+                <div style={{ fontFamily: serif, fontSize: fs.small, fontWeight: 700, color: ink, marginBottom: "3px", textTransform: "uppercase", letterSpacing: "2px" }}>
+                  <span style={{ display: "inline-block", width: "10px", height: "1px", backgroundColor: accent, verticalAlign: "middle", marginRight: "6px" }} />
+                  {cat.name}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 8px" }}>
+                  {cat.skills.map((sk, i) => (
+                    <span key={i} style={{ fontSize: fs.small, color: body, lineHeight: 1.45 }}>
+                      {sk}{i < cat.skills.length - 1 && <span style={{ color: accent, marginLeft: "8px" }}>·</span>}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -6564,45 +6637,62 @@ function MagazineTemplate({ config }: { config: ResumeConfig }) {
 
     projects: () =>
       enabledProjects.length > 0 ? (
-        <div key="projects" style={{ marginBottom: "22px" }}>
-          <SectionHead title="Projects" />
-          <div style={{ columnCount: enabledProjects.length > 2 ? 2 : 1, columnGap: "20px", columnRule: "1px solid #e5e7eb" }}>
-            {enabledProjects.map((proj) => (
-              <div key={proj.id} style={{ breakInside: "avoid" as const, marginBottom: "10px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, fontWeight: 700, color: "#111827" }}>{proj.title}</span>
-                  {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+        <div key="projects" style={{ marginBottom: "14px" }}>
+          <SectionHead title="Selected Works" kicker="Portfolio" />
+          {/* Explicit 2-column grid (not CSS multi-column) so projects always sit
+              side-by-side regardless of how tall each entry is. */}
+          <div style={{ display: "grid", gridTemplateColumns: enabledProjects.length > 1 ? "1fr 1fr" : "1fr", columnGap: "20px", alignItems: "start" }}>
+            {enabledProjects.map((proj, idx) => {
+              const twoCol = enabledProjects.length > 1
+              const leftCol = idx % 2 === 0
+              return (
+              <article key={proj.id} style={{ breakInside: "avoid" as const, marginBottom: "9px", paddingBottom: "6px", borderBottom: `1px dotted ${hairline}`, ...(twoCol && leftCol ? { paddingRight: "20px", borderRight: `1px solid ${hairline}` } : {}) }}>
+                <div style={{ fontSize: "9px", fontFamily: serif, fontWeight: 700, color: accent, letterSpacing: "2px", textTransform: "uppercase", marginBottom: "2px" }}>
+                  Feature{proj.role && ` · ${proj.role}`}
                 </div>
-                {proj.description && <p style={{ fontSize: fs.body, color: "#4b5563", marginTop: "3px", lineHeight: 1.5 }}>{proj.description}</p>}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
+                  <h3 style={{ fontFamily: serif, fontSize: fs.h3, fontWeight: 700, color: ink, margin: 0, lineHeight: 1.2 }}>{proj.title}</h3>
+                  {(proj.url || proj.repoUrl) && (
+                    <div style={{ display: "flex", gap: "10px", flexShrink: 0 }}>
+                      {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} label="Live Demo" />}
+                      {proj.repoUrl && <UrlLink url={proj.repoUrl} color={accent} fontSize={fs.small} label="GitHub" />}
+                    </div>
+                  )}
+                </div>
+                {proj.description && <p style={{ fontSize: fs.body, color: body, marginTop: "3px", marginBottom: 0, lineHeight: 1.45 }}>{proj.description}</p>}
                 {proj.achievements && proj.achievements.length > 0 && (
                   <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
                     {proj.achievements.map((a, i) => (
-                      <li key={i} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
-                        <span style={{ position: "absolute", left: 0, top: "6px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />
+                      <li key={i} style={{ fontSize: fs.body, color: body, lineHeight: 1.4, paddingLeft: "14px", position: "relative", marginBottom: "2px" }}>
+                        <span style={{ position: "absolute", left: 0, top: "7px", width: "6px", height: "1px", backgroundColor: accent }} />
                         {a}
                       </li>
                     ))}
                   </ul>
                 )}
                 {proj.techStack.length > 0 && (
-                  <div style={{ fontSize: fs.small, color: "#9ca3af", marginTop: "3px" }}>{proj.techStack.join(" · ")}</div>
+                  <div style={{ fontSize: fs.small, color: muted, marginTop: "4px", fontStyle: "italic", fontFamily: serif }}>
+                    {proj.techStack.join(" · ")}
+                  </div>
                 )}
-              </div>
-            ))}
+              </article>
+              )
+            })}
           </div>
         </div>
       ) : null,
 
     certifications: () =>
       enabledCerts.length > 0 ? (
-        <div key="certifications" style={{ marginBottom: "22px" }}>
-          <SectionHead title="Certifications" />
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+        <div key="certifications" style={{ marginBottom: "14px" }}>
+          <SectionHead title="Accreditations" kicker="Credentials" />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "5px 18px" }}>
             {enabledCerts.map((cert) => (
-              <div key={cert.id} style={{ fontSize: fs.small, padding: "4px 10px", border: "1px solid #d1d5db", borderRadius: "2px" }}>
-                <span style={{ fontWeight: 600, color: "#111827" }}>{cert.name}</span>
-                {cert.issuer && <span style={{ color: "#6b7280" }}> — {cert.issuer}</span>}
-                {cert.date && <span style={{ color: "#9ca3af" }}> ({formatDisplayDate(cert.date)})</span>}
+              <div key={cert.id} style={{ paddingBottom: "4px", borderBottom: `1px dotted ${hairline}` }}>
+                <div style={{ fontFamily: serif, fontSize: fs.body, fontWeight: 700, color: ink }}>{cert.name}</div>
+                <div style={{ fontSize: fs.small, color: muted, fontStyle: "italic", fontFamily: serif }}>
+                  {cert.issuer}{cert.date && ` · ${formatDisplayDate(cert.date)}`}
+                </div>
               </div>
             ))}
           </div>
@@ -6611,46 +6701,60 @@ function MagazineTemplate({ config }: { config: ResumeConfig }) {
 
     custom: () =>
       config.customSections.length > 0
-        ? config.customSections.map((section) => (
-            <div key={section.id} style={{ marginBottom: "22px" }}>
-              <SectionHead title={section.title} />
-              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+        ? <>{config.customSections.map((section) => (
+            <div key={section.id} style={{ marginBottom: "14px" }}>
+              <SectionHead title={section.title} kicker="Notes" />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, columnCount: section.items.length > 4 ? 2 : 1, columnGap: "20px" }}>
                 {section.items.map((item) => (
-                  <li key={item.id} style={{ fontSize: fs.body, color: "#4b5563", lineHeight: 1.6, paddingLeft: "12px", position: "relative" }}>
-                    <span style={{ position: "absolute", left: 0, top: "7px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#374151" }} />
+                  <li key={item.id} style={{ fontSize: fs.body, color: body, lineHeight: 1.45, paddingLeft: "14px", position: "relative", breakInside: "avoid" as const, marginBottom: "3px" }}>
+                    <span style={{ position: "absolute", left: 0, top: "7px", width: "6px", height: "1px", backgroundColor: accent }} />
                     {item.content}
                   </li>
                 ))}
               </ul>
             </div>
-          ))
+          ))}</>
         : null,
   }
 
   return (
-    <div style={{ ...PAGE_BASE, fontFamily: "'Inter', -apple-system, sans-serif", padding: `${pad}px` }}>
+    <div style={{ ...PAGE_BASE, fontFamily: "'Inter', -apple-system, sans-serif", padding: `${pad}px`, position: "relative" as const, color: body }}>
+ 
       {/* Masthead */}
-      <div style={{ textAlign: "center", marginBottom: "20px", borderBottom: "3px double #111827", paddingBottom: "16px" }}>
-        <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "32px", fontWeight: 700, color: "#111827", letterSpacing: "4px", textTransform: "uppercase" as const }}>{p.fullName || "Your Name"}</div>
-        {p.title && <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: fs.h3, color: accent, fontStyle: "italic", marginTop: "4px" }}>{p.title}</div>}
+      <header style={{ textAlign: "center", paddingTop: "10px", paddingBottom: "9px", borderBottom: `4px double ${rule}`, marginBottom: "13px" }}>
+        <div style={{ fontFamily: serif, fontSize: fs.h1 === "25px" ? "34px" : fs.h1 === "22px" ? "30px" : "38px", fontWeight: 900, color: ink, letterSpacing: "4px", textTransform: "uppercase" as const, lineHeight: 1.02 }}>
+          {p.fullName || "Your Name"}
+        </div>
+        {p.title && (
+          <div style={{ marginTop: "7px", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+            <span style={{ width: "30px", height: "1px", backgroundColor: accent }} />
+            <span style={{ fontFamily: serif, fontSize: fs.h3, color: accent, fontStyle: "italic", letterSpacing: "1px" }}>{p.title}</span>
+            <span style={{ width: "30px", height: "1px", backgroundColor: accent }} />
+          </div>
+        )}
         {contacts.length > 0 && (
-          <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "8px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "8px", flexWrap: "wrap", fontFamily: serif, fontSize: fs.small, color: muted }}>
             {contacts.map((c, i) => {
               const href = contactHref(c.type, c.value)
               return (
-                <LinkText key={i} href={href} style={{ fontSize: fs.small, color: "#6b7280" }}>{c.value}</LinkText>
+                <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                  {i > 0 && <span style={{ color: hairline }}>•</span>}
+                  <LinkText href={href} style={{ fontSize: fs.small, color: muted }}>{c.value}</LinkText>
+                </span>
               )
             })}
           </div>
         )}
-      </div>
+      </header>
 
       {/* Sections */}
       {config.sectionOrder.map((section) => sectionRenderers[section] ? sectionRenderers[section]() : null)}
 
-      {/* Page number footer */}
-      <div style={{ position: "absolute" as const, bottom: `${pad}px`, left: 0, right: 0, textAlign: "center" }}>
-        <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "10px", color: "#9ca3af" }}>— 1 —</span>
+      {/* Folio footer — kept in normal flow so it never overlaps content on multi-page output */}
+      <div style={{ marginTop: "14px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${hairline}`, paddingTop: "8px", breakInside: "avoid" as const, fontFamily: serif, fontSize: "9.5px", color: muted, letterSpacing: "2px", textTransform: "uppercase" }}>
+        <span>{p.fullName || "Curriculum"}</span>
+        {/* <span style={{ color: accent }}>— Folio I —</span> */}
+        <span>{issueDate}</span>
       </div>
     </div>
   )
@@ -9452,7 +9556,7 @@ function ArchitectTemplate({ config }: { config: ResumeConfig }) {
 // 1-4. Premium template stubs (using existing templates as base)
 function AuroraTemplate({ config }: { config: ResumeConfig }) { return <ModernTemplate config={config} /> }
 function VibrantTemplate({ config }: { config: ResumeConfig }) { return <CreativeTemplate config={config} /> }
-function SunsetTemplate({ config }: { config: ResumeConfig }) { return <EloquentTemplate config={config} /> }
+function SunsetTemplate({ config }: { config: ResumeConfig }) { return <ElegantTemplate config={config} /> }
 function CodeStackTemplate({ config }: { config: ResumeConfig }) { return <TechnicalTemplate config={config} /> }
 
 function CloudNativeTemplate({ config }: { config: ResumeConfig }) { return <ModernTemplate config={config} /> }
@@ -9473,11 +9577,1185 @@ function FinanceTemplate({ config }: { config: ResumeConfig }) { return <MetroTe
 function CreativeFinanceTemplate({ config }: { config: ResumeConfig }) { return <ModernTemplate config={config} /> }
 
 /* ═══════════════════════════════════════════════
+   EDITORIAL TEMPLATE
+   Long-form article-style: full-bleed accent header,
+   bio-heavy hero, single-column reading flow with
+   marginalia, sidebar metadata column for skills/certs
+   ═══════════════════════════════════════════════ */
+function EditorialTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 40
+  const serif = "Georgia, 'Times New Roman', serif"
+  const ink = "#0f172a"
+  const body = "#374151"
+  const muted = "#6b7280"
+  const cream = "#fafaf7"
+
+  function H({ title, kicker }: { title: string; kicker?: string }) {
+    return (
+      <div style={{ marginBottom: "10px", marginTop: "6px" }}>
+        {kicker && <div style={{ fontFamily: serif, fontSize: "9px", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "3px", marginBottom: "4px" }}>{kicker}</div>}
+        <div style={{ fontFamily: serif, fontSize: fs.h2, fontWeight: 700, color: ink, letterSpacing: "0.5px" }}>{title}</div>
+        <div style={{ width: "32px", height: "2px", backgroundColor: accent, marginTop: "6px" }} />
+      </div>
+    )
+  }
+
+  const renderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <section key="summary" style={{ marginBottom: "22px" }}>
+          <H title="The Story" kicker="Profile" />
+          <p style={{ fontSize: fs.body, lineHeight: 1.85, color: body, margin: 0, textAlign: "justify", hyphens: "auto" as const }}>
+            <span style={{ fontFamily: serif, fontSize: "42px", fontWeight: 700, color: accent, float: "left", lineHeight: 0.85, marginRight: "8px", marginTop: "4px" }}>
+              {p.summary.charAt(0)}
+            </span>
+            {p.summary.slice(1)}
+          </p>
+        </section>
+      ) : null,
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <section key="experience" style={{ marginBottom: "22px" }}>
+          <H title="Work" kicker="Chapter I" />
+          {enabledExp.map((exp) => {
+            const dateRange = `${formatDisplayDate(exp.startDate)}${(exp.endDate || exp.isCurrent) ? ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}` : ""}`
+            return (
+              <article key={exp.id} style={{ marginBottom: "16px", paddingLeft: "16px", borderLeft: `2px solid ${accent}40` }}>
+                <div style={{ fontSize: "9px", fontFamily: serif, fontWeight: 700, color: accent, letterSpacing: "2px", textTransform: "uppercase", marginBottom: "3px" }}>
+                  {dateRange}{exp.location && ` · ${exp.location}`}
+                </div>
+                <h3 style={{ fontFamily: serif, fontSize: fs.h3, fontWeight: 700, color: ink, margin: "0 0 2px 0" }}>{exp.title}{exp.company && <span style={{ fontStyle: "italic", color: muted, fontWeight: 400 }}>{" "}— {exp.company}</span>}</h3>
+                {exp.description && <p style={{ fontSize: fs.body, color: body, margin: "4px 0 0 0", lineHeight: 1.65 }}>{exp.description}</p>}
+                {exp.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                    {exp.achievements.map((a, i) => (
+                      <li key={i} style={{ fontSize: fs.body, color: body, lineHeight: 1.6, paddingLeft: "14px", position: "relative", marginBottom: "2px" }}>
+                        <span style={{ position: "absolute", left: 0, top: "8px", width: "6px", height: "1px", backgroundColor: accent }} />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            )
+          })}
+        </section>
+      ) : null,
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <section key="projects" style={{ marginBottom: "22px" }}>
+          <H title="Selected Works" kicker="Chapter II" />
+          {enabledProjects.map((proj) => (
+            <article key={proj.id} style={{ marginBottom: "14px", paddingBottom: "10px", borderBottom: `1px dotted #d4d4d8` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
+                <h3 style={{ fontFamily: serif, fontSize: fs.h3, fontWeight: 700, color: ink, margin: 0 }}>{proj.title}{proj.role && <span style={{ fontStyle: "italic", color: muted, fontWeight: 400 }}>{" "}— {proj.role}</span>}</h3>
+                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+              </div>
+              {proj.description && <p style={{ fontSize: fs.body, color: body, margin: "3px 0 0 0", lineHeight: 1.6 }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: body, lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "8px", width: "6px", height: "1px", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {proj.techStack.length > 0 && (
+                <div style={{ fontSize: fs.small, color: muted, marginTop: "5px", fontFamily: serif, fontStyle: "italic" }}>{proj.techStack.join(" · ")}</div>
+              )}
+            </article>
+          ))}
+        </section>
+      ) : null,
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <section key="education" style={{ marginBottom: "22px" }}>
+          <H title="Education" />
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontFamily: serif, fontSize: fs.h3, fontWeight: 700, color: ink }}>{edu.degree}{edu.field && <span style={{ fontStyle: "italic", color: muted, fontWeight: 400 }}>{" "}in {edu.field}</span>}</span>
+                <span style={{ fontSize: "9.5px", fontFamily: serif, color: muted, letterSpacing: "1.5px", textTransform: "uppercase" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>
+              </div>
+              <div style={{ fontSize: fs.body, color: accent, fontFamily: serif, fontStyle: "italic" }}>{edu.institution}</div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "3px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontSize: fs.body, color: body, lineHeight: 1.5, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "8px", width: "6px", height: "1px", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </section>
+      ) : null,
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <section key="skills" style={{ marginBottom: "22px" }}>
+          <H title="Toolkit" />
+          {config.skillCategories.map((cat) => (
+            <div key={cat.id} style={{ marginBottom: "8px", paddingBottom: "6px", borderBottom: `1px dotted #d4d4d8` }}>
+              <div style={{ fontFamily: serif, fontSize: fs.small, fontWeight: 700, color: ink, marginBottom: "3px", textTransform: "uppercase", letterSpacing: "2px" }}>{cat.name}</div>
+              <div style={{ fontSize: fs.small, color: body, lineHeight: 1.65 }}>{cat.skills.join("  ·  ")}</div>
+            </div>
+          ))}
+        </section>
+      ) : null,
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <section key="certifications" style={{ marginBottom: "22px" }}>
+          <H title="Accreditations" />
+          {enabledCerts.map((cert) => (
+            <div key={cert.id} style={{ marginBottom: "5px" }}>
+              <span style={{ fontFamily: serif, fontSize: fs.body, fontWeight: 700, color: ink }}>{cert.name}</span>
+              <span style={{ fontSize: fs.small, color: muted, fontStyle: "italic", fontFamily: serif }}>  ·  {cert.issuer}{cert.date && `, ${formatDisplayDate(cert.date)}`}</span>
+            </div>
+          ))}
+        </section>
+      ) : null,
+    custom: () =>
+      config.customSections.length > 0
+        ? <>{config.customSections.map((section) => (
+            <section key={section.id} style={{ marginBottom: "22px" }}>
+              <H title={section.title} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontSize: fs.body, color: body, lineHeight: 1.65, paddingLeft: "14px", position: "relative", marginBottom: "3px" }}>
+                    <span style={{ position: "absolute", left: 0, top: "8px", width: "6px", height: "1px", backgroundColor: accent }} />
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}</>
+        : null,
+  }
+
+  return (
+    <div style={{ ...PAGE_BASE, fontFamily: "'Inter', -apple-system, sans-serif", padding: 0, color: body, position: "relative" as const, backgroundColor: cream }}>
+      {/* Full-bleed hero */}
+      <header style={{ background: `linear-gradient(135deg, ${accent} 0%, ${accent}dd 100%)`, color: "white", padding: `${pad + 6}px ${pad}px ${pad}px ${pad}px`, position: "relative" as const, overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, right: 0, width: "240px", height: "240px", background: "rgba(255,255,255,0.08)", borderRadius: "50%", transform: "translate(40%, -40%)" }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {/* <div style={{ fontFamily: serif, fontSize: "10px", fontWeight: 700, color: "rgba(255,255,255,0.85)", letterSpacing: "4px", textTransform: "uppercase", marginBottom: "8px" }}>The Curriculum</div> */}
+          <h1 style={{ fontFamily: serif, fontSize: "44px", fontWeight: 900, color: "white", margin: 0, lineHeight: 1.05, letterSpacing: "-0.5px" }}>{p.fullName || "Your Name"}</h1>
+          {p.title && <div style={{ fontFamily: serif, fontSize: fs.h3, color: "rgba(255,255,255,0.95)", fontStyle: "italic", marginTop: "6px" }}>{p.title}</div>}
+          {contacts.length > 0 && (
+            <div style={{ marginTop: "14px", display: "flex", flexWrap: "wrap", gap: "16px", fontFamily: serif, fontSize: fs.small, color: "rgba(255,255,255,0.92)" }}>
+              {contacts.map((c, i) => (
+                <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: "10px" }}>
+                  {i > 0 && <span style={{ opacity: 0.5 }}>·</span>}
+                  <LinkText href={contactHref(c.type, c.value)} style={{ color: "rgba(255,255,255,0.95)", fontSize: fs.small }}>{c.value}</LinkText>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </header>
+      <main style={{ padding: `${pad}px` }}>
+        {config.sectionOrder.map((s) => renderers[s] ? renderers[s]() : null)}
+      </main>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   MONOGRAPH TEMPLATE
+   Single-column, journal/letterpress aesthetic.
+   Heavy use of italics, en/em dashes, classical metrics.
+   ═══════════════════════════════════════════════ */
+function MonographTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 56
+  const serif = "Georgia, 'Times New Roman', serif"
+  const ink = "#1a1a1a"
+  const body = "#3f3f3f"
+  const muted = "#7a7a7a"
+
+  function H({ title }: { title: string }) {
+    return (
+      <div style={{ textAlign: "center", margin: "20px 0 12px 0" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "16px" }}>
+          <span style={{ width: "40px", height: "1px", backgroundColor: muted }} />
+          <span style={{ fontFamily: serif, fontSize: fs.h2, fontWeight: 700, color: ink, fontVariant: "small-caps" as const, letterSpacing: "4px" }}>{title}</span>
+          <span style={{ width: "40px", height: "1px", backgroundColor: muted }} />
+        </div>
+      </div>
+    )
+  }
+
+  const renderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <section key="summary" style={{ marginBottom: "16px" }}>
+          <p style={{ fontFamily: serif, fontSize: fs.body, lineHeight: 1.85, color: body, margin: 0, textAlign: "justify", hyphens: "auto" as const, fontStyle: "italic" }}>
+            {p.summary}
+          </p>
+        </section>
+      ) : null,
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <section key="experience" style={{ marginBottom: "12px" }}>
+          <H title="Experience" />
+          {enabledExp.map((exp) => (
+            <article key={exp.id} style={{ marginBottom: "14px", textAlign: "left" }}>
+              <div style={{ fontFamily: serif, fontSize: fs.h3, color: ink }}>
+                <strong>{exp.title}</strong>{exp.company && <span style={{ fontStyle: "italic", color: muted }}>, {exp.company}</span>}
+                {exp.location && <span style={{ color: muted }}> · {exp.location}</span>}
+              </div>
+              <div style={{ fontFamily: serif, fontSize: fs.small, color: muted, fontStyle: "italic" }}>
+                {formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}
+              </div>
+              {exp.description && <p style={{ fontFamily: serif, fontSize: fs.body, color: body, lineHeight: 1.7, margin: "4px 0 0 0" }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontFamily: serif, fontSize: fs.body, color: body, lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "0", color: accent }}>—</span>
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          ))}
+        </section>
+      ) : null,
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <section key="education" style={{ marginBottom: "12px" }}>
+          <H title="Education" />
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "8px" }}>
+              <div style={{ fontFamily: serif, fontSize: fs.h3, color: ink }}>
+                <strong>{edu.degree}</strong>{edu.field && <span style={{ fontStyle: "italic", color: muted }}> in {edu.field}</span>}
+              </div>
+              <div style={{ fontFamily: serif, fontSize: fs.body, color: body, fontStyle: "italic" }}>
+                {edu.institution}{edu.startDate && <span style={{ color: muted }}> · {formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</span>}
+              </div>
+              {edu.achievements && edu.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "3px 0 0 0" }}>
+                  {edu.achievements.map((a, i) => (
+                    <li key={i} style={{ fontFamily: serif, fontSize: fs.body, color: body, lineHeight: 1.6, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "0", color: accent }}>—</span>{a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </section>
+      ) : null,
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <section key="skills" style={{ marginBottom: "12px" }}>
+          <H title="Skills" />
+          {config.skillCategories.map((cat) => (
+            <div key={cat.id} style={{ marginBottom: "5px", textAlign: "center" }}>
+              <span style={{ fontFamily: serif, fontSize: fs.small, fontWeight: 700, color: ink, fontVariant: "small-caps" as const, letterSpacing: "2px" }}>{cat.name} · </span>
+              <span style={{ fontFamily: serif, fontSize: fs.body, color: body, fontStyle: "italic" }}>{cat.skills.join(", ")}</span>
+            </div>
+          ))}
+        </section>
+      ) : null,
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <section key="projects" style={{ marginBottom: "12px" }}>
+          <H title="Selected Works" />
+          {enabledProjects.map((proj) => (
+            <article key={proj.id} style={{ marginBottom: "12px" }}>
+              <div style={{ fontFamily: serif, fontSize: fs.h3, color: ink }}>
+                <strong>{proj.title}</strong>{proj.role && <span style={{ fontStyle: "italic", color: muted }}> · {proj.role}</span>}
+                {proj.url && <span style={{ marginLeft: "8px" }}><UrlLink url={proj.url} color={accent} fontSize={fs.small} /></span>}
+              </div>
+              {proj.description && <p style={{ fontFamily: serif, fontSize: fs.body, color: body, lineHeight: 1.7, margin: "3px 0 0 0", fontStyle: "italic" }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontFamily: serif, fontSize: fs.body, color: body, lineHeight: 1.65, paddingLeft: "14px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "0", color: accent }}>—</span>{a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {proj.techStack.length > 0 && (
+                <div style={{ fontFamily: serif, fontSize: fs.small, color: muted, marginTop: "4px", fontStyle: "italic" }}>{proj.techStack.join(" · ")}</div>
+              )}
+            </article>
+          ))}
+        </section>
+      ) : null,
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <section key="certifications" style={{ marginBottom: "12px" }}>
+          <H title="Accreditations" />
+          {enabledCerts.map((cert) => (
+            <div key={cert.id} style={{ fontFamily: serif, fontSize: fs.body, color: body, textAlign: "center", marginBottom: "3px" }}>
+              <strong style={{ color: ink }}>{cert.name}</strong>
+              <span style={{ color: muted, fontStyle: "italic" }}> · {cert.issuer}{cert.date && `, ${formatDisplayDate(cert.date)}`}</span>
+            </div>
+          ))}
+        </section>
+      ) : null,
+    custom: () =>
+      config.customSections.length > 0
+        ? <>{config.customSections.map((section) => (
+            <section key={section.id} style={{ marginBottom: "12px" }}>
+              <H title={section.title} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontFamily: serif, fontSize: fs.body, color: body, lineHeight: 1.7, paddingLeft: "14px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: 0, top: "0", color: accent }}>—</span>{item.content}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}</>
+        : null,
+  }
+
+  return (
+    <div style={{ ...PAGE_BASE, fontFamily: serif, padding: `${pad}px`, color: body, backgroundColor: "#fdfcf8" }}>
+      <header style={{ textAlign: "center", marginBottom: "10px" }}>
+        <div style={{ fontFamily: serif, fontSize: fs.h1 === "25px" ? "40px" : fs.h1 === "22px" ? "34px" : "46px", fontWeight: 400, color: ink, letterSpacing: "3px", lineHeight: 1.1, fontVariant: "small-caps" as const }}>
+          {p.fullName || "Your Name"}
+        </div>
+        {p.title && <div style={{ fontFamily: serif, fontSize: fs.h3, color: muted, fontStyle: "italic", marginTop: "4px", letterSpacing: "1px" }}>{p.title}</div>}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", marginTop: "10px" }}>
+          <span style={{ width: "60px", height: "1px", backgroundColor: muted }} />
+          <span style={{ width: "5px", height: "5px", backgroundColor: accent, transform: "rotate(45deg)" }} />
+          <span style={{ width: "60px", height: "1px", backgroundColor: muted }} />
+        </div>
+        {contacts.length > 0 && (
+          <div style={{ marginTop: "10px", fontFamily: serif, fontSize: fs.small, color: muted, fontStyle: "italic" }}>
+            {contacts.map((c, i) => (
+              <span key={i}>
+                {i > 0 && <span style={{ margin: "0 8px", color: accent }}>·</span>}
+                <LinkText href={contactHref(c.type, c.value)} style={{ color: muted, fontSize: fs.small }}>{c.value}</LinkText>
+              </span>
+            ))}
+          </div>
+        )}
+      </header>
+      {config.sectionOrder.map((s) => renderers[s] ? renderers[s]() : null)}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   BLUEPRINT TEMPLATE
+   Architectural / engineering blueprint feel:
+   grid backdrop, monospace coordinates, crosshair markers,
+   technical labels. Suited to engineers, architects.
+   ═══════════════════════════════════════════════ */
+function BlueprintTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 36
+  const mono = "'JetBrains Mono', 'Fira Code', 'Courier New', monospace"
+  const sans = "'Inter', -apple-system, sans-serif"
+  const ink = "#0c1424"
+  const body = "#27374d"
+  const muted = "#526d82"
+  const grid = `${accent}10`
+
+  function H({ title, code }: { title: string; code: string }) {
+    return (
+      <div style={{ marginBottom: "10px", marginTop: "4px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ fontFamily: mono, fontSize: "9px", color: accent, fontWeight: 700, padding: "2px 6px", border: `1px solid ${accent}`, borderRadius: "2px" }}>{code}</span>
+          <span style={{ fontFamily: sans, fontSize: fs.h2, fontWeight: 700, color: ink, textTransform: "uppercase", letterSpacing: "2.5px" }}>{title}</span>
+          <span style={{ flex: 1, borderTop: `1px dashed ${accent}80` }} />
+        </div>
+      </div>
+    )
+  }
+
+  const renderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <section key="summary" style={{ marginBottom: "18px" }}>
+          <H title="Brief" code="01" />
+          <div style={{ position: "relative", padding: "12px 14px", border: `1px dashed ${accent}80`, backgroundColor: "white" }}>
+            <span style={{ position: "absolute", top: "-5px", left: "-5px", width: "10px", height: "10px", backgroundColor: "white", border: `1px solid ${accent}` }} />
+            <span style={{ position: "absolute", top: "-5px", right: "-5px", width: "10px", height: "10px", backgroundColor: "white", border: `1px solid ${accent}` }} />
+            <span style={{ position: "absolute", bottom: "-5px", left: "-5px", width: "10px", height: "10px", backgroundColor: "white", border: `1px solid ${accent}` }} />
+            <span style={{ position: "absolute", bottom: "-5px", right: "-5px", width: "10px", height: "10px", backgroundColor: "white", border: `1px solid ${accent}` }} />
+            <p style={{ fontFamily: sans, fontSize: fs.body, color: body, margin: 0, lineHeight: 1.7 }}>{p.summary}</p>
+          </div>
+        </section>
+      ) : null,
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <section key="experience" style={{ marginBottom: "18px" }}>
+          <H title="Engagements" code="02" />
+          {enabledExp.map((exp, idx) => {
+            const dateRange = `${formatDisplayDate(exp.startDate)}${(exp.endDate || exp.isCurrent) ? ` → ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}` : ""}`
+            return (
+              <article key={exp.id} style={{ marginBottom: "12px", paddingLeft: "16px", borderLeft: `2px solid ${accent}`, position: "relative" }}>
+                <span style={{ position: "absolute", left: "-5px", top: "5px", width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "white", border: `2px solid ${accent}` }} />
+                <div style={{ fontFamily: mono, fontSize: "9px", color: accent, fontWeight: 700, letterSpacing: "1px", marginBottom: "2px" }}>
+                  [E{String(idx + 1).padStart(2, "0")}] {dateRange}{exp.location && ` · ${exp.location}`}
+                </div>
+                <h3 style={{ fontFamily: sans, fontSize: fs.h3, fontWeight: 700, color: ink, margin: "0" }}>{exp.title}{exp.company && <span style={{ color: accent, fontWeight: 600 }}>{" "}/ {exp.company}</span>}</h3>
+                {exp.description && <p style={{ fontFamily: sans, fontSize: fs.body, color: body, margin: "4px 0 0 0", lineHeight: 1.6 }}>{exp.description}</p>}
+                {exp.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                    {exp.achievements.map((a, i) => (
+                      <li key={i} style={{ fontFamily: sans, fontSize: fs.body, color: body, lineHeight: 1.55, paddingLeft: "16px", position: "relative", marginBottom: "2px" }}>
+                        <span style={{ position: "absolute", left: 0, top: "5px", fontFamily: mono, color: accent, fontSize: "10px" }}>›</span>
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            )
+          })}
+        </section>
+      ) : null,
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <section key="education" style={{ marginBottom: "18px" }}>
+          <H title="Education" code="03" />
+          {enabledEdu.map((edu, idx) => (
+            <div key={edu.id} style={{ marginBottom: "8px", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: "12px", alignItems: "baseline" }}>
+              <span style={{ fontFamily: mono, fontSize: "9px", color: accent, fontWeight: 700 }}>[E{String(idx + 1).padStart(2, "0")}]</span>
+              <div>
+                <div style={{ fontFamily: sans, fontSize: fs.h3, fontWeight: 700, color: ink }}>{edu.degree}{edu.field && <span style={{ color: accent, fontWeight: 500 }}> / {edu.field}</span>}</div>
+                <div style={{ fontFamily: sans, fontSize: fs.body, color: muted }}>{edu.institution}</div>
+                {edu.achievements && edu.achievements.length > 0 && (
+                  <div style={{ fontFamily: mono, fontSize: fs.small, color: body, marginTop: "2px" }}>{edu.achievements.join(" · ")}</div>
+                )}
+              </div>
+              <div style={{ fontFamily: mono, fontSize: "9.5px", color: muted }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` → ${formatDisplayDate(edu.endDate)}`}</div>
+            </div>
+          ))}
+        </section>
+      ) : null,
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <section key="skills" style={{ marginBottom: "18px" }}>
+          <H title="Stack" code="04" />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px 24px" }}>
+            {config.skillCategories.map((cat) => (
+              <div key={cat.id} style={{ paddingBottom: "6px", borderBottom: `1px dashed ${accent}40` }}>
+                <div style={{ fontFamily: mono, fontSize: "9.5px", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "3px" }}>// {cat.name}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                  {cat.skills.map((sk, i) => (
+                    <span key={i} style={{ fontFamily: mono, fontSize: fs.small, color: body, padding: "1px 6px", border: `1px solid ${accent}30`, backgroundColor: "white", borderRadius: "2px" }}>{sk}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null,
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <section key="projects" style={{ marginBottom: "18px" }}>
+          <H title="Builds" code="05" />
+          {enabledProjects.map((proj, idx) => (
+            <article key={proj.id} style={{ marginBottom: "12px", padding: "10px 12px", border: `1px dashed ${accent}80`, backgroundColor: "white", position: "relative" }}>
+              <span style={{ position: "absolute", top: "-5px", left: "8px", padding: "0 6px", backgroundColor: "white", fontFamily: mono, fontSize: "9px", color: accent, fontWeight: 700 }}>[P{String(idx + 1).padStart(2, "0")}]</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px", marginTop: "2px" }}>
+                <h3 style={{ fontFamily: sans, fontSize: fs.h3, fontWeight: 700, color: ink, margin: 0 }}>{proj.title}{proj.role && <span style={{ color: accent, fontWeight: 600 }}>{" "}/ {proj.role}</span>}</h3>
+                {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+              </div>
+              {proj.description && <p style={{ fontFamily: sans, fontSize: fs.body, color: body, margin: "4px 0 0 0", lineHeight: 1.55 }}>{proj.description}</p>}
+              {proj.achievements && proj.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                  {proj.achievements.map((a, i) => (
+                    <li key={i} style={{ fontFamily: sans, fontSize: fs.body, color: body, lineHeight: 1.55, paddingLeft: "16px", position: "relative" }}>
+                      <span style={{ position: "absolute", left: 0, top: "5px", fontFamily: mono, color: accent, fontSize: "10px" }}>›</span>{a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {proj.techStack.length > 0 && (
+                <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                  {proj.techStack.map((t, i) => (
+                    <span key={i} style={{ fontFamily: mono, fontSize: "9.5px", color: accent, padding: "1px 6px", backgroundColor: `${accent}15`, borderRadius: "2px" }}>#{t}</span>
+                  ))}
+                </div>
+              )}
+            </article>
+          ))}
+        </section>
+      ) : null,
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <section key="certifications" style={{ marginBottom: "18px" }}>
+          <H title="Certifications" code="06" />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "6px 18px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ paddingLeft: "16px", position: "relative" }}>
+                <span style={{ position: "absolute", left: 0, top: "5px", fontFamily: mono, color: accent, fontSize: "10px" }}>›</span>
+                <div style={{ fontFamily: sans, fontSize: fs.body, fontWeight: 700, color: ink }}>{cert.name}</div>
+                <div style={{ fontFamily: mono, fontSize: fs.small, color: muted }}>{cert.issuer}{cert.date && ` · ${formatDisplayDate(cert.date)}`}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null,
+    custom: () =>
+      config.customSections.length > 0
+        ? <>{config.customSections.map((section, sidx) => (
+            <section key={section.id} style={{ marginBottom: "18px" }}>
+              <H title={section.title} code={`${String(7 + sidx).padStart(2, "0")}`} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontFamily: sans, fontSize: fs.body, color: body, lineHeight: 1.6, paddingLeft: "16px", position: "relative", marginBottom: "3px" }}>
+                    <span style={{ position: "absolute", left: 0, top: "5px", fontFamily: mono, color: accent, fontSize: "10px" }}>›</span>{item.content}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}</>
+        : null,
+  }
+
+  return (
+    <div style={{
+      ...PAGE_BASE,
+      fontFamily: sans,
+      padding: `${pad}px`,
+      color: body,
+      position: "relative" as const,
+      backgroundColor: "#fcfdff",
+      backgroundImage: `linear-gradient(to right, ${grid} 1px, transparent 1px), linear-gradient(to bottom, ${grid} 1px, transparent 1px)`,
+      backgroundSize: "24px 24px",
+    }}>
+      {/* Crosshair corners */}
+      <span style={{ position: "absolute", top: "12px", left: "12px", width: "16px", height: "16px", borderTop: `2px solid ${accent}`, borderLeft: `2px solid ${accent}` }} />
+      <span style={{ position: "absolute", top: "12px", right: "12px", width: "16px", height: "16px", borderTop: `2px solid ${accent}`, borderRight: `2px solid ${accent}` }} />
+      <span style={{ position: "absolute", bottom: "12px", left: "12px", width: "16px", height: "16px", borderBottom: `2px solid ${accent}`, borderLeft: `2px solid ${accent}` }} />
+      <span style={{ position: "absolute", bottom: "12px", right: "12px", width: "16px", height: "16px", borderBottom: `2px solid ${accent}`, borderRight: `2px solid ${accent}` }} />
+
+      <header style={{ paddingBottom: "16px", marginBottom: "20px", borderBottom: `2px solid ${accent}`, position: "relative" }}>
+        <div style={{ fontFamily: mono, fontSize: "9px", color: accent, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", marginBottom: "4px" }}>
+          // PROJECT.RESUME / DRAWING NO. 001 / SHEET 1 OF 1
+        </div>
+        <h1 style={{ fontFamily: sans, fontSize: "38px", fontWeight: 800, color: ink, margin: 0, lineHeight: 1.05, letterSpacing: "-0.5px" }}>{p.fullName || "Your Name"}</h1>
+        {p.title && <div style={{ fontFamily: mono, fontSize: fs.body, color: accent, marginTop: "4px", fontWeight: 600 }}>// {p.title}</div>}
+        {contacts.length > 0 && (
+          <div style={{ marginTop: "10px", display: "flex", flexWrap: "wrap", gap: "12px", fontFamily: mono, fontSize: fs.small, color: muted }}>
+            {contacts.map((c) => (
+              <LinkText key={c.type} href={contactHref(c.type, c.value)} style={{ color: muted, fontSize: fs.small }}>
+                <span style={{ color: accent }}>{c.type}:</span> {c.value}
+              </LinkText>
+            ))}
+          </div>
+        )}
+      </header>
+      {config.sectionOrder.map((s) => renderers[s] ? renderers[s]() : null)}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   MOSAIC GRID TEMPLATE
+   Card-based grid where each section is a tile,
+   modern startup vibe with bold typography and ratios.
+   ═══════════════════════════════════════════════ */
+function MosaicGridTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  const contacts = getContactItems(p)
+  const pad = config.pagePadding ?? 32
+  const sans = "'Inter', -apple-system, sans-serif"
+  const ink = "#0a0e27"
+  const body = "#3c4255"
+  const muted = "#7a8198"
+  const tile: React.CSSProperties = {
+    backgroundColor: "white",
+    border: "1px solid #e5e7eb",
+    borderRadius: "12px",
+    padding: "16px",
+    breakInside: "avoid" as const,
+    marginBottom: "12px",
+  }
+
+  function TileH({ icon, title }: { icon: string; title: string }) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", paddingBottom: "8px", borderBottom: `1px solid ${accent}25` }}>
+        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", backgroundColor: `${accent}15`, color: accent, borderRadius: "8px", fontWeight: 700, fontSize: "14px" }}>{icon}</span>
+        <h3 style={{ fontFamily: sans, fontSize: fs.h2, fontWeight: 800, color: ink, margin: 0, letterSpacing: "-0.3px" }}>{title}</h3>
+      </div>
+    )
+  }
+
+  const renderers: Record<string, () => React.ReactNode> = {
+    summary: () =>
+      p.summary ? (
+        <div key="summary" style={{ ...tile, background: `linear-gradient(135deg, ${accent}10 0%, white 100%)`, borderColor: `${accent}40` }}>
+          <TileH icon="✦" title="Profile" />
+          <p style={{ fontFamily: sans, fontSize: fs.body, color: body, margin: 0, lineHeight: 1.7 }}>{p.summary}</p>
+        </div>
+      ) : null,
+    experience: () =>
+      enabledExp.length > 0 ? (
+        <div key="experience" style={tile}>
+          <TileH icon="◆" title="Experience" />
+          {enabledExp.map((exp, idx) => (
+            <div key={exp.id} style={{ marginBottom: idx < enabledExp.length - 1 ? "12px" : 0, paddingBottom: idx < enabledExp.length - 1 ? "10px" : 0, borderBottom: idx < enabledExp.length - 1 ? "1px dashed #e5e7eb" : "none" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
+                <h4 style={{ fontFamily: sans, fontSize: fs.h3, fontWeight: 700, color: ink, margin: 0 }}>{exp.title}</h4>
+                <span style={{ fontFamily: sans, fontSize: fs.small, color: muted, fontWeight: 600, whiteSpace: "nowrap" }}>{formatDisplayDate(exp.startDate)}{(exp.endDate || exp.isCurrent) && ` – ${exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}`}</span>
+              </div>
+              <div style={{ fontFamily: sans, fontSize: fs.body, color: accent, fontWeight: 600 }}>{exp.company}{exp.location && <span style={{ color: muted, fontWeight: 400 }}> · {exp.location}</span>}</div>
+              {exp.description && <p style={{ fontFamily: sans, fontSize: fs.body, color: body, margin: "4px 0 0 0", lineHeight: 1.6 }}>{exp.description}</p>}
+              {exp.achievements.length > 0 && (
+                <ul style={{ listStyle: "none", padding: 0, margin: "5px 0 0 0" }}>
+                  {exp.achievements.map((a, i) => (
+                    <li key={i} style={{ fontFamily: sans, fontSize: fs.body, color: body, lineHeight: 1.55, paddingLeft: "16px", position: "relative", marginBottom: "2px" }}>
+                      <span style={{ position: "absolute", left: 0, top: "8px", width: "6px", height: "6px", borderRadius: "50%", backgroundColor: accent }} />
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : null,
+    projects: () =>
+      enabledProjects.length > 0 ? (
+        <div key="projects" style={tile}>
+          <TileH icon="❖" title="Projects" />
+          <div style={{ display: "grid", gridTemplateColumns: enabledProjects.length > 1 ? "1fr 1fr" : "1fr", gap: "10px" }}>
+            {enabledProjects.map((proj) => (
+              <div key={proj.id} style={{ padding: "10px", border: `1px solid ${accent}25`, borderRadius: "8px", backgroundColor: `${accent}05` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "6px" }}>
+                  <h4 style={{ fontFamily: sans, fontSize: fs.h3, fontWeight: 700, color: ink, margin: 0 }}>{proj.title}</h4>
+                  {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+                </div>
+                {proj.description && <p style={{ fontFamily: sans, fontSize: fs.body, color: body, margin: "3px 0 0 0", lineHeight: 1.5 }}>{proj.description}</p>}
+                {proj.achievements && proj.achievements.length > 0 && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0 0" }}>
+                    {proj.achievements.map((a, i) => (
+                      <li key={i} style={{ fontFamily: sans, fontSize: fs.body, color: body, lineHeight: 1.5, paddingLeft: "12px", position: "relative" }}>
+                        <span style={{ position: "absolute", left: 0, top: "7px", width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accent }} />{a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {proj.techStack.length > 0 && (
+                  <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "3px" }}>
+                    {proj.techStack.map((t, i) => (
+                      <span key={i} style={{ fontFamily: sans, fontSize: "9.5px", color: accent, padding: "2px 6px", backgroundColor: "white", border: `1px solid ${accent}40`, borderRadius: "4px", fontWeight: 600 }}>{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+    education: () =>
+      enabledEdu.length > 0 ? (
+        <div key="education" style={tile}>
+          <TileH icon="✦" title="Education" />
+          {enabledEdu.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "8px", display: "grid", gridTemplateColumns: "1fr auto", gap: "12px", alignItems: "baseline" }}>
+              <div>
+                <div style={{ fontFamily: sans, fontSize: fs.h3, fontWeight: 700, color: ink }}>{edu.degree}{edu.field && <span style={{ color: muted, fontWeight: 500 }}> in {edu.field}</span>}</div>
+                <div style={{ fontFamily: sans, fontSize: fs.body, color: accent, fontWeight: 600 }}>{edu.institution}</div>
+                {edu.achievements && edu.achievements.length > 0 && (
+                  <div style={{ fontFamily: sans, fontSize: fs.small, color: body, marginTop: "2px" }}>{edu.achievements.join(" · ")}</div>
+                )}
+              </div>
+              <div style={{ fontFamily: sans, fontSize: fs.small, color: muted, fontWeight: 600, whiteSpace: "nowrap" }}>{formatDisplayDate(edu.startDate)}{edu.endDate && ` – ${formatDisplayDate(edu.endDate)}`}</div>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    skills: () =>
+      config.skillCategories.length > 0 ? (
+        <div key="skills" style={tile}>
+          <TileH icon="◇" title="Toolkit" />
+          {config.skillCategories.map((cat) => (
+            <div key={cat.id} style={{ marginBottom: "10px" }}>
+              <div style={{ fontFamily: sans, fontSize: fs.small, fontWeight: 700, color: accent, marginBottom: "5px", textTransform: "uppercase", letterSpacing: "1.5px" }}>{cat.name}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                {cat.skills.map((sk, i) => (
+                  <span key={i} style={{ fontFamily: sans, fontSize: fs.small, color: ink, padding: "3px 9px", backgroundColor: `${accent}12`, borderRadius: "999px", fontWeight: 600 }}>{sk}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null,
+    certifications: () =>
+      enabledCerts.length > 0 ? (
+        <div key="certifications" style={tile}>
+          <TileH icon="★" title="Certifications" />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "6px 12px" }}>
+            {enabledCerts.map((cert) => (
+              <div key={cert.id} style={{ padding: "6px 10px", backgroundColor: `${accent}08`, borderRadius: "6px", borderLeft: `3px solid ${accent}` }}>
+                <div style={{ fontFamily: sans, fontSize: fs.body, fontWeight: 700, color: ink }}>{cert.name}</div>
+                <div style={{ fontFamily: sans, fontSize: fs.small, color: muted }}>{cert.issuer}{cert.date && ` · ${formatDisplayDate(cert.date)}`}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null,
+    custom: () =>
+      config.customSections.length > 0
+        ? <>{config.customSections.map((section) => (
+            <div key={section.id} style={tile}>
+              <TileH icon="✸" title={section.title} />
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {section.items.map((item) => (
+                  <li key={item.id} style={{ fontFamily: sans, fontSize: fs.body, color: body, lineHeight: 1.55, paddingLeft: "16px", position: "relative", marginBottom: "3px" }}>
+                    <span style={{ position: "absolute", left: 0, top: "8px", width: "6px", height: "6px", borderRadius: "50%", backgroundColor: accent }} />{item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}</>
+        : null,
+  }
+
+  return (
+    <div style={{ ...PAGE_BASE, fontFamily: sans, padding: `${pad}px`, color: body, backgroundColor: "#f5f6fa" }}>
+      {/* Hero tile */}
+      <div style={{ ...tile, background: `linear-gradient(135deg, ${accent} 0%, ${accent}dd 100%)`, color: "white", borderColor: accent, padding: "22px" }}>
+        <h1 style={{ fontFamily: sans, fontSize: "36px", fontWeight: 800, color: "white", margin: 0, lineHeight: 1.05, letterSpacing: "-0.5px" }}>{p.fullName || "Your Name"}</h1>
+        {p.title && <div style={{ fontFamily: sans, fontSize: fs.h3, color: "rgba(255,255,255,0.95)", marginTop: "4px", fontWeight: 500 }}>{p.title}</div>}
+        {contacts.length > 0 && (
+          <div style={{ marginTop: "12px", display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            {contacts.map((c) => (
+              <LinkText key={c.type} href={contactHref(c.type, c.value)} style={{ fontFamily: sans, fontSize: fs.small, color: "white", padding: "4px 10px", backgroundColor: "rgba(255,255,255,0.18)", borderRadius: "999px", fontWeight: 500 }}>
+                {c.value}
+              </LinkText>
+            ))}
+          </div>
+        )}
+      </div>
+      {config.sectionOrder.map((s) => renderers[s] ? renderers[s]() : null)}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   SPOTLIGHT TEMPLATE
+   "Double column" layout (Enhancv-style): bold uppercase
+   name, blue title, contact row with icons, then a wide
+   left column (Summary / Experience / Projects / Languages)
+   and a narrow right column (Key Achievements / Skills /
+   Education / Training-Courses / Interests). Black underlined
+   section headers, dashed item separators, language bars.
+   ═══════════════════════════════════════════════ */
+function SpotlightTemplate({ config }: { config: ResumeConfig }) {
+  const fs = getFontSize(config.fontSize)
+  const accent = config.accentColor
+  const p = config.profile
+  const ink = "#1a1a1a"
+  const sub = "#4b5563"
+  const muted = "#6b7280"
+  const dash = "1px dashed #d1d5db"
+  const pad = config.pagePadding ?? 40
+
+  const enabledExp = config.experiences.filter((e) => e.enabled)
+  const enabledEdu = config.education.filter((e) => e.enabled)
+  const enabledCerts = config.certifications.filter((c) => c.enabled)
+  const enabledProjects = config.projects.filter((pr) => pr.enabled)
+  // Alternate projects across two columns: 1st left, 2nd right, 3rd left, …
+  const leftProjects = enabledProjects.filter((_, i) => i % 2 === 0)
+  const rightProjects = enabledProjects.filter((_, i) => i % 2 === 1)
+  const contacts = getContactItems(p)
+  const allSkills = config.skillCategories.flatMap((c) => c.skills)
+
+  const langSections = config.customSections.filter((cs) => /language/i.test(cs.title))
+  const achieveSections = config.customSections.filter(
+    (cs) => !/language/i.test(cs.title) && /achiev/i.test(cs.title)
+  )
+  const otherCustom = config.customSections.filter(
+    (cs) => !/language/i.test(cs.title) && !/achiev/i.test(cs.title)
+  )
+
+  const mmYYYY = (str: string) => {
+    if (!str) return ""
+    const d = new Date(str)
+    if (isNaN(d.getTime())) return str
+    return `${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
+  }
+  const range = (start: string, end: string, current?: boolean) => {
+    const a = mmYYYY(start)
+    const b = current ? "Present" : mmYYYY(end)
+    return a && b ? `${a} - ${b}` : a || b
+  }
+
+  // Split "Heading — description" / "Heading: description" into parts
+  const splitItem = (content: string): { head: string; body: string } => {
+    const m = content.match(/^(.*?)(?:\s[—–-]\s|:\s)([\s\S]+)$/)
+    if (m && m[1].trim().length <= 60) return { head: m[1].trim(), body: m[2].trim() }
+    return { head: "", body: content }
+  }
+
+  const levelCount = (level: string) => {
+    const l = level.toLowerCase()
+    if (/native|fluent|mother/.test(l)) return 5
+    if (/advanced|proficient/.test(l)) return 4
+    if (/intermediate|working/.test(l)) return 3
+    if (/basic|beginner|elementary/.test(l)) return 2
+    return 3
+  }
+
+  const SectionHead = ({ children, first }: { children: React.ReactNode; first?: boolean }) => (
+    <h2
+      style={{
+        fontSize: fs.h2,
+        fontWeight: 700,
+        textTransform: "uppercase",
+        color: ink,
+        borderBottom: `2px solid ${ink}`,
+        paddingBottom: "3px",
+        marginTop: first ? 0 : "20px",
+        marginBottom: "10px",
+        letterSpacing: "0.3px",
+      }}
+    >
+      {children}
+    </h2>
+  )
+
+  const Bullets = ({ items }: { items: string[] }) =>
+    items && items.length ? (
+      <ul style={{ margin: "5px 0 0", padding: 0, listStyle: "none" }}>
+        {items.map((it, i) => (
+          <li
+            key={i}
+            style={{ fontSize: fs.body, color: sub, lineHeight: 1.5, paddingLeft: "13px", position: "relative", marginBottom: "3px" }}
+          >
+            <span style={{ position: "absolute", left: 0, top: "6px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: ink }} />
+            {it}
+          </li>
+        ))}
+      </ul>
+    ) : null
+
+  const MetaRow = ({ date, location }: { date?: string; location?: string }) =>
+    date || location ? (
+      <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", fontSize: fs.small, color: muted, margin: "3px 0 5px" }}>
+        {date && (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+            <IconCalendar color={muted} size={11} />
+            {date}
+          </span>
+        )}
+        {location && (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+            <IconMapPin color={muted} size={11} />
+            {location}
+          </span>
+        )}
+      </div>
+    ) : null
+
+  const LangBar = ({ count }: { count: number }) => (
+    <div style={{ display: "flex", gap: "3px", flexShrink: 0 }}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <span key={i} style={{ width: "6px", height: "15px", borderRadius: "1px", backgroundColor: i < count ? accent : "#d8dce1" }} />
+      ))}
+    </div>
+  )
+
+  const TitledList = ({ items }: { items: { id: string; content: string }[] }) => (
+    <>
+      {items.map((it, i) => {
+        const { head, body } = splitItem(it.content)
+        return (
+          <div
+            key={it.id}
+            style={{
+              paddingBottom: i < items.length - 1 ? "9px" : 0,
+              marginBottom: i < items.length - 1 ? "9px" : 0,
+              borderBottom: i < items.length - 1 ? dash : "none",
+            }}
+          >
+            {head && <div style={{ fontSize: fs.body, fontWeight: 700, color: ink, marginBottom: "2px" }}>{head}</div>}
+            <p style={{ fontSize: fs.body, color: sub, lineHeight: 1.5, margin: 0 }}>{body}</p>
+          </div>
+        )
+      })}
+    </>
+  )
+
+  const rightFirstIsAchieve = achieveSections.length > 0
+
+  const ProjectCard = ({ proj, isLast }: { proj: ResumeConfig["projects"][number]; isLast: boolean }) => (
+    <div
+      style={{
+        paddingBottom: isLast ? 0 : "11px",
+        marginBottom: isLast ? 0 : "11px",
+        borderBottom: isLast ? "none" : dash,
+        breakInside: "avoid",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+        <h3 style={{ fontSize: fs.h3, fontWeight: 600, color: ink, margin: 0 }}>{proj.title}</h3>
+        {proj.url && <UrlLink url={proj.url} color={accent} fontSize={fs.small} />}
+        {proj.repoUrl && <UrlLink url={proj.repoUrl} color={muted} fontSize={fs.small} />}
+      </div>
+      {proj.role && <div style={{ fontSize: fs.body, fontWeight: 700, color: accent, marginTop: "1px" }}>{proj.role}</div>}
+      {proj.description && <p style={{ fontSize: fs.body, color: sub, lineHeight: 1.5, margin: "3px 0 0" }}>{proj.description}</p>}
+      <Bullets items={proj.achievements} />
+      {proj.techStack.length > 0 && (
+        <div style={{ fontSize: fs.small, color: muted, marginTop: "4px" }}>
+          <strong style={{ color: ink }}>Tech:</strong> {proj.techStack.join(", ")}
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <div className="resume-page" style={{ ...PAGE_BASE, padding: `${pad}px ${pad + 4}px` }}>
+      {/* HEADER */}
+      <h1 style={{ fontSize: "30px", fontWeight: 800, letterSpacing: "-0.3px", color: ink, margin: 0, textTransform: "uppercase", lineHeight: 1.1 }}>
+        {p.fullName || "Your Name"}
+      </h1>
+      {p.title && <div style={{ fontSize: "14px", color: accent, fontWeight: 600, margin: "5px 0 0" }}>{p.title}</div>}
+      {contacts.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", margin: "8px 0 0", fontSize: fs.small, color: "#374151" }}>
+          {contacts.map((c, i) => (
+            <LinkText key={i} href={contactHref(c.type, c.value)} style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontWeight: 600 }}>
+              {contactIcon(c.type, accent, 12)}
+              {contactLabel(c.type, c.value)}
+            </LinkText>
+          ))}
+        </div>
+      )}
+
+      {/* BODY — two columns */}
+      <div style={{ display: "flex", gap: "34px", marginTop: "18px", alignItems: "flex-start" }}>
+        {/* LEFT */}
+        <div style={{ flex: "1.65", minWidth: 0 }}>
+          {p.summary && (
+            <section>
+              <SectionHead first>Summary</SectionHead>
+              <p style={{ fontSize: fs.body, lineHeight: 1.6, color: sub, margin: 0 }}>{p.summary}</p>
+            </section>
+          )}
+
+          {enabledExp.length > 0 && (
+            <section>
+              <SectionHead first={!p.summary}>Experience</SectionHead>
+              {enabledExp.map((exp, idx) => (
+                <div
+                  key={exp.id}
+                  style={{
+                    paddingBottom: idx < enabledExp.length - 1 ? "11px" : 0,
+                    marginBottom: idx < enabledExp.length - 1 ? "11px" : 0,
+                    borderBottom: idx < enabledExp.length - 1 ? dash : "none",
+                  }}
+                >
+                  <h3 style={{ fontSize: fs.h3, fontWeight: 600, color: ink, margin: 0 }}>{exp.title}</h3>
+                  {exp.company && <div style={{ fontSize: fs.body, fontWeight: 700, color: accent, marginTop: "1px" }}>{exp.company}</div>}
+                  <MetaRow date={range(exp.startDate, exp.endDate, exp.isCurrent)} location={exp.location} />
+                  {exp.description && <p style={{ fontSize: fs.body, color: sub, lineHeight: 1.5, margin: "0 0 3px" }}>{exp.description}</p>}
+                  <Bullets items={exp.achievements} />
+                </div>
+              ))}
+            </section>
+          )}
+
+          {langSections.map((cs) => (
+            <section key={cs.id}>
+              <SectionHead>{cs.title}</SectionHead>
+              <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
+                {cs.items.map((it) => {
+                  const { head, body } = splitItem(it.content)
+                  const name = head || body
+                  const level = head ? body : ""
+                  return (
+                    <div key={it.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+                      <div>
+                        <div style={{ fontSize: fs.body, fontWeight: 600, color: ink }}>{name}</div>
+                        {level && <div style={{ fontSize: fs.small, color: muted }}>{level}</div>}
+                      </div>
+                      <LangBar count={levelCount(level)} />
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        {/* RIGHT */}
+        <div style={{ flex: "1", minWidth: 0 }}>
+          {achieveSections.map((cs, ci) => (
+            <section key={cs.id}>
+              <SectionHead first={ci === 0}>{cs.title}</SectionHead>
+              <TitledList items={cs.items} />
+            </section>
+          ))}
+
+          {allSkills.length > 0 && (
+            <section>
+              <SectionHead first={!rightFirstIsAchieve}>Skills</SectionHead>
+              <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
+                {config.skillCategories
+                  .filter((c) => c.skills.length > 0)
+                  .map((cat) => (
+                    <div key={cat.id} style={{ breakInside: "avoid" }}>
+                      <div
+                        style={{
+                          fontSize: fs.small,
+                          fontWeight: 700,
+                          color: accent,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.5px",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        {cat.name}
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                        {cat.skills.map((sk, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              fontSize: fs.small,
+                              color: "#374151",
+                              backgroundColor: `${accent}12`,
+                              border: `1px solid ${accent}26`,
+                              padding: "2px 8px",
+                              borderRadius: "4px",
+                              fontWeight: 500,
+                              lineHeight: 1.45,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {sk}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </section>
+          )}
+
+          {enabledEdu.length > 0 && (
+            <section>
+              <SectionHead first={!rightFirstIsAchieve && allSkills.length === 0}>Education</SectionHead>
+              {enabledEdu.map((edu, idx) => (
+                <div
+                  key={edu.id}
+                  style={{
+                    paddingBottom: idx < enabledEdu.length - 1 ? "9px" : 0,
+                    marginBottom: idx < enabledEdu.length - 1 ? "9px" : 0,
+                    borderBottom: idx < enabledEdu.length - 1 ? dash : "none",
+                  }}
+                >
+                  <h3 style={{ fontSize: fs.h3, fontWeight: 600, color: ink, margin: 0 }}>
+                    {edu.degree}
+                    {edu.field ? ` (${edu.field})` : ""}
+                  </h3>
+                  {edu.institution && <div style={{ fontSize: fs.body, fontWeight: 700, color: accent, marginTop: "1px" }}>{edu.institution}</div>}
+                  <MetaRow date={range(edu.startDate, edu.endDate)} />
+                  <Bullets items={edu.achievements} />
+                </div>
+              ))}
+            </section>
+          )}
+
+          {enabledCerts.length > 0 && (
+            <section>
+              <SectionHead>Training / Courses</SectionHead>
+              {enabledCerts.map((cert, idx) => (
+                <div
+                  key={cert.id}
+                  style={{
+                    paddingBottom: idx < enabledCerts.length - 1 ? "9px" : 0,
+                    marginBottom: idx < enabledCerts.length - 1 ? "9px" : 0,
+                    borderBottom: idx < enabledCerts.length - 1 ? dash : "none",
+                  }}
+                >
+                  <div style={{ fontSize: fs.body, fontWeight: 700, color: accent }}>{cert.name}</div>
+                  {(cert.issuer || cert.date) && (
+                    <p style={{ fontSize: fs.small, color: sub, lineHeight: 1.45, margin: "2px 0 0" }}>
+                      {[cert.issuer, cert.date ? formatDisplayDate(cert.date) : ""].filter(Boolean).join(" • ")}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </section>
+          )}
+
+          {otherCustom.map((cs) => (
+            <section key={cs.id}>
+              <SectionHead>{cs.title}</SectionHead>
+              <TitledList items={cs.items} />
+            </section>
+          ))}
+        </div>
+      </div>
+
+      {/* PROJECTS — full width, alternating across two columns */}
+      {enabledProjects.length > 0 && (
+        <section style={{ marginTop: "20px" }}>
+          <SectionHead>Projects</SectionHead>
+          <div style={{ display: "flex", gap: "34px", alignItems: "flex-start" }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {leftProjects.map((proj, i) => (
+                <ProjectCard key={proj.id} proj={proj} isLast={i === leftProjects.length - 1} />
+              ))}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {rightProjects.map((proj, i) => (
+                <ProjectCard key={proj.id} proj={proj} isLast={i === rightProjects.length - 1} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════
    MAIN PREVIEW COMPONENT
    ═══════════════════════════════════════════════ */
 export function ResumePreview({ config }: { config: ResumeConfig }) {
   switch (config.template) {
     // Original Templates
+    case "spotlight":
+      return <SpotlightTemplate config={config} />
     case "modern":
       return <ModernTemplate config={config} />
     case "minimal":
@@ -9530,6 +10808,14 @@ export function ResumePreview({ config }: { config: ResumeConfig }) {
       return <DualToneTemplate config={config} />
     case "magazine":
       return <MagazineTemplate config={config} />
+    case "editorial":
+      return <EditorialTemplate config={config} />
+    case "monograph":
+      return <MonographTemplate config={config} />
+    case "blueprint":
+      return <BlueprintTemplate config={config} />
+    case "mosaic-grid":
+      return <MosaicGridTemplate config={config} />
     case "neon":
       return <NeonTemplate config={config} />
     case "paper":

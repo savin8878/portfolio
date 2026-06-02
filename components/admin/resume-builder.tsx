@@ -45,6 +45,7 @@ import {
   Minus,
   FileDown,
   FileType,
+  FileCheck,
   Loader2,
   Save,
   Check,
@@ -67,7 +68,7 @@ import {
 } from "@/components/ui/select"
 import { ResumePreview } from "@/components/admin/resume-preview"
 import { ResumePdfPreview } from "@/components/admin/resume-pdf-preview"
-import { downloadPDF, downloadDOCX } from "@/lib/resume-export"
+import { downloadPDF, downloadDOCX, downloadAtsPDF } from "@/lib/resume-export"
 import { AISettingsPanel, AITailorPanel } from "@/components/admin/resume-ai-panel"
 import { AIWriteButton, AIAchievementsButton } from "@/components/admin/ai-assistant"
 import { ResumeImportPanel } from "@/components/admin/resume-import-panel"
@@ -262,14 +263,14 @@ function buildInitialConfig(data: any): ResumeConfig {
         title: "Full-Stack Portfolio CMS & AI-Powered Resume Builder",
         role: "Full-Stack Developer",
         description:
-          "Built a full-stack portfolio CMS platform using Next.js 16 (App Router), React 19, TypeScript, and Tailwind CSS 4, with Neon serverless PostgreSQL, featuring 12+ admin modules for dynamic content management.",
+          "A full-stack portfolio CMS using Next.js 16 (App Router), React 19, TypeScript, and Tailwind CSS 4 on Neon serverless PostgreSQL, with 12+ admin modules for dynamic content management.",
         achievements: [
-          "Engineered an AI-powered resume builder with 40+ premium templates across 10 categories, supporting real-time live preview, 30+ color schemes, and 5 layout types",
-          "Implemented server-side PDF generation using Puppeteer with A4-optimized rendering, intelligent multi-page breaks, and DOCX export producing ATS-friendly, WCAG 2.1 AA compliant output",
-          "Built a drag-and-drop page builder with dnd-kit, custom block editing, and 10+ animated landing sections powered by Framer Motion and Lenis smooth scrolling",
-          "Integrated AI-assisted features for resume content parsing, job description tailoring, and content suggestions via 15+ RESTful API endpoints",
-          "Developed a runtime theme engine with dynamic color/font/dark-mode configuration, Recharts analytics dashboard, and 25+ Radix UI components ensuring responsive, accessible experience",
-          "Created blog management, project showcase, service listings, testimonials, contact form with bulk operations, media library, and site-wide theme/visibility settings",
+          "Engineered an AI-powered resume builder with 40+ templates across 10 categories, real-time live preview, 30+ color schemes, and 5 layout types.",
+          "Architected server-side PDF generation with Puppeteer (A4 rendering, multi-page breaks) and DOCX export, producing ATS-friendly, WCAG 2.1 AA-compliant output.",
+          "Created 15+ RESTful API endpoints powering AI-assisted resume parsing, job-description tailoring, and content suggestions.",
+          "Developed a drag-and-drop page builder with dnd-kit, custom block editing, and 10+ animated landing sections using Framer Motion.",
+          "Designed a runtime theme engine with dynamic color, font, and dark-mode configuration plus a Recharts analytics dashboard, on 25+ accessible Radix UI components.",
+          "Delivered blog management, project showcase, service listings, testimonials, a contact form with bulk operations, and a media library.",
         ],
         techStack: [
           "Next.js 16",
@@ -465,8 +466,13 @@ export function ResumeBuilder({ data }: { data: any }) {
   }, [config, configId])
 
   // dnd-kit sensors
+  // distance: 8 → a deliberate drag must move ~8px before it engages, so
+  // clicks, text selection inside fields, and scrolling no longer trigger
+  // an accidental reorder. (Note: dnd-kit treats distance and delay as
+  // mutually exclusive activation constraints — distance is the right one
+  // here because we want movement-based, not hold-based, activation.)
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
@@ -805,8 +811,10 @@ export function ResumeBuilder({ data }: { data: any }) {
     })
   }, [])
 
-  const [exporting, setExporting] = useState<"pdf" | "docx" | null>(null)
+  const [exporting, setExporting] = useState<"pdf" | "docx" | "ats" | null>(null)
   const [showPdfPreview, setShowPdfPreview] = useState(false)
+  // Drag-to-reorder overlay shown directly on the Live Preview tab.
+  const [showReorder, setShowReorder] = useState(false)
 
   const handleDownloadPDF = useCallback(async () => {
     if (exporting) return
@@ -828,6 +836,20 @@ export function ResumeBuilder({ data }: { data: any }) {
       await downloadDOCX(config, `${config.profile.fullName || "Resume"} - Resume`)
     } catch (err) {
       console.error("DOCX export failed:", err)
+    } finally {
+      setExporting(null)
+    }
+  }, [config, exporting])
+
+  // ATS-optimized PDF — plain single-column rendering built from `config`
+  // (not the styled template) so Applicant Tracking Systems parse it cleanly.
+  const handleDownloadAtsPDF = useCallback(async () => {
+    if (exporting) return
+    setExporting("ats")
+    try {
+      await downloadAtsPDF(config, `${config.profile.fullName || "Resume"} - ATS Resume`)
+    } catch (err) {
+      console.error("ATS PDF export failed:", err)
     } finally {
       setExporting(null)
     }
@@ -938,6 +960,10 @@ export function ResumeBuilder({ data }: { data: any }) {
               <Button size="sm" onClick={handleDownloadPDF} disabled={exporting !== null}>
                 {exporting === "pdf" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
                 {exporting === "pdf" ? "Generating..." : "Download PDF"}
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleDownloadAtsPDF} disabled={exporting !== null} title="Plain single-column PDF optimized for Applicant Tracking Systems (job boards)">
+                {exporting === "ats" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileCheck className="h-4 w-4 mr-1" />}
+                {exporting === "ats" ? "Generating..." : "ATS PDF"}
               </Button>
               <Button size="sm" variant="outline" onClick={handleDownloadDOCX} disabled={exporting !== null}>
                 {exporting === "docx" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileType className="h-4 w-4 mr-1" />}
@@ -1644,12 +1670,70 @@ export function ResumeBuilder({ data }: { data: any }) {
 
         {/* ─── PREVIEW TAB ─── */}
         <TabsContent value="preview">
-          <div className="flex justify-center">
+          <div className="relative flex justify-center">
+            {/* Toggle for the on-preview drag-to-reorder panel */}
+            <Button
+              variant={showReorder ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowReorder((v) => !v)}
+              className="absolute right-0 -top-12 z-20"
+            >
+              <GripVertical className="h-4 w-4 mr-1" />
+              {showReorder ? "Done Rearranging" : "Rearrange Sections"}
+            </Button>
+
             <div className="w-full max-w-[900px]">
               <div ref={activeTab === "preview" ? previewRef : undefined}>
                 <ResumePreview config={config} />
               </div>
             </div>
+
+            {/* Floating drag-to-reorder panel — drag here and the full
+                resume on the left reflows live as sections move. */}
+            {showReorder && (
+              <div className="sticky top-6 ml-4 h-fit w-[260px] shrink-0 self-start">
+                <Card className="border-accent/40 shadow-xl">
+                  <CardHeader className="py-3 px-4 bg-accent/5">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <GripVertical className="h-4 w-4 text-accent" />
+                      Drag to Reorder
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-3 pb-3 pt-2">
+                    <p className="text-[11px] text-muted-foreground mb-2">
+                      Drag a section up or down — the preview updates instantly.
+                    </p>
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleSectionDragEnd}
+                    >
+                      <SortableContext
+                        items={config.sectionOrder}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-1.5">
+                          {config.sectionOrder.map((section) => {
+                            const SIcon = sectionIcons[section] || Sparkles
+                            return (
+                              <SortableItem key={section} id={section}>
+                                <div className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-2 cursor-grab active:cursor-grabbing hover:bg-muted/80 transition-colors border border-transparent hover:border-border/50">
+                                  <GripVertical className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                  <SIcon className="h-3.5 w-3.5 text-accent shrink-0" />
+                                  <span className="text-sm truncate">
+                                    {sectionLabels[section] || section}
+                                  </span>
+                                </div>
+                              </SortableItem>
+                            )
+                          })}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </div>
         </TabsContent>
 
@@ -1670,6 +1754,11 @@ export function ResumeBuilder({ data }: { data: any }) {
                 <CardContent className="px-4 pb-4 pt-0">
                   <div className="grid grid-cols-2 gap-3">
                     {[
+                      {
+                        id: "spotlight",
+                        name: "Spotlight",
+                        desc: "Two-column, key achievements",
+                      },
                       {
                         id: "classic",
                         name: "Classic",
@@ -1804,6 +1893,26 @@ export function ResumeBuilder({ data }: { data: any }) {
                         id: "magazine",
                         name: "Magazine",
                         desc: "Editorial multi-column",
+                      },
+                      {
+                        id: "editorial",
+                        name: "Editorial",
+                        desc: "Long-form article hero",
+                      },
+                      {
+                        id: "monograph",
+                        name: "Monograph",
+                        desc: "Classic journal serif",
+                      },
+                      {
+                        id: "blueprint",
+                        name: "Blueprint",
+                        desc: "Engineering blueprint grid",
+                      },
+                      {
+                        id: "mosaic-grid",
+                        name: "Mosaic Grid",
+                        desc: "Card tiles, startup vibe",
                       },
                       {
                         id: "neon",

@@ -306,6 +306,51 @@ export const TEMPLATE_THEMES: TemplateTheme[] = [
     previewColors: ["#be123c", "#ffe4e6", "#1f1f2e"],
     layout: "top-banner",
   },
+
+  // ════════════════════════════════════════════════════════════════
+  // EDITORIAL & PREMIUM ADDITIONS
+  // ════════════════════════════════════════════════════════════════
+
+  {
+    id: "magazine",
+    name: "Magazine",
+    category: "creative",
+    description: "Editorial spread with masthead, drop cap, and pull-quote rail",
+    previewColors: ["#2563eb", "#fafaf7", "#111827"],
+    layout: "top-banner",
+  },
+  {
+    id: "editorial",
+    name: "Editorial",
+    category: "creative",
+    description: "Long-form article look with full-bleed accent hero",
+    previewColors: ["#7c3aed", "#fafaf7", "#0f172a"],
+    layout: "top-banner",
+  },
+  {
+    id: "monograph",
+    name: "Monograph",
+    category: "academic",
+    description: "Classic journal serif, single-column, small caps section heads",
+    previewColors: ["#1f2937", "#fdfcf8", "#3f3f3f"],
+    layout: "single",
+  },
+  {
+    id: "blueprint",
+    name: "Blueprint",
+    category: "tech",
+    description: "Architectural blueprint grid with crosshair corners and monospace coordinates",
+    previewColors: ["#0ea5e9", "#fcfdff", "#0c1424"],
+    layout: "single",
+  },
+  {
+    id: "mosaic-grid",
+    name: "Mosaic Grid",
+    category: "modern",
+    description: "Card-based tile grid for a modern startup vibe",
+    previewColors: ["#6366f1", "#f5f6fa", "#0a0e27"],
+    layout: "two-column",
+  },
 ]
 
 /**
