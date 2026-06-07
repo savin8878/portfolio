@@ -4,8 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Moon, Sun, ArrowRight } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -20,13 +19,10 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname()
-  const { theme, setTheme } = useTheme()
   const [isOpen, setIsOpen] = React.useState(false)
   const [scrolled, setScrolled] = React.useState(false)
-  const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => {
-    setMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 20)
     handleScroll()
     window.addEventListener("scroll", handleScroll, { passive: true })
@@ -91,29 +87,6 @@ export function Navbar() {
           {/* Right actions */}
           <div className="hidden lg:flex items-center gap-2">
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-full h-9 w-9 text-muted-foreground hover:text-foreground"
-              aria-label="Toggle theme"
-            >
-              {mounted && (
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.span
-                    key={theme}
-                    initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
-                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                    exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex"
-                  >
-                    {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                  </motion.span>
-                </AnimatePresence>
-              )}
-            </Button>
-
-            <Button
               asChild
               size="sm"
               className="group relative overflow-hidden rounded-full h-9 px-4 bg-foreground text-background hover:bg-foreground/90 shadow-sm"
@@ -129,15 +102,6 @@ export function Navbar() {
 
           {/* Mobile */}
           <div className="flex lg:hidden items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-full h-9 w-9 text-muted-foreground"
-              aria-label="Toggle theme"
-            >
-              {mounted && (theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />)}
-            </Button>
             <Button
               variant="ghost"
               size="icon"

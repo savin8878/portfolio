@@ -1,8 +1,7 @@
 "use client"
 
-import { useRef } from "react"
-import { motion, useInView } from "framer-motion"
 import type { TechStackItem } from "@/lib/db"
+import { Reveal, Stagger, StaggerItem, Parallax } from "@/components/anim"
 
 interface SkillsOverviewProps {
   techStack: TechStackItem[]
@@ -12,131 +11,96 @@ interface SkillsOverviewProps {
 const CATEGORY_ORDER = ["Frontend", "Backend", "Infrastructure", "Tools"]
 
 export function SkillsOverview({ techStack, content }: SkillsOverviewProps) {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true })
-
-  const grouped = techStack.reduce(
-    (acc, tech) => {
-      if (!acc[tech.category]) {
-        acc[tech.category] = []
-      }
-      acc[tech.category].push(tech)
-      return acc
-    },
-    {} as Record<string, TechStackItem[]>
-  )
+  const grouped = techStack.reduce((acc, tech) => {
+    if (!acc[tech.category]) acc[tech.category] = []
+    acc[tech.category].push(tech)
+    return acc
+  }, {} as Record<string, TechStackItem[]>)
 
   const categories = CATEGORY_ORDER.filter((c) => grouped[c])
 
   return (
-    <section className="relative py-28 border-t border-border/40">
-      {/* Subtle dot grid — matching metrics-section */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 0)",
-          backgroundSize: "32px 32px",
-        }}
-      />
+    <section className="relative overflow-hidden border-t border-border/50 py-24 sm:py-32">
+      {/* right glow drifts up (positive) */}
+      <Parallax
+        speed={60}
+        className="pointer-events-none absolute -right-32 top-1/4 -z-10 h-96 w-96 opacity-50"
+      >
+        <div
+          className="h-full w-full rounded-full blur-3xl"
+          style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(255,122,24,0.08), transparent 70%)" }}
+        />
+      </Parallax>
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Section Header — left-aligned home page style */}
-        <div ref={ref} className="mb-14">
-          <motion.div
-            initial={{ opacity: 0, x: -16 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.5 }}
-            className="flex items-center gap-3 mb-4"
-          >
-            <span className="h-px w-8 bg-accent" />
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">
+      {/* left glow drifts the opposite way (negative) — counter-drift = depth */}
+      <Parallax
+        speed={-40}
+        className="pointer-events-none absolute -left-24 bottom-12 -z-10 h-80 w-80 opacity-40"
+      >
+        <div
+          className="h-full w-full rounded-full blur-3xl"
+          style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(255,122,24,0.06), transparent 70%)" }}
+        />
+      </Parallax>
+
+      {/* oversized ghost count floating behind the heading */}
+      <Parallax
+        speed={48}
+        className="pointer-events-none absolute -right-4 top-8 -z-10 select-none"
+      >
+        <span className="font-mono text-[9rem] font-black leading-none tracking-tighter text-muted-foreground/5 sm:text-[15rem]">
+          {String(techStack.length).padStart(2, "0")}
+        </span>
+      </Parallax>
+
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        {/* header group — eyebrow drops from top, heading slides from left */}
+        <div className="mb-16 max-w-3xl">
+          <Reveal from="top">
+            <span className="flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
+              <span className="h-px w-8 bg-accent/60" />
               {(content?.label as string) || "Tech Stack"}
             </span>
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="text-4xl sm:text-5xl font-black tracking-tight text-foreground"
-          >
-            {(content?.title as string) || "Skills &"}{" "}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: "linear-gradient(90deg, hsl(var(--accent)), #818cf8)" }}
-            >
-              {(content?.title_highlight as string) || "Expertise"}
-            </span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-4 text-lg text-muted-foreground max-w-2xl leading-relaxed"
-          >
-            {(content?.description as string) ||
-              "A comprehensive overview of my technical capabilities built over years of hands-on experience."}
-          </motion.p>
+          </Reveal>
+          <Reveal from="left" delay={0.08}>
+            <h2 className="mt-6 text-4xl font-semibold leading-[1.02] tracking-[-0.03em] text-foreground sm:text-5xl md:text-6xl">
+              {(content?.title as string) || "Skills &"}{" "}
+              <span className="text-gradient-static">{(content?.title_highlight as string) || "expertise."}</span>
+            </h2>
+          </Reveal>
         </div>
 
-        {/* Grid — matching home tech-stack-section style */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        {/* category rows — cycle through 4 directions for layered 3D arrival */}
+        <Stagger stagger={0.1} className="border-t border-border/50">
           {categories.map((category, ci) => (
-            <motion.div
+            <StaggerItem
               key={category}
-              initial={{ opacity: 0, y: 24 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.15 + ci * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              from={(["left", "right", "flip-up", "zoom"] as const)[ci % 4]}
+              className="grid grid-cols-1 gap-4 border-b border-border/50 py-10 md:grid-cols-[14rem_1fr] md:gap-12"
             >
-              {/* Category label */}
-              <div className="flex items-center gap-2 mb-5">
-                <span className="h-px w-5 bg-accent/50" />
-                <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-accent">
-                  {category}
+              <div className="flex items-baseline gap-3">
+                <span className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">{category}</span>
+                <span className="font-mono text-[10px] tabular-nums text-muted-foreground/40">
+                  {String(grouped[category].length).padStart(2, "0")}
                 </span>
               </div>
-
-              <div className="flex flex-col gap-2">
-                {grouped[category].map((tech, ti) => (
-                  <motion.div
-                    key={tech.id}
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={inView ? { opacity: 1, x: 0 } : {}}
-                    transition={{ duration: 0.4, delay: 0.2 + ci * 0.08 + ti * 0.04 }}
-                    className="group flex items-center justify-between rounded-xl border border-border/50 bg-card px-4 py-3 hover:border-accent/40 hover:bg-accent/[0.03] transition-all duration-300"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors duration-200">
-                        {tech.name}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground ml-2">
+              <div className="flex flex-wrap gap-x-8 gap-y-3">
+                {grouped[category].map((tech) => (
+                  <span key={tech.id} className="group inline-flex items-baseline gap-1.5">
+                    <span className="text-xl font-medium tracking-tight text-foreground/55 transition-colors duration-300 group-hover:text-accent md:text-2xl">
+                      {tech.name}
+                    </span>
+                    {tech.years_experience ? (
+                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground/40">
                         {tech.years_experience}y
                       </span>
-                    </div>
-
-                    {/* Proficiency dots — matching home tech-stack */}
-                    <div className="flex gap-1 shrink-0 ml-3">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <motion.span
-                          key={i}
-                          initial={{ scale: 0 }}
-                          animate={inView ? { scale: 1 } : {}}
-                          transition={{
-                            delay: 0.25 + ci * 0.08 + ti * 0.04 + i * 0.04,
-                            type: "spring",
-                            stiffness: 400,
-                          }}
-                          className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                            i < tech.proficiency_level ? "bg-accent" : "bg-border"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
+                    ) : null}
+                  </span>
                 ))}
               </div>
-            </motion.div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </div>
     </section>
   )

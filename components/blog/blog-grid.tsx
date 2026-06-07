@@ -2,17 +2,17 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
 import { Clock, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { Reveal, Stagger, StaggerItem, TiltCard, type RevealFrom } from "@/components/anim"
 import type { BlogPost, BlogCategory } from "@/lib/db"
 
 interface BlogGridProps {
   posts: BlogPost[]
   categories: BlogCategory[]
 }
+
+const DIRECTIONS: RevealFrom[] = ["left", "bottom", "right", "zoom"]
 
 export function BlogGrid({ posts, categories }: BlogGridProps) {
   const [activeCategory, setActiveCategory] = useState<string>("all")
@@ -32,126 +32,139 @@ export function BlogGrid({ posts, categories }: BlogGridProps) {
   return (
     <div>
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-12">
-        <div className="flex-1 max-w-md">
-          <Input
-            placeholder="Search articles..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant={activeCategory === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setActiveCategory("all")}
-          >
-            All
-          </Button>
-          {categories.map((category) => (
-            <Button
-              key={category.id}
-              variant={
-                activeCategory === category.id.toString() ? "default" : "outline"
-              }
-              size="sm"
-              onClick={() => setActiveCategory(category.id.toString())}
+      <Reveal from="top" className="mb-16">
+        <div className="flex flex-col gap-6 border-b border-border/50 pb-8 sm:flex-row sm:items-end sm:justify-between">
+          <div className="w-full max-w-md">
+            <label className="mb-3 flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
+              <span className="h-px w-8 bg-accent/60" />
+              Search
+            </label>
+            <Input
+              placeholder="Search articles..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded-none border-0 border-b border-border/60 bg-transparent px-0 text-lg shadow-none focus-visible:border-accent focus-visible:ring-0"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-mono">
+            <button
+              type="button"
+              onClick={() => setActiveCategory("all")}
+              className={`uppercase tracking-wide transition-colors ${
+                activeCategory === "all"
+                  ? "text-accent"
+                  : "text-muted-foreground/60 hover:text-foreground"
+              }`}
             >
-              {category.name}
-            </Button>
-          ))}
+              All
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => setActiveCategory(category.id.toString())}
+                className={`uppercase tracking-wide transition-colors ${
+                  activeCategory === category.id.toString()
+                    ? "text-accent"
+                    : "text-muted-foreground/60 hover:text-foreground"
+                }`}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </Reveal>
 
-      {/* Posts Grid */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${activeCategory}-${searchQuery}`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
-        >
-          {filteredPosts.map((post, index) => (
-            <motion.article
+      {/* Posts Grid — keyed so the layered reveal re-fires on filter change */}
+      <Stagger
+        key={`${activeCategory}-${searchQuery}`}
+        stagger={0.1}
+        className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {filteredPosts.map((post, index) => {
+          const categoryName = (post as BlogPost & { category_name?: string })
+            .category_name
+          return (
+            <StaggerItem
               key={post.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              className="group relative flex flex-col rounded-2xl bg-card border border-border overflow-hidden hover:border-accent/50 hover:shadow-lg transition-all"
+              from={DIRECTIONS[index % DIRECTIONS.length]}
             >
-              {/* Image */}
-              <div className="aspect-video bg-muted relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5" />
-                {post.is_featured && (
-                  <Badge className="absolute top-4 right-4 bg-accent text-accent-foreground">
-                    Featured
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex flex-col flex-1 p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  {(post as BlogPost & { category_name?: string }).category_name && (
-                    <Badge variant="secondary" className="text-xs">
-                      {(post as BlogPost & { category_name?: string }).category_name}
-                    </Badge>
-                  )}
-                  <div className="flex items-center text-xs text-muted-foreground">
-                    <Clock className="mr-1 h-3 w-3" />
-                    {post.reading_time} min read
-                  </div>
-                </div>
-
-                <h3 className="text-lg font-semibold text-foreground group-hover:text-accent transition-colors line-clamp-2">
-                  <Link href={`/blog/${post.slug}`}>
-                    {post.title}
-                    <span className="absolute inset-0" />
-                  </Link>
-                </h3>
-
-                <p className="mt-2 text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                  {post.excerpt}
-                </p>
-
-                {/* Tags */}
-                {post.tags && post.tags.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-1">
-                    {post.tags.slice(0, 3).map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-xs text-muted-foreground"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-auto pt-4 flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">
-                    {post.published_at &&
-                      new Date(post.published_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+              <TiltCard className="group relative flex h-full flex-col">
+                {/* Image / gradient banner */}
+                <div className="relative aspect-video overflow-hidden rounded-xl border border-border/50">
+                  <div className="absolute inset-0 bg-linear-to-br from-accent/20 to-accent/3" />
+                  <div className="absolute inset-0 bg-linear-to-t from-background/60 to-transparent" />
+                  <span className="absolute left-4 top-4 font-mono text-xs tabular-nums text-muted-foreground/50">
+                    {String(index + 1).padStart(2, "0")}
                   </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                  {post.is_featured && (
+                    <span className="absolute right-4 top-4 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.2em] text-accent">
+                      Featured
+                    </span>
+                  )}
                 </div>
-              </div>
-            </motion.article>
-          ))}
-        </motion.div>
-      </AnimatePresence>
+
+                <div className="flex flex-1 flex-col pt-5">
+                  <div className="flex items-center gap-4 text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground/70">
+                    {categoryName && (
+                      <span className="text-accent">{categoryName}</span>
+                    )}
+                    <span className="flex items-center">
+                      <Clock className="mr-1.5 h-3 w-3" />
+                      {post.reading_time} min
+                    </span>
+                  </div>
+
+                  <h3 className="mt-4 text-xl font-semibold leading-snug tracking-[-0.02em] text-foreground transition-colors group-hover:text-accent">
+                    <Link href={`/blog/${post.slug}`}>
+                      {post.title}
+                      <span className="absolute inset-0" />
+                    </Link>
+                  </h3>
+
+                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                    {post.excerpt}
+                  </p>
+
+                  {/* Tags */}
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1">
+                      {post.tags.slice(0, 3).map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-xs font-mono text-muted-foreground/50"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-auto flex items-center justify-between border-t border-border/50 pt-4">
+                    <span className="text-xs font-mono tabular-nums text-muted-foreground/60">
+                      {post.published_at &&
+                        new Date(post.published_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-accent" />
+                  </div>
+                </div>
+              </TiltCard>
+            </StaggerItem>
+          )
+        })}
+      </Stagger>
 
       {filteredPosts.length === 0 && (
-        <div className="text-center py-12">
+        <Reveal from="zoom" className="py-20 text-center">
           <p className="text-muted-foreground">
             No articles found. Try a different search or category.
           </p>
-        </div>
+        </Reveal>
       )}
     </div>
   )

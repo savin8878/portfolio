@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { motion } from "framer-motion"
 import { Mail, MapPin, Clock, Github, Linkedin, Twitter } from "lucide-react"
+import { Reveal, Stagger, StaggerItem, TiltCard } from "@/components/anim"
 
 const contactDetails = [
   {
@@ -31,45 +31,58 @@ const socialLinks = [
   { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
 ]
 
+const expectations = [
+  "Initial response within 24 hours",
+  "Discovery call to discuss your project",
+  "Detailed proposal within 3-5 business days",
+  "Kick-off once terms are agreed",
+]
+
 export function ContactInfo() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
-      className="space-y-8"
-    >
+    <div className="space-y-12">
       {/* Status */}
-      <div className="p-6 rounded-2xl bg-accent/5 border border-accent/20">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-          </span>
-          <span className="font-semibold text-foreground">
-            Available for Projects
-          </span>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Currently accepting new projects starting in 2-4 weeks.
-        </p>
-      </div>
+      <Reveal from="right">
+        <TiltCard className="rounded-2xl border border-accent/20 bg-accent/5 p-6">
+          <div className="mb-2 flex items-center gap-3">
+            <span className="relative flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500" />
+            </span>
+            <span className="font-semibold text-foreground">Available for Projects</span>
+          </div>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Currently accepting new projects starting in 2-4 weeks.
+          </p>
+        </TiltCard>
+      </Reveal>
 
       {/* Contact Details */}
-      <div className="p-6 rounded-2xl bg-card border border-border">
-        <h3 className="font-semibold text-foreground mb-4">Contact Details</h3>
-        <div className="space-y-4">
-          {contactDetails.map((detail) => (
-            <div key={detail.label} className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-muted text-muted-foreground">
+      <div>
+        <Reveal from="top">
+          <span className="flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
+            <span className="h-px w-8 bg-accent/60" />
+            Contact Details
+          </span>
+        </Reveal>
+        <Stagger className="mt-6 border-t border-border/50">
+          {contactDetails.map((detail, i) => (
+            <StaggerItem
+              key={detail.label}
+              from={i % 2 ? "right" : "left"}
+              className="flex items-start gap-4 border-b border-border/50 py-4"
+            >
+              <span className="mt-0.5 text-accent">
                 <detail.icon className="h-4 w-4" />
-              </div>
+              </span>
               <div>
-                <p className="text-sm text-muted-foreground">{detail.label}</p>
+                <p className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground/60">
+                  {detail.label}
+                </p>
                 {detail.href ? (
                   <Link
                     href={detail.href}
-                    className="font-medium text-foreground hover:text-accent transition-colors"
+                    className="font-medium text-foreground transition-colors hover:text-accent"
                   >
                     {detail.value}
                   </Link>
@@ -77,40 +90,59 @@ export function ContactInfo() {
                   <p className="font-medium text-foreground">{detail.value}</p>
                 )}
               </div>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </div>
 
       {/* Social Links */}
-      <div className="p-6 rounded-2xl bg-card border border-border">
-        <h3 className="font-semibold text-foreground mb-4">Connect</h3>
-        <div className="flex gap-3">
-          {socialLinks.map((social) => (
-            <Link
-              key={social.label}
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3 rounded-lg bg-muted text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
-            >
-              <social.icon className="h-5 w-5" />
-              <span className="sr-only">{social.label}</span>
-            </Link>
+      <div>
+        <Reveal from="left">
+          <span className="flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
+            <span className="h-px w-8 bg-accent/60" />
+            Connect
+          </span>
+        </Reveal>
+        <Stagger className="mt-6 flex gap-3">
+          {socialLinks.map((social, i) => (
+            <StaggerItem key={social.label} from={i % 2 ? "bottom" : "zoom"}>
+              <Link
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-border/60 text-muted-foreground transition-colors hover:border-accent/60 hover:text-accent"
+              >
+                <social.icon className="h-5 w-5" />
+                <span className="sr-only">{social.label}</span>
+              </Link>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </div>
 
       {/* Quick Note */}
-      <div className="p-6 rounded-2xl bg-muted/50 border border-border">
-        <h3 className="font-semibold text-foreground mb-2">What to Expect</h3>
-        <ul className="text-sm text-muted-foreground space-y-2">
-          <li>1. Initial response within 24 hours</li>
-          <li>2. Discovery call to discuss your project</li>
-          <li>3. Detailed proposal within 3-5 business days</li>
-          <li>4. Kick-off once terms are agreed</li>
-        </ul>
+      <div>
+        <Reveal from="bottom">
+          <span className="flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
+            <span className="h-px w-8 bg-accent/60" />
+            What to Expect
+          </span>
+        </Reveal>
+        <Stagger className="mt-6 space-y-4">
+          {expectations.map((step, i) => (
+            <StaggerItem
+              key={step}
+              from={i % 2 ? "right" : "left"}
+              className="flex items-baseline gap-4"
+            >
+              <span className="font-mono text-sm tabular-nums text-muted-foreground/40">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <p className="text-sm leading-relaxed text-muted-foreground">{step}</p>
+            </StaggerItem>
+          ))}
+        </Stagger>
       </div>
-    </motion.div>
+    </div>
   )
 }

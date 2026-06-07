@@ -1,9 +1,9 @@
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { HeroSection } from "@/components/sections/hero-section"
+import { CinematicHero } from "@/components/sections/cinematic-hero"
 import { ClientsSection } from "@/components/sections/clients-section"
 import { MetricsSection } from "@/components/sections/metrics-section"
-import { FeaturedProjectsSection } from "@/components/sections/featured-projects-section"
+import { ScrollProjectsSection } from "@/components/sections/scroll-projects-section"
 import { PhilosophySection } from "@/components/sections/philosophy-section"
 import { TechStackSection } from "@/components/sections/tech-stack-section"
 import { ProcessSection } from "@/components/sections/process-section"
@@ -75,7 +75,7 @@ export default async function HomePage() {
   // Map section IDs to their rendered components
   const sectionComponents: Record<string, React.ReactNode> = {
     hero: show("hero") ? (
-      <HeroSection
+      <CinematicHero
         key="hero"
         developerName={siteSettings?.developer_name || "Alex Chen"}
         professionalTitle={siteSettings?.professional_title || "Full-Stack Product Engineer"}
@@ -98,7 +98,7 @@ export default async function HomePage() {
     ) : null,
 
     featured_projects: show("featured_projects") && projects.length > 0 ? (
-      <FeaturedProjectsSection key="featured_projects" projects={projects} content={pageContent.featured_projects} />
+      <ScrollProjectsSection key="featured_projects" projects={projects} content={pageContent.featured_projects} />
     ) : null,
 
     philosophy: show("philosophy") && philosophy.length > 0 ? (

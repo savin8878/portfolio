@@ -15,8 +15,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Reveal } from "@/components/anim"
 
-interface FormField {
+export interface FormField {
   id: number
   field_name: string
   field_label: string
@@ -151,7 +152,7 @@ export function ContactForm({ fields }: ContactFormProps) {
               value={value as string}
               onChange={(e) => handleChange(field.field_name, e.target.value)}
               placeholder={field.placeholder || ""}
-              className={`min-h-[120px] resize-none ${error ? "border-destructive" : ""}`}
+              className={`min-h-30 resize-none ${error ? "border-destructive" : ""}`}
               required={field.is_required}
             />
           )
@@ -244,9 +245,12 @@ export function ContactForm({ fields }: ContactFormProps) {
         className={`space-y-2 ${widthClass}`}
       >
         {field.field_type !== "checkbox" && (
-          <Label htmlFor={field.field_name} className="text-foreground">
+          <Label
+            htmlFor={field.field_name}
+            className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground/70"
+          >
             {field.field_label}
-            {field.is_required && <span className="text-destructive ml-1">*</span>}
+            {field.is_required && <span className="ml-1 text-accent">*</span>}
           </Label>
         )}
         {fieldContent()}
@@ -260,63 +264,71 @@ export function ContactForm({ fields }: ContactFormProps) {
 
   if (submitStatus === "success") {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-12 px-6 bg-card rounded-2xl border border-border"
-      >
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center">
-          <CheckCircle className="h-8 w-8 text-green-500" />
+      <Reveal from="zoom">
+        <div className="rounded-2xl border border-border/60 bg-card/40 px-6 py-16 text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10">
+            <CheckCircle className="h-8 w-8 text-green-500" />
+          </div>
+          <h3 className="mb-2 text-2xl font-semibold tracking-[-0.02em] text-foreground">
+            Message Sent
+          </h3>
+          <p className="mb-6 text-muted-foreground">
+            Thank you for reaching out. I&apos;ll get back to you within 24-48 hours.
+          </p>
+          <Button variant="outline" onClick={() => setSubmitStatus("idle")}>
+            Send Another Message
+          </Button>
         </div>
-        <h3 className="text-2xl font-bold text-foreground mb-2">Message Sent!</h3>
-        <p className="text-muted-foreground mb-6">
-          Thank you for reaching out. I'll get back to you within 24-48 hours.
-        </p>
-        <Button variant="outline" onClick={() => setSubmitStatus("idle")}>
-          Send Another Message
-        </Button>
-      </motion.div>
+      </Reveal>
     )
   }
 
   return (
-    <motion.form
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      onSubmit={handleSubmit}
-      className="p-8 rounded-2xl bg-card border border-border"
-    >
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {activeFields.map(renderField)}
-      </div>
+    <div className="space-y-8">
+      <Reveal from="left">
+        <span className="flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
+          <span className="h-px w-8 bg-accent/60" />
+          Start a Conversation
+        </span>
+        <h2 className="mt-5 text-3xl font-semibold tracking-[-0.03em] text-foreground sm:text-4xl">
+          Tell me about your <span className="text-gradient-static">project</span>
+        </h2>
+      </Reveal>
 
-      {submitStatus === "error" && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 p-4 mt-6 rounded-lg bg-destructive/10 text-destructive"
-        >
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
-          <p className="text-sm">
-            Something went wrong. Please try again or email me directly.
-          </p>
-        </motion.div>
-      )}
+      <Reveal from="bottom" delay={0.1}>
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {activeFields.map(renderField)}
+          </div>
 
-      <Button type="submit" size="lg" className="w-full mt-6" disabled={isSubmitting}>
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Sending...
-          </>
-        ) : (
-          <>
-            <Send className="mr-2 h-4 w-4" />
-            Send Message
-          </>
-        )}
-      </Button>
-    </motion.form>
+          {submitStatus === "error" && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 flex items-center gap-2 rounded-lg bg-destructive/10 p-4 text-destructive"
+            >
+              <AlertCircle className="h-5 w-5 shrink-0" />
+              <p className="text-sm">
+                Something went wrong. Please try again or email me directly.
+              </p>
+            </motion.div>
+          )}
+
+          <Button type="submit" size="lg" className="mt-8 w-full" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <Send className="mr-2 h-4 w-4" />
+                Send Message
+              </>
+            )}
+          </Button>
+        </form>
+      </Reveal>
+    </div>
   )
 }

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Caveat } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SmoothScrollProvider } from "@/components/scroll-provider"
 import { SketchDefs } from "@/components/sketch-primitives"
+import { CinematicIntro } from "@/components/cinematic-intro"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -72,9 +73,10 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
+          forcedTheme="dark"
           disableTransitionOnChange
         >
+          <CinematicIntro />
           <SmoothScrollProvider>
             {children}
           </SmoothScrollProvider>

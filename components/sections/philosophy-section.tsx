@@ -1,84 +1,72 @@
 "use client"
 
-import { useRef } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { ArrowUpRight } from "lucide-react"
 import type { PhilosophyItem } from "@/lib/db"
 import { iconMap, DefaultIcon } from "@/lib/icon-map"
+import { Reveal, Stagger, StaggerItem, Parallax } from "@/components/anim"
 
 interface PhilosophySectionProps {
   items: PhilosophyItem[]
 }
 
+const DIRS = ["left", "right"] as const
+
 export function PhilosophySection({ items }: PhilosophySectionProps) {
-  const containerRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  })
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "15%"])
-
   return (
-    <section ref={containerRef} className="relative py-32 overflow-hidden">
-      <motion.div style={{ y }} className="absolute inset-0 -z-10 aurora opacity-50" />
+    <section className="relative overflow-hidden border-t border-border/50 py-24 sm:py-32">
+      {/* ghost word + glow — layered parallax depth */}
+      <Parallax speed={-46} className="pointer-events-none absolute left-1/2 top-24 -z-10 -translate-x-1/2 select-none">
+        <span className="block font-mono text-[20vw] font-semibold uppercase leading-none tracking-[-0.05em] text-muted-foreground/5">
+          ETHOS
+        </span>
+      </Parallax>
+      <Parallax speed={44} className="pointer-events-none absolute -right-20 bottom-0 -z-10">
+        <div className="h-112 w-md rounded-full bg-accent/8 blur-3xl" />
+      </Parallax>
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="text-center max-w-2xl mx-auto mb-20"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs font-medium text-accent mb-5">
-            Principles
-          </div>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-[-0.03em] leading-[1.05] text-foreground text-balance">
-            How I <span className="text-gradient-static">build</span> the things I build.
-          </h2>
-          <p className="mt-5 text-lg text-muted-foreground leading-relaxed text-balance">
-            Four rules that decide what goes into the codebase — and what never does.
-          </p>
-        </motion.div>
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-16 max-w-3xl">
+          <Reveal from="top">
+            <span className="flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
+              <span className="h-px w-8 bg-accent/60" />
+              Principles
+            </span>
+          </Reveal>
+          <Reveal from="left" delay={0.08}>
+            <h2 className="mt-6 text-4xl font-semibold leading-[1.02] tracking-[-0.03em] text-foreground sm:text-5xl md:text-6xl">
+              How I build the things I build.
+            </h2>
+          </Reveal>
+        </div>
 
-        {/* Bento grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Stagger stagger={0.12} className="border-t border-border/50">
           {items.map((item, index) => {
             const Icon = iconMap[item.icon] || DefaultIcon
             return (
-              <motion.div
+              <StaggerItem
                 key={item.id}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="group relative rounded-2xl ring-conic h-full"
+                from={DIRS[index % DIRS.length]}
+                className="group relative grid grid-cols-1 gap-4 border-b border-border/50 py-9 md:grid-cols-[7rem_1fr_auto] md:items-baseline md:gap-10"
               >
-                <div className="relative h-full rounded-2xl border border-border/60 bg-card/70 backdrop-blur-sm p-7 overflow-hidden transition-all duration-500 group-hover:border-accent/30 group-hover:bg-card">
-                  {/* Index number */}
-                  <span className="absolute top-5 right-5 text-xs font-mono text-muted-foreground/60 tabular-nums">
-                    0{index + 1}
-                  </span>
+                <span className="pointer-events-none absolute -inset-x-6 inset-y-0 -z-10 rounded-2xl bg-accent/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-                  {/* Icon with gradient backdrop */}
-                  <div className="relative inline-flex mb-5">
-                    <div className="absolute inset-0 bg-linear-to-br from-accent to-accent-2 rounded-xl blur-md opacity-40 group-hover:opacity-70 transition-opacity duration-500" />
-                    <div className="relative w-12 h-12 rounded-xl bg-linear-to-br from-accent to-accent-2 grid place-items-center text-accent-foreground">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                  </div>
+                <span className="font-mono text-5xl font-semibold leading-none tabular-nums text-muted-foreground/30 transition-colors duration-500 group-hover:text-accent md:text-6xl">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
 
-                  <h3 className="text-lg font-semibold text-foreground mb-2 tracking-tight">
+                <div className="max-w-2xl">
+                  <h3 className="flex items-center gap-2.5 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+                    <Icon className="h-5 w-5 text-accent" />
                     {item.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.description}
-                  </p>
+                  <p className="mt-3 text-base leading-relaxed text-muted-foreground">{item.description}</p>
                 </div>
-              </motion.div>
+
+                <ArrowUpRight className="hidden h-6 w-6 translate-y-1 text-muted-foreground/40 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:text-accent group-hover:opacity-100 md:block" />
+              </StaggerItem>
             )
           })}
-        </div>
+        </Stagger>
       </div>
     </section>
   )
