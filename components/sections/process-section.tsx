@@ -1,38 +1,76 @@
 "use client"
 
-import { useRef } from "react"
-import { motion, useScroll, useSpring, useTransform } from "framer-motion"
 import { Check } from "lucide-react"
 import type { ProcessStep } from "@/lib/db"
 import { iconMap, DefaultIcon } from "@/lib/icon-map"
-import { Reveal, Stagger, StaggerItem, Parallax } from "@/components/anim"
+import { Reveal, Parallax } from "@/components/anim"
+import {
+  SketchCircle,
+  SketchVerticalLine,
+  SketchUnderline,
+  SketchStar,
+  SketchArrow,
+  SketchSquiggle,
+  SketchCheck,
+} from "@/components/sketch-primitives"
 
 interface ProcessSectionProps {
   steps: ProcessStep[]
   content?: Record<string, unknown>
 }
 
-function Step({ step, index }: { step: ProcessStep; index: number }) {
+/** One step rendered as a hand-drawn, self-animating sketch unit. */
+function SketchStep({ step, index, isLast }: { step: ProcessStep; index: number; isLast: boolean }) {
   const Icon = iconMap[step.icon] || DefaultIcon
+  const d = index * 0.12
+
   return (
-    <StaggerItem from={index % 2 ? "right" : "left"} className="group relative pb-12 last:pb-0">
-      <div className="absolute -left-[2.65rem] top-1 grid h-7 w-7 place-items-center rounded-full border border-border bg-background font-mono text-[10px] font-semibold tabular-nums text-muted-foreground transition-colors duration-500 group-hover:border-accent group-hover:text-accent sm:-left-[3.65rem]">
-        {String(index + 1).padStart(2, "0")}
+    <div className="relative flex gap-5 pb-14 last:pb-0 sm:gap-7">
+      {/* hand-drawn rail: node + connector that draw themselves */}
+      <div className="relative flex shrink-0 flex-col items-center">
+        <div className="relative grid h-16 w-16 shrink-0 place-items-center">
+          <SketchCircle className="text-accent" strokeWidth={2.5} duration={1.4} delay={d} />
+          <span className="font-sketch text-3xl font-bold text-accent">{index + 1}</span>
+        </div>
+        {!isLast && (
+          <div className="relative my-1 min-h-20 w-6 flex-1">
+            <SketchVerticalLine
+              className="absolute inset-0 h-full w-full text-accent/70"
+              strokeWidth={2.5}
+              duration={1.8}
+              delay={d + 0.3}
+            />
+          </div>
+        )}
       </div>
-      <h3 className="flex items-center gap-2.5 text-xl font-semibold tracking-tight text-foreground md:text-2xl">
-        <Icon className="h-5 w-5 text-accent" />
-        {step.title}
-      </h3>
-      <p className="mt-2 max-w-xl text-base leading-relaxed text-muted-foreground">{step.description}</p>
-    </StaggerItem>
+
+      {/* content */}
+      <div className="relative flex-1 pt-2">
+        <div className="mb-2 flex items-center gap-3">
+          <Icon className="h-5 w-5 text-accent" />
+          <h3 className="relative inline-block font-sketch text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            {step.title}
+            <SketchUnderline className="text-accent" strokeWidth={3} duration={1} delay={d + 0.5} />
+          </h3>
+        </div>
+        <p className="max-w-md text-base leading-relaxed text-muted-foreground">{step.description}</p>
+
+        {/* alternating hand-drawn doodle accents */}
+        {index % 3 === 0 && (
+          <SketchStar className="absolute -right-2 -top-3 h-7 w-7 text-accent-2 sm:right-10" delay={d + 0.8} />
+        )}
+        {index % 3 === 1 && (
+          <SketchArrow className="absolute -right-1 top-0 h-12 w-14 text-accent/70 sm:right-8" curve={1.2} delay={d + 0.7} />
+        )}
+        {index % 3 === 2 && (
+          <SketchSquiggle className="mt-4 max-w-40 text-accent/50" delay={d + 0.7} />
+        )}
+      </div>
+    </div>
   )
 }
 
 export function ProcessSection({ steps, content }: ProcessSectionProps) {
-  const sectionRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start 80%", "end 20%"] })
-  const progressY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 1]), { stiffness: 60, damping: 20 })
-
   const label = (content?.label as string) || "Process"
   const title = (content?.title as string) || "From idea to"
   const titleHighlight = (content?.title_highlight as string) || "production"
@@ -49,10 +87,16 @@ export function ProcessSection({ steps, content }: ProcessSectionProps) {
   ]
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden border-t border-border/50 py-24 sm:py-32">
-      <Parallax speed={-55} className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/3 top-1/4 h-80 w-80 rounded-full bg-accent/5 blur-3xl" />
-      </Parallax>
+    <section className="relative border-t border-border/50 py-24 sm:py-32">
+      {/* ghost word clipped in its own box so the section keeps no `overflow`
+          ancestor — otherwise the sticky panel below would break */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <Parallax speed={-44} className="absolute -left-6 top-12 select-none">
+          <span className="block font-mono text-[18vw] font-semibold uppercase leading-none tracking-[-0.05em] text-muted-foreground/5">
+            FLOW
+          </span>
+        </Parallax>
+      </div>
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-16 max-w-3xl">
@@ -69,35 +113,34 @@ export function ProcessSection({ steps, content }: ProcessSectionProps) {
           </Reveal>
         </div>
 
-        <div className="grid items-start gap-16 lg:grid-cols-[1fr_340px]">
-          {/* steps on a rail */}
-          <div className="relative ml-10 border-l border-border/50 pl-10 sm:ml-14 sm:pl-14">
-            <motion.div className="absolute -left-px top-0 h-full w-px origin-top bg-accent" style={{ scaleY: progressY }} />
-            <Stagger stagger={0.12} className="flex flex-col">
-              {steps.map((step, i) => (
-                <Step key={step.id} step={step} index={i} />
-              ))}
-            </Stagger>
+        {/* LEFT = scrolling hand-drawn sketch journey · RIGHT = sticky panel */}
+        <div className="grid items-start gap-12 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
+          <div>
+            {steps.map((step, i) => (
+              <SketchStep key={step.id} step={step} index={i} isLast={i === steps.length - 1} />
+            ))}
           </div>
 
-          {/* commitment — card-free, anchored by a left accent rule */}
-          <Reveal from="right" delay={0.15} className="lg:sticky lg:top-28">
-            <div className="border-l-2 border-accent/40 pl-6">
+          {/* sticky commitment — stays pinned while the sketch scrolls */}
+          <div className="lg:sticky lg:top-24 lg:self-start">
+            <div className="relative border-l-2 border-accent/40 pl-6">
               <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent">{panelLabel}</p>
-              <h3 className="mt-4 text-2xl font-semibold leading-tight tracking-tight text-foreground">{panelTitle}</h3>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{panelDescription}</p>
-              <Stagger stagger={0.08} delay={0.15} className="mt-7 flex flex-col gap-3">
+              <h3 className="relative mt-4 inline-block font-sketch text-3xl font-bold leading-tight tracking-tight text-foreground">
+                {panelTitle}
+                <SketchUnderline className="text-accent" strokeWidth={3} delay={0.4} />
+              </h3>
+              <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{panelDescription}</p>
+              <div className="mt-7 flex flex-col gap-3.5">
                 {panelItems.map((item) => (
-                  <StaggerItem key={item} from="left" distance={24} className="flex items-center gap-3 text-sm text-foreground">
-                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full border border-accent/30 bg-accent/15 text-accent">
-                      <Check className="h-3 w-3" />
-                    </span>
+                  <div key={item} className="flex items-center gap-3 text-sm text-foreground">
+                    <SketchCheck className="h-5 w-5 shrink-0 text-accent" />
                     {item}
-                  </StaggerItem>
+                  </div>
                 ))}
-              </Stagger>
+              </div>
+              <SketchStar className="absolute -right-2 top-0 h-6 w-6 text-accent-2" delay={0.9} />
             </div>
-          </Reveal>
+          </div>
         </div>
       </div>
     </section>
