@@ -1,256 +1,158 @@
 "use client"
 
 /**
- * ScrollProjectsSection — a pinned, scroll-driven "deck → grid" reveal.
- *
- * The cards live in their real responsive grid; we measure each slot, then on
- * scroll-start offset them back into a tilted, overlapping cluster and
- * interpolate them into their grid positions as the user scrolls. Smooth,
- * staggered, and resolution-independent (only a transform is animated, layout
- * is real CSS grid). Modeled on the Shakira-Yanti reference.
+ * Projects showcase — CARD-FREE. A large editorial index: an interactive list
+ * of project titles on the left; hovering a title morphs a big cinematic
+ * preview on the right (with 3D tilt + parallax). No boxes, no bento grid.
  */
 
 import Link from "next/link"
 import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
-import { motion, useScroll, useTransform, type MotionValue } from "framer-motion"
+import { useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 import { ArrowUpRight } from "lucide-react"
 import type { Project } from "@/lib/db"
-import { Reveal, Parallax } from "@/components/anim"
-
-const GRADIENTS = [
-  "from-violet-600 via-indigo-500 to-blue-600",
-  "from-rose-500 via-pink-500 to-purple-600",
-  "from-amber-500 via-orange-500 to-rose-500",
-  "from-emerald-500 via-teal-500 to-cyan-500",
-]
-// Per-card cluster scatter (px) + fan rotation (deg) at scroll-start.
-const SCATTER: [number, number][] = [
-  [-46, -26],
-  [42, -34],
-  [-30, 30],
-  [50, 22],
-]
-const ROT = [-9, 7, -6, 8]
-
-const ease = (t: number) => (t <= 0 ? 0 : t >= 1 ? 1 : 1 - Math.pow(1 - t, 3))
-const seg = (p: number, a: number, b: number) =>
-  ease(Math.min(1, Math.max(0, (p - a) / (b - a))))
-
-interface Offset {
-  dx: number
-  dy: number
-  rot: number
-}
-
-function DeckCard({
-  project,
-  index,
-  progress,
-  offset,
-  ready,
-  registerRef,
-}: {
-  project: Project
-  index: number
-  progress: MotionValue<number>
-  offset: Offset
-  ready: boolean
-  registerRef: (el: HTMLElement | null) => void
-}) {
-  const start = index * 0.05
-  const end = Math.min(0.98, 0.62 + index * 0.07)
-
-  const x = useTransform(progress, (p) => offset.dx * (1 - seg(p, start, end)))
-  const y = useTransform(progress, (p) => offset.dy * (1 - seg(p, start, end)))
-  const rotate = useTransform(progress, (p) => offset.rot * (1 - seg(p, start, end)))
-  const scale = useTransform(progress, (p) => 0.8 + 0.2 * seg(p, start, end))
-
-  const gradient = GRADIENTS[index % GRADIENTS.length]
-
-  return (
-    <motion.div
-      ref={registerRef}
-      style={{ x, y, rotate, scale, zIndex: index, opacity: ready ? 1 : 0 }}
-      className="group relative will-change-transform"
-    >
-      <Link
-        href={`/projects/${project.slug}`}
-        className="flex h-full flex-col overflow-hidden rounded-3xl border transition-colors duration-300"
-        style={{
-          background: "rgba(20,18,26,0.6)",
-          borderColor: "rgba(255,255,255,0.08)",
-          boxShadow: "0 30px 70px -30px rgba(0,0,0,0.7)",
-        }}
-      >
-        {/* visual */}
-        <div className="relative aspect-16/10 w-full overflow-hidden">
-          {project.featured_image ? (
-            <Image
-              src={project.featured_image}
-              alt={project.title}
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, 45vw"
-            />
-          ) : (
-            <>
-              <div className={`absolute inset-0 bg-linear-to-br ${gradient}`} />
-              <div
-                className="absolute -right-4 -bottom-8 select-none font-black leading-none tracking-tighter text-white/15"
-                style={{ fontSize: "9rem" }}
-              >
-                {project.title.charAt(0)}
-              </div>
-            </>
-          )}
-          {/* hover chip */}
-          <div className="pointer-events-none absolute inset-0 grid place-items-center">
-            <span
-              className="translate-y-2 rounded-full px-4 py-1.5 text-xs font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-              style={{ background: "rgba(10,8,12,0.7)", color: "#f5ede6" }}
-            >
-              View Project
-            </span>
-          </div>
-        </div>
-
-        {/* meta */}
-        <div className="flex items-center justify-between gap-4 px-5 py-4">
-          <div className="min-w-0">
-            <h3 className="truncate text-base font-semibold tracking-tight" style={{ color: "#f5ede6" }}>
-              {project.title}
-            </h3>
-            <p className="truncate text-xs" style={{ color: "rgba(245,237,230,0.55)" }}>
-              {project.short_description}
-            </p>
-          </div>
-          <span
-            className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold"
-            style={{ color: "#ff7a18" }}
-          >
-            Peek Inside <ArrowUpRight className="h-3.5 w-3.5" />
-          </span>
-        </div>
-      </Link>
-    </motion.div>
-  )
-}
+import { Reveal, Stagger, StaggerItem, Parallax, TiltCard } from "@/components/anim"
 
 interface ScrollProjectsSectionProps {
   projects: Project[]
   content?: Record<string, unknown>
 }
 
+const GRADIENTS = [
+  "from-accent/30 via-accent-3/20 to-transparent",
+  "from-accent-2/25 via-accent/15 to-transparent",
+  "from-accent-3/25 via-accent/15 to-transparent",
+  "from-accent/25 via-accent-2/15 to-transparent",
+  "from-accent-2/25 via-accent-3/15 to-transparent",
+  "from-accent/30 via-accent-2/15 to-transparent",
+]
+
+function Preview({ project, index }: { project: Project; index: number }) {
+  const gradient = GRADIENTS[index % GRADIENTS.length]
+  return (
+    <motion.div
+      key={project.id}
+      initial={{ opacity: 0, scale: 1.04, rotateY: 8, filter: "blur(12px)" }}
+      animate={{ opacity: 1, scale: 1, rotateY: 0, filter: "blur(0px)" }}
+      exit={{ opacity: 0, scale: 0.98, rotateY: -8, filter: "blur(12px)" }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="absolute inset-0"
+      style={{ transformPerspective: 1200 }}
+    >
+      <div className="relative h-full w-full overflow-hidden rounded-3xl">
+        {project.featured_image ? (
+          <Image src={project.featured_image} alt={project.title} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" />
+        ) : (
+          <div className={`absolute inset-0 bg-linear-to-br ${gradient}`}>
+            <span className="absolute -right-6 -bottom-10 select-none text-[16rem] font-black leading-none text-foreground/10">
+              {project.title.charAt(0)}
+            </span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-linear-to-t from-background/85 via-background/10 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 p-7">
+          <p className="text-xl font-semibold tracking-tight text-foreground">{project.title}</p>
+          <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">{project.short_description}</p>
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+            {project.tech_stack?.slice(0, 4).map((tech) => (
+              <span key={tech} className="font-mono text-xs text-muted-foreground/70">{tech}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 export function ScrollProjectsSection({ projects, content }: ScrollProjectsSectionProps) {
-  const cards = projects.slice(0, 4)
+  const items = projects.slice(0, 6)
+  const [active, setActive] = useState(0)
 
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const gridRef = useRef<HTMLDivElement>(null)
-  const cardEls = useRef<(HTMLElement | null)[]>([])
-  const [offsets, setOffsets] = useState<Offset[]>([])
-  const [ready, setReady] = useState(false)
-
-  const { scrollYProgress } = useScroll({
-    target: wrapperRef,
-    offset: ["start start", "end end"],
-  })
-
-  useEffect(() => {
-    const measure = () => {
-      const grid = gridRef.current
-      if (!grid) return
-      const cx = grid.clientWidth / 2
-      const cy = grid.clientHeight / 2
-      const offs = cardEls.current.slice(0, cards.length).map((el, i) => {
-        if (!el) return { dx: 0, dy: 0, rot: 0 }
-        const ccx = el.offsetLeft + el.offsetWidth / 2
-        const ccy = el.offsetTop + el.offsetHeight / 2
-        const s = SCATTER[i % SCATTER.length]
-        return { dx: cx - ccx + s[0], dy: cy - ccy + s[1], rot: ROT[i % ROT.length] }
-      })
-      setOffsets(offs)
-      setReady(true)
-    }
-    measure()
-    window.addEventListener("resize", measure)
-    return () => window.removeEventListener("resize", measure)
-  }, [cards.length])
-
-  if (cards.length === 0) return null
+  if (items.length === 0) return null
 
   const label = (content?.label as string) || "Featured Work"
   const title = (content?.title as string) || "Selected"
-  const highlight = (content?.title_highlight as string) || "case studies"
+  const highlight = (content?.title_highlight as string) || "case studies."
 
   return (
-    <section ref={wrapperRef} data-scroll-deck className="relative" style={{ height: "240vh", backgroundColor: "#08070b" }}>
-      <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
-        {/* ambient glow — drifts for depth */}
-        <Parallax speed={60} className="pointer-events-none absolute inset-0">
-          <div
-            className="absolute inset-0"
-            style={{ background: "radial-gradient(50% 40% at 50% 30%, rgba(255,122,24,0.10), transparent 70%)" }}
-          />
-        </Parallax>
-        {/* counter-drifting secondary glow for layered parallax */}
-        <Parallax speed={-40} className="pointer-events-none absolute inset-0">
-          <div
-            className="absolute inset-0"
-            style={{ background: "radial-gradient(40% 35% at 70% 80%, rgba(255,77,46,0.08), transparent 70%)" }}
-          />
-        </Parallax>
+    <section className="relative overflow-hidden border-t border-border/50 py-24 sm:py-32">
+      <Parallax speed={-44} className="pointer-events-none absolute -left-6 top-10 -z-10 select-none">
+        <span className="block font-mono text-[18vw] font-semibold uppercase leading-none tracking-[-0.05em] text-muted-foreground/5">
+          WORK
+        </span>
+      </Parallax>
 
-        <div className="relative mx-auto flex h-full w-full max-w-6xl flex-col px-4 py-16 sm:px-6 lg:px-8">
-          {/* heading */}
-          <div className="shrink-0 text-center">
-            <Reveal from="top" distance={32}>
-              <span
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium"
-                style={{ background: "rgba(255,122,24,0.10)", border: "1px solid rgba(255,122,24,0.22)", color: "#ffd24a" }}
-              >
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+          <div>
+            <Reveal from="top">
+              <span className="flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
+                <span className="h-px w-8 bg-accent/60" />
                 {label}
               </span>
             </Reveal>
-            <Reveal from="zoom" delay={0.08} duration={0.9}>
-              <h2
-                className="mt-4 font-black uppercase leading-[0.95] tracking-tighter"
-                style={{ color: "#f5ede6", fontSize: "clamp(2rem,5vw,3.5rem)" }}
-              >
-                {title}{" "}
-                <span
-                  style={{
-                    backgroundImage: "linear-gradient(100deg,#ff4d2e,#ff7a18 50%,#ffd24a)",
-                    WebkitBackgroundClip: "text",
-                    backgroundClip: "text",
-                    color: "transparent",
-                  }}
-                >
-                  {highlight}
-                </span>
+            <Reveal from="left" delay={0.08}>
+              <h2 className="mt-6 text-4xl font-semibold leading-[1.02] tracking-[-0.03em] text-foreground sm:text-5xl md:text-6xl">
+                {title} <span className="text-gradient-static">{highlight}</span>
               </h2>
             </Reveal>
           </div>
+          <Reveal from="right" delay={0.16}>
+            <Link href="/projects" className="group inline-flex items-center gap-2 text-sm font-semibold text-accent">
+              All projects
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </Link>
+          </Reveal>
+        </div>
 
-          {/* the deck → grid */}
-          <div
-            ref={gridRef}
-            className="relative mt-8 grid min-h-0 flex-1 grid-cols-1 gap-5 sm:grid-cols-2 sm:grid-rows-2"
-          >
-            {cards.map((p, i) => (
-              <DeckCard
-                key={p.id}
-                project={p}
-                index={i}
-                progress={scrollYProgress}
-                offset={offsets[i] ?? { dx: 0, dy: 0, rot: 0 }}
-                ready={ready}
-                registerRef={(el) => {
-                  cardEls.current[i] = el
-                }}
-              />
+        <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+          {/* interactive title list */}
+          <Stagger stagger={0.08} className="border-t border-border/50">
+            {items.map((p, i) => (
+              <StaggerItem key={p.id} from="left">
+                <Link
+                  href={`/projects/${p.slug}`}
+                  onMouseEnter={() => setActive(i)}
+                  onFocus={() => setActive(i)}
+                  className="group flex items-center gap-5 border-b border-border/50 py-6"
+                >
+                  <span className={`font-mono text-sm tabular-nums transition-colors ${active === i ? "text-accent" : "text-muted-foreground/40"}`}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  {/* mobile inline preview (card-free, full-bleed) */}
+                  <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl lg:hidden">
+                    {p.featured_image ? (
+                      <Image src={p.featured_image} alt="" fill className="object-cover" sizes="96px" />
+                    ) : (
+                      <div className={`absolute inset-0 bg-linear-to-br ${GRADIENTS[i % GRADIENTS.length]}`} />
+                    )}
+                  </div>
+                  <span
+                    className={`flex-1 text-2xl font-semibold tracking-tight transition-colors duration-300 md:text-3xl ${
+                      active === i ? "text-foreground" : "text-muted-foreground/55 group-hover:text-foreground"
+                    }`}
+                  >
+                    {p.title}
+                  </span>
+                  <ArrowUpRight
+                    className={`h-6 w-6 shrink-0 transition-all duration-300 ${
+                      active === i ? "text-accent opacity-100" : "text-muted-foreground/40 opacity-0 group-hover:opacity-100"
+                    }`}
+                  />
+                </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
+
+          {/* big morphing preview (desktop) */}
+          <Reveal from="right" className="hidden lg:block">
+            <TiltCard max={7} className="sticky top-28 aspect-4/5 w-full">
+              <AnimatePresence mode="wait">
+                <Preview key={active} project={items[active]} index={active} />
+              </AnimatePresence>
+            </TiltCard>
+          </Reveal>
         </div>
       </div>
     </section>

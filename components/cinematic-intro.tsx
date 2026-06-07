@@ -16,6 +16,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { AnimatePresence, motion, type Variants } from "framer-motion"
+import { GeometryCanvas } from "@/components/geometry-canvas"
 
 interface CinematicIntroProps {
   name?: string
@@ -203,6 +204,16 @@ export function CinematicIntro({
             animate={motionOk ? { opacity: [0.55, 1, 0.7], scale: [1, 1.06, 1] } : undefined}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           />
+
+          {/* Advanced 3D geometry animation — the "intro video" centerpiece */}
+          <motion.div
+            className="pointer-events-none absolute inset-0"
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.4, ease: EASE_OUT }}
+          >
+            <GeometryCanvas className="h-full w-full" density={180} />
+          </motion.div>
 
           {/* Faint kinetic backdrop word-strip (CSS `.marquee` self-disables
               under prefers-reduced-motion, so it's always rendered). */}
