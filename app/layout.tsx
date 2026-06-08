@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { SmoothScrollProvider } from "@/components/scroll-provider"
 import { SketchDefs } from "@/components/sketch-primitives"
 import { CinematicIntro } from "@/components/cinematic-intro"
+import { CarCursorMount } from "@/components/car-cursor-mount"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -77,6 +78,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <CinematicIntro />
+          <CarCursorMount />
           <SmoothScrollProvider>
             {children}
           </SmoothScrollProvider>
