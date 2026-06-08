@@ -16,8 +16,7 @@ import {
 } from "framer-motion"
 import { ArrowRight, Github, Linkedin, Twitter, Mail, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Mascot } from "@/components/mascot"
-import { GeometryCanvas } from "@/components/geometry-canvas"
+import { HeroVideo } from "@/components/hero-video"
 import type { SocialLink } from "@/lib/db"
 
 interface CinematicHeroProps {
@@ -90,15 +89,6 @@ export function CinematicHero({
   }, [px, py])
 
   const nameParts = developerName.trim().split(/\s+/)
-  const firstName = nameParts[0] || developerName
-
-  // The mascot's narration.
-  const lines = [
-    `Hey — I'm ${firstName} 👋`,
-    professionalTitle,
-    tagline,
-    "Let's build something great →",
-  ]
 
   return (
     <section
@@ -127,8 +117,6 @@ export function CinematicHero({
             ),
           }}
         />
-        {/* advanced geometry animation — subtle depth layer */}
-        <GeometryCanvas className="absolute inset-0 h-full w-full opacity-60" density={120} speed={0.7} intensity={0.8} />
         {/* light rays from top */}
         <div
           className="absolute inset-x-0 top-0 h-[70vh] opacity-50 mix-blend-screen"
@@ -278,9 +266,14 @@ export function CinematicHero({
           </motion.div>
         </div>
 
-        {/* right: the mascot that tells about you */}
+        {/* right: real video introduction */}
         <div className="order-1 lg:order-2">
-          <Mascot lines={lines} parallaxX={sx} parallaxY={sy} />
+          <HeroVideo
+            name={developerName}
+            title={professionalTitle}
+            parallaxX={sx}
+            parallaxY={sy}
+          />
         </div>
       </div>
 
