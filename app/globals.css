@@ -175,12 +175,6 @@
 
 canvas { touch-action: none; }
 
-/* 3D car cursor: hide the native pointer while the car stands in for it */
-html.car-cursor-on,
-html.car-cursor-on * {
-  cursor: none !important;
-}
-
 /* =========================================================
    MODERN DESIGN SYSTEM UTILITIES
    =========================================================*/

@@ -11,6 +11,9 @@ import { TestimonialsSection } from "@/components/sections/testimonials-section"
 import { BlogPreviewSection } from "@/components/sections/blog-preview-section"
 import { CtaSection } from "@/components/sections/cta-section"
 import { CustomBlocksRenderer } from "@/components/custom-blocks-renderer"
+import { SectionReveal } from "@/components/section-reveal"
+import { SectionRail } from "@/components/section-rail"
+import { SECTION_META } from "@/lib/section-meta"
 import {
   getSiteSettings,
   getHeroSection,
@@ -126,13 +129,34 @@ export default async function HomePage() {
     ) : null,
   }
 
+  // Sections that actually render, in order — drives BOTH the reveal wrappers
+  // and the section rail so they can never drift apart.
+  const visibleIds = order.filter(
+    (id) => sectionComponents[id] != null && SECTION_META[id],
+  )
+  const railItems = visibleIds.map((id) => ({
+    anchorId: SECTION_META[id].anchorId,
+    label: SECTION_META[id].label,
+  }))
+
   return (
     <div className="min-h-screen bg-background relative">
       <Navbar />
+      <SectionRail items={railItems} />
 
       <main className="relative">
         <CustomBlocksRenderer page="home" />
-        {order.map((sectionId) => sectionComponents[sectionId] || null)}
+        {visibleIds.map((id) => (
+          <SectionReveal
+            key={id}
+            anchorId={SECTION_META[id].anchorId}
+            sticky={SECTION_META[id].sticky}
+            isHero={id === "hero"}
+            thin={id === "clients"}
+          >
+            {sectionComponents[id]}
+          </SectionReveal>
+        ))}
       </main>
 
       <Footer />
