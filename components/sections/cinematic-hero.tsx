@@ -1,19 +1,13 @@
 "use client"
 
 /**
- * CinematicHero — a cinematic landing with an animated cartoon mascot of the
- * developer that "speaks" (typewriter narration) and introduces them. Bold
- * fire/ember theme to match the intro. Drop-in replacement for HeroSection.
+ * CinematicHero — a full-screen cinematic landing: a full-bleed video
+ * introduction fills the hero, with the name, tagline and CTAs overlaid on a
+ * readable scrim. Bold fire/ember theme. Drop-in replacement for HeroSection.
  */
 
 import Link from "next/link"
-import { useEffect, useRef, useState } from "react"
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion"
+import { motion } from "framer-motion"
 import { ArrowRight, Github, Linkedin, Twitter, Mail, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { HeroVideo } from "@/components/hero-video"
@@ -44,14 +38,6 @@ const fallbackSocialLinks = [
   { href: "mailto:hello@akash.dev", icon: Mail, label: "Email" },
 ]
 
-const FLOAT_TAGS = [
-  { label: "React", x: "6%", y: "18%", d: 0 },
-  { label: "Next.js", x: "78%", y: "10%", d: 1.2 },
-  { label: "TypeScript", x: "84%", y: "62%", d: 0.6 },
-  { label: "Node", x: "2%", y: "66%", d: 1.8 },
-  { label: "AI", x: "70%", y: "84%", d: 0.9 },
-]
-
 export function CinematicHero({
   developerName,
   professionalTitle,
@@ -66,107 +52,29 @@ export function CinematicHero({
   const availabilityText =
     (content?.availability_text as string) || "Available for new projects"
 
-  const sectionRef = useRef<HTMLElement>(null)
-
-  // pointer parallax (drives the mascot + light)
-  const px = useMotionValue(0)
-  const py = useMotionValue(0)
-  const sx = useSpring(px, { stiffness: 80, damping: 18 })
-  const sy = useSpring(py, { stiffness: 80, damping: 18 })
-  const glowX = useTransform(sx, (v) => `${50 + v * 12}%`)
-  const glowY = useTransform(sy, (v) => `${55 + v * 10}%`)
-
-  useEffect(() => {
-    const el = sectionRef.current
-    if (!el) return
-    const onMove = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect()
-      px.set((e.clientX - r.left) / r.width - 0.5)
-      py.set((e.clientY - r.top) / r.height - 0.5)
-    }
-    el.addEventListener("mousemove", onMove)
-    return () => el.removeEventListener("mousemove", onMove)
-  }, [px, py])
-
   const nameParts = developerName.trim().split(/\s+/)
 
   return (
     <section
-      ref={sectionRef}
-      className="relative min-h-screen flex items-center overflow-hidden"
+      className="relative flex min-h-screen items-center overflow-hidden"
       style={{ backgroundColor: "#08070b" }}
     >
-      {/* ---------- cinematic background ---------- */}
-      <div className="absolute inset-0 -z-10">
-        {/* base gradient */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(120% 80% at 50% -10%, #1a0f08 0%, #0b0810 45%, #08070b 100%)",
-          }}
-        />
-        {/* fire glow that follows the cursor */}
-        <motion.div
-          className="absolute inset-0"
-          style={{
-            background: useTransform(
-              [glowX, glowY],
-              ([x, y]) =>
-                `radial-gradient(40% 45% at ${x} ${y}, rgba(255,122,24,0.22), transparent 70%)`,
-            ),
-          }}
-        />
-        {/* light rays from top */}
-        <div
-          className="absolute inset-x-0 top-0 h-[70vh] opacity-50 mix-blend-screen"
-          style={{
-            background:
-              "conic-gradient(from 180deg at 50% 0%, transparent 0deg, rgba(255,160,60,0.10) 18deg, transparent 36deg, rgba(255,90,40,0.08) 54deg, transparent 72deg, rgba(255,160,60,0.10) 90deg, transparent 108deg)",
-            maskImage: "linear-gradient(to bottom, black, transparent 80%)",
-            WebkitMaskImage: "linear-gradient(to bottom, black, transparent 80%)",
-          }}
-        />
-        {/* grain + line grid for texture */}
-        <div className="absolute inset-0 grain opacity-60" />
-        <div className="absolute inset-0 line-grid opacity-[0.18] mask-fade-radial" />
-        {/* bottom vignette so the next section blends in */}
-        <div
-          className="absolute inset-x-0 bottom-0 h-48"
-          style={{ background: "linear-gradient(to bottom, transparent, #08070b)" }}
-        />
-      </div>
+      {/* ---------- full-screen video introduction ---------- */}
+      <HeroVideo name={developerName} />
 
-      {/* floating tech tags */}
-      {FLOAT_TAGS.map((t) => (
-        <motion.div
-          key={t.label}
-          className="pointer-events-none absolute hidden md:flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium backdrop-blur-md"
-          style={{
-            left: t.x,
-            top: t.y,
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            color: "rgba(245,237,230,0.85)",
-          }}
-          animate={{ y: [0, -14, 0] }}
-          transition={{ duration: 5 + t.d, repeat: Infinity, ease: "easeInOut", delay: t.d }}
-        >
-          <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#ff7a18" }} />
-          {t.label}
-        </motion.div>
-      ))}
-
-      {/* ---------- content ---------- */}
-      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-10 px-4 py-28 sm:px-6 lg:grid-cols-2 lg:px-8">
-        {/* left: copy */}
-        <div className="order-2 text-center lg:order-1 lg:text-left">
+      {/* ---------- overlaid content ---------- */}
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-28 text-center sm:px-6 lg:px-8 lg:text-left">
+        <div className="mx-auto max-w-3xl lg:mx-0">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="mb-7 inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-xs font-medium"
-            style={{ background: "rgba(255,122,24,0.10)", border: "1px solid rgba(255,122,24,0.25)", color: "#ffd24a" }}
+            style={{
+              background: "rgba(255,122,24,0.10)",
+              border: "1px solid rgba(255,122,24,0.25)",
+              color: "#ffd24a",
+            }}
           >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" style={{ background: "#34d399" }} />
@@ -201,8 +109,8 @@ export function CinematicHero({
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="mx-auto mt-6 max-w-md text-base leading-relaxed sm:text-lg lg:mx-0"
-            style={{ color: "rgba(245,237,230,0.7)" }}
+            className="mx-auto mt-6 max-w-xl text-base leading-relaxed sm:text-lg lg:mx-0"
+            style={{ color: "rgba(245,237,230,0.78)" }}
           >
             {tagline}
           </motion.p>
@@ -230,7 +138,7 @@ export function CinematicHero({
               variant="outline"
               size="lg"
               className="h-12 rounded-full px-6 text-sm font-semibold"
-              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.15)", color: "#f5ede6" }}
+              style={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.18)", color: "#f5ede6" }}
             >
               <Link href={secondaryCtaUrl}>{secondaryCtaText}</Link>
             </Button>
@@ -257,23 +165,13 @@ export function CinematicHero({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group rounded-full p-3 transition-colors"
-                style={{ color: "rgba(245,237,230,0.55)" }}
+                style={{ color: "rgba(245,237,230,0.6)" }}
               >
                 <l.Icon className="h-5 w-5 transition-colors group-hover:text-[#ff7a18]" />
                 <span className="sr-only">{l.label}</span>
               </Link>
             ))}
           </motion.div>
-        </div>
-
-        {/* right: real video introduction */}
-        <div className="order-1 lg:order-2">
-          <HeroVideo
-            name={developerName}
-            title={professionalTitle}
-            parallaxX={sx}
-            parallaxY={sy}
-          />
         </div>
       </div>
 

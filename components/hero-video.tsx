@@ -1,57 +1,53 @@
 "use client"
 
 /**
- * HeroVideo — a framed, cinematic "video introduction" player that replaces the
- * cartoon mascot in the hero.
+ * HeroVideo — a FULL-SCREEN video introduction that fills the hero behind the
+ * headline + CTAs.
  *
- *  · plays /hero-intro.mp4 muted-on-load as a silent looping preview
- *  · a tap on the play button unmutes and plays with sound; then a small
- *    play/pause + mute control bar appears
- *  · subtle pointer-parallax tilt (driven by the hero's cursor springs)
- *  · if the video file isn't there yet, it shows a polished fallback frame so
- *    the hero never looks broken — drop hero-intro.mp4 (+ optional
+ *  · plays /hero-intro.mp4 full-bleed (object-cover), muted + looping on load
+ *  · cinematic scrims keep the overlaid text readable
+ *  · a small corner control bar toggles play/pause and sound (tap unmute to
+ *    hear the intro)
+ *  · if the video file isn't there yet, it shows a polished fallback backdrop
+ *    so the hero never looks broken — drop hero-intro.mp4 (+ optional
  *    hero-poster.jpg) into /public to go live.
+ *
+ * Assumes it is mounted inside a `position: relative` hero <section>; it renders
+ * its own absolute background layer (-z-10) and a z-20 corner control bar.
  */
 
 import { useRef, useState } from "react"
-import { motion, useTransform, type MotionValue } from "framer-motion"
+import { motion } from "framer-motion"
 import { Play, Pause, Volume2, VolumeX } from "lucide-react"
 
 interface HeroVideoProps {
   name: string
-  title: string
   src?: string
   poster?: string
-  parallaxX: MotionValue<number>
-  parallaxY: MotionValue<number>
 }
 
 export function HeroVideo({
   name,
-  title,
   src = "/hero-intro.mp4",
   poster = "/hero-poster.jpg",
-  parallaxX,
-  parallaxY,
 }: HeroVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [failed, setFailed] = useState(false)
   const [soundOn, setSoundOn] = useState(false)
   const [paused, setPaused] = useState(false)
 
-  const rotateY = useTransform(parallaxX, [-0.5, 0.5], [9, -9])
-  const rotateX = useTransform(parallaxY, [-0.5, 0.5], [-7, 7])
-
   const firstName = name.trim().split(/\s+/)[0] || name
 
-  const enableSound = () => {
+  const toggleSound = () => {
     const v = videoRef.current
     if (!v) return
-    v.muted = false
-    v.volume = 1
-    void v.play()
-    setSoundOn(true)
-    setPaused(false)
+    v.muted = !v.muted
+    if (!v.muted) {
+      v.volume = 1
+      void v.play()
+      setPaused(false)
+    }
+    setSoundOn(!v.muted)
   }
 
   const togglePlay = () => {
@@ -66,40 +62,19 @@ export function HeroVideo({
     }
   }
 
-  const toggleMute = () => {
-    const v = videoRef.current
-    if (!v) return
-    v.muted = !v.muted
-    setSoundOn(!v.muted)
+  const showHint = process.env.NODE_ENV !== "production"
+  const ctrl =
+    "grid h-10 w-10 place-items-center rounded-full border backdrop-blur-md transition-colors"
+  const ctrlStyle = {
+    background: "rgba(8,7,11,0.45)",
+    borderColor: "rgba(245,237,230,0.15)",
+    color: "#f5ede6",
   }
 
-  const showHint = process.env.NODE_ENV !== "production"
-
   return (
-    <div className="relative mx-auto w-full max-w-md">
-      {/* ambient ember glow behind the frame */}
-      <div
-        className="pointer-events-none absolute -inset-6 -z-10 rounded-[3rem] opacity-70 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(60% 60% at 50% 40%, rgba(255,90,40,0.45), transparent 70%)",
-        }}
-      />
-
-      <motion.div
-        style={{ rotateX, rotateY, transformPerspective: 1100 }}
-        className="group relative aspect-4/5 w-full overflow-hidden rounded-[2rem]"
-      >
-        {/* frame ring + depth shadow */}
-        <div className="pointer-events-none absolute inset-0 z-30 rounded-[2rem] ring-1 ring-inset ring-white/12" />
-        <div
-          className="pointer-events-none absolute inset-0 z-30 rounded-[2rem]"
-          style={{
-            boxShadow:
-              "inset 0 0 0 1px rgba(255,122,24,0.25), 0 40px 80px -24px rgba(0,0,0,0.65)",
-          }}
-        />
-
+    <>
+      {/* full-bleed video background + cinematic scrims */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
         {failed ? (
           <Fallback firstName={firstName} showHint={showHint} />
         ) : (
@@ -117,70 +92,42 @@ export function HeroVideo({
           />
         )}
 
-        {/* top vignette + live "Intro" label */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-24 bg-linear-to-b from-black/50 to-transparent" />
-        <div className="absolute left-4 top-4 z-20 flex items-center gap-2 rounded-full bg-black/40 px-3 py-1 backdrop-blur-md">
-          <span className="relative flex h-2 w-2">
-            <span
-              className="absolute inline-flex h-full w-full animate-ping rounded-full"
-              style={{ background: "#ff7a18" }}
-            />
-            <span
-              className="relative inline-flex h-2 w-2 rounded-full"
-              style={{ background: "#ff7a18" }}
-            />
-          </span>
-          <span
-            className="text-[10px] font-mono uppercase tracking-[0.2em]"
-            style={{ color: "rgba(245,237,230,0.85)" }}
-          >
-            Intro
-          </span>
-        </div>
+        {/* left-darkening scrim so left/centered copy stays legible */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to right, rgba(8,7,11,0.88) 0%, rgba(8,7,11,0.55) 45%, rgba(8,7,11,0.15) 100%)",
+          }}
+        />
+        {/* bottom-up scrim + vignette to blend into the next section */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, #08070b 0%, rgba(8,7,11,0.35) 32%, transparent 65%)",
+          }}
+        />
+        <div className="grain absolute inset-0 opacity-40" />
+      </div>
 
-        {/* big play-with-sound button, shown until sound is enabled */}
-        {!failed && !soundOn && (
-          <button
-            onClick={enableSound}
-            aria-label="Play introduction with sound"
-            className="absolute inset-0 z-20 grid place-items-center outline-none"
-          >
-            <motion.span
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              whileHover={{ scale: 1.06 }}
-              whileTap={{ scale: 0.96 }}
-              className="grid h-16 w-16 place-items-center rounded-full shadow-2xl"
-              style={{ background: "linear-gradient(100deg,#ff4d2e,#ff7a18)" }}
-            >
-              <Play className="ml-0.5 h-7 w-7" fill="#1a0a04" stroke="#1a0a04" />
-            </motion.span>
+      {/* corner control bar (above the overlaid content) */}
+      {!failed && (
+        <div className="absolute bottom-6 right-5 z-20 flex items-center gap-2 sm:bottom-8 sm:right-8">
+          <button onClick={togglePlay} aria-label={paused ? "Play" : "Pause"} className={ctrl} style={ctrlStyle}>
+            {paused ? <Play className="ml-0.5 h-4 w-4" /> : <Pause className="h-4 w-4" />}
           </button>
-        )}
-
-        {/* control bar, once sound is enabled */}
-        {!failed && soundOn && (
-          <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between gap-2 bg-linear-to-t from-black/65 to-transparent px-4 pb-4 pt-12 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-            <button
-              onClick={togglePlay}
-              aria-label={paused ? "Play" : "Pause"}
-              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 backdrop-blur-md transition-colors hover:bg-white/20"
-              style={{ color: "#f5ede6" }}
-            >
-              {paused ? <Play className="ml-0.5 h-4 w-4" /> : <Pause className="h-4 w-4" />}
-            </button>
-            <button
-              onClick={toggleMute}
-              aria-label="Mute"
-              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 backdrop-blur-md transition-colors hover:bg-white/20"
-              style={{ color: "#f5ede6" }}
-            >
-              <Volume2 className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-      </motion.div>
-    </div>
+          <button
+            onClick={toggleSound}
+            aria-label={soundOn ? "Mute introduction" : "Play introduction with sound"}
+            className={ctrl}
+            style={ctrlStyle}
+          >
+            {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+          </button>
+        </div>
+      )}
+    </>
   )
 }
 
@@ -190,10 +137,9 @@ function Fallback({ firstName, showHint }: { firstName: string; showHint: boolea
       className="absolute inset-0 grid place-items-center"
       style={{
         background:
-          "radial-gradient(80% 70% at 50% 35%, #2a1207, #120a14 70%, #0b0810)",
+          "radial-gradient(120% 80% at 50% 30%, #2a1207 0%, #120a14 55%, #08070b 100%)",
       }}
     >
-      <div className="grain absolute inset-0 opacity-40" />
       <div className="relative z-10 flex flex-col items-center gap-4 px-6 text-center">
         <motion.span
           animate={{ scale: [1, 1.07, 1] }}
