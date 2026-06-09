@@ -79,26 +79,28 @@ function TimelineItem({ exp, index }: { exp: Experience; index: number }) {
 
 export function ExperienceTimeline({ experiences, education, certifications, content }: ExperienceTimelineProps) {
   return (
-    <section className="relative overflow-hidden border-t border-border/50 py-24 sm:py-32">
-      {/* background glow drifts up, ghost count drifts down — layered depth */}
-      <Parallax
-        speed={-44}
-        className="pointer-events-none absolute -left-24 top-1/3 -z-10 h-[28rem] w-[28rem] opacity-50"
-      >
-        <div
-          className="h-full w-full rounded-full blur-3xl"
-          style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(255,122,24,0.07), transparent 70%)" }}
-        />
-      </Parallax>
+    <section className="relative border-t border-border/50 py-24 sm:py-32">
+      {/* Decorative layers live in their OWN overflow-hidden box so the
+          <section> keeps NO overflow ancestor. overflow:hidden on ANY ancestor
+          breaks position:sticky — that's why the side panel wasn't pinning. */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        {/* background glow drifts up, ghost count drifts down — layered depth */}
+        <Parallax
+          speed={-44}
+          className="absolute -left-24 top-1/3 h-[28rem] w-[28rem] opacity-50"
+        >
+          <div
+            className="h-full w-full rounded-full blur-3xl"
+            style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(255,122,24,0.07), transparent 70%)" }}
+          />
+        </Parallax>
 
-      <Parallax
-        speed={40}
-        className="pointer-events-none absolute right-0 top-12 -z-10 select-none"
-      >
-        <span className="font-mono text-[9rem] font-black leading-none tracking-tighter text-muted-foreground/5 sm:text-[14rem]">
-          {String(experiences.length).padStart(2, "0")}
-        </span>
-      </Parallax>
+        <Parallax speed={40} className="absolute right-0 top-12 select-none">
+          <span className="font-mono text-[9rem] font-black leading-none tracking-tighter text-muted-foreground/5 sm:text-[14rem]">
+            {String(experiences.length).padStart(2, "0")}
+          </span>
+        </Parallax>
+      </div>
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* header group — eyebrow drops from top, heading slides from left */}
