@@ -11,6 +11,7 @@ import { motion } from "framer-motion"
 import { ArrowRight, Github, Linkedin, Twitter, Mail, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { HeroVideo } from "@/components/hero-video"
+import { SpeakingIntro } from "@/components/speaking-intro"
 import type { SocialLink } from "@/lib/db"
 
 interface CinematicHeroProps {
@@ -53,6 +54,25 @@ export function CinematicHero({
     (content?.availability_text as string) || "Available for new projects"
 
   const nameParts = developerName.trim().split(/\s+/)
+  const firstName = nameParts[0] || developerName
+
+  // The spoken introduction — built from the real résumé content. Overridable
+  // via the page content store, but defaults to Akash's story so it speaks even
+  // before anything is set in the DB.
+  const introLines = (content?.intro_lines as string[]) || [
+    `Hi — I'm ${firstName}, a ${professionalTitle.toLowerCase()}.`,
+    "For over two years I've built scalable web applications with Next.js, React, TypeScript, and Node.js.",
+    "I've shipped AI-powered tools that cut API costs by fifty percent and boosted efficiency by thirty percent.",
+    "And I've scaled multilingual platforms to more than two hundred countries across a hundred and ten languages.",
+    "Let's build something great together.",
+  ]
+  const metrics = (content?.metrics as string[]) || [
+    "2+ yrs experience",
+    "50% lower API costs",
+    "+30% efficiency",
+    "200+ countries",
+    "110+ languages",
+  ]
 
   return (
     <section
@@ -106,14 +126,22 @@ export function CinematicHero({
           </motion.h1>
 
           <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.18 }}
+            className="mt-4 text-sm font-mono uppercase tracking-[0.28em]"
+            style={{ color: "#ff9a4a" }}
+          >
+            {professionalTitle}
+          </motion.p>
+
+          <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="mx-auto mt-6 max-w-xl text-base leading-relaxed sm:text-lg lg:mx-0"
-            style={{ color: "rgba(245,237,230,0.78)" }}
           >
-            {tagline}
-          </motion.p>
+            <SpeakingIntro idle={tagline} lines={introLines} metrics={metrics} />
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 16 }}

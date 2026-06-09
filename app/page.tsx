@@ -80,9 +80,9 @@ export default async function HomePage() {
     hero: show("hero") ? (
       <CinematicHero
         key="hero"
-        developerName={siteSettings?.developer_name || "Alex Chen"}
-        professionalTitle={siteSettings?.professional_title || "Full-Stack Product Engineer"}
-        tagline={siteSettings?.tagline || "I build scalable SaaS platforms, AI tools, and high-performance web applications."}
+        developerName={siteSettings?.developer_name || "Akash Vishwakarma"}
+        professionalTitle={siteSettings?.professional_title || "Full-Stack Developer"}
+        tagline={siteSettings?.tagline || "I build scalable, multilingual web platforms and AI-powered tools with Next.js, React, TypeScript & Node.js."}
         primaryCtaText={heroSection?.primary_cta_text || "View Case Studies"}
         primaryCtaUrl={heroSection?.primary_cta_url || "/projects"}
         secondaryCtaText={heroSection?.secondary_cta_text || "Start a Project"}
