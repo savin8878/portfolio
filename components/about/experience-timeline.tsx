@@ -1,13 +1,26 @@
 "use client"
 
-import Image from "next/image"
-import { motion } from "framer-motion"
-import { Briefcase, GraduationCap, Award } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+/**
+ * ExperienceTimeline — mirrors the homepage Process section: a hand-drawn,
+ * self-animating sketch journey on the LEFT (experience → education →
+ * certifications, each a numbered sketch unit) and a sticky "At a glance"
+ * commitment-style panel on the RIGHT that stays pinned while the journey
+ * scrolls. Same fire/ember + Caveat sketch aesthetic.
+ */
+
+import { GraduationCap, Award, Briefcase, type LucideIcon } from "lucide-react"
 import type { Experience, Education, Certification } from "@/lib/db"
-import { Reveal, Stagger, StaggerItem, Parallax, TiltCard } from "@/components/anim"
+import { Reveal, Parallax } from "@/components/anim"
+import {
+  SketchCircle,
+  SketchVerticalLine,
+  SketchUnderline,
+  SketchStar,
+  SketchArrow,
+  SketchSquiggle,
+  SketchCheck,
+} from "@/components/sketch-primitives"
 import { SectionSketches } from "@/components/section-sketches"
-import { SketchUnderline, SketchStar, SketchArrow } from "@/components/sketch-primitives"
 
 interface ExperienceTimelineProps {
   experiences: Experience[]
@@ -21,235 +34,193 @@ function formatDate(date: Date | null): string {
   return new Date(date).toLocaleDateString("en-US", { month: "short", year: "numeric" })
 }
 
-function TimelineItem({ exp, index }: { exp: Experience; index: number }) {
+/** A single unified entry in the career journey (job, degree or certificate). */
+interface JourneyEntry {
+  icon: LucideIcon
+  title: string
+  subtitle?: string
+  meta?: string
+  description?: string
+  bullets?: string[]
+  tech?: string[]
+}
+
+/** One entry rendered as a hand-drawn, self-animating sketch unit. */
+function JourneyStep({ entry, index, isLast }: { entry: JourneyEntry; index: number; isLast: boolean }) {
+  const Icon = entry.icon
+  const d = index * 0.12
+
   return (
-    <StaggerItem
-      from={index % 2 ? "right" : "left"}
-      className="group relative pb-12 last:pb-0"
-    >
-      <div className="absolute -left-[2.65rem] top-1 grid h-7 w-7 place-items-center rounded-full border border-border bg-background font-mono text-[10px] font-semibold tabular-nums text-muted-foreground transition-colors duration-500 group-hover:border-accent group-hover:text-accent sm:-left-[3.65rem]">
-        {String(index + 1).padStart(2, "0")}
-      </div>
-
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex items-center gap-3">
-          {exp.company_logo ? (
-            <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-border/50 bg-muted">
-              <Image src={exp.company_logo} alt={exp.company_name} fill className="object-contain p-1" sizes="36px" />
-            </div>
-          ) : null}
-          <div>
-            <h3 className="text-xl font-semibold tracking-tight text-foreground transition-colors group-hover:text-accent md:text-2xl">
-              {exp.job_title}
-            </h3>
-            <p className="text-sm font-medium text-accent">{exp.company_name}</p>
+    <div className="relative flex gap-5 pb-14 last:pb-0 sm:gap-7">
+      {/* hand-drawn rail: numbered node + connector that draw themselves */}
+      <div className="relative flex shrink-0 flex-col items-center">
+        <div className="relative grid h-16 w-16 shrink-0 place-items-center">
+          <SketchCircle className="text-accent" strokeWidth={2.5} duration={1.4} delay={d} />
+          <span className="font-sketch text-3xl font-bold text-accent">{index + 1}</span>
+        </div>
+        {!isLast && (
+          <div className="relative my-1 min-h-20 w-6 flex-1">
+            <SketchVerticalLine
+              className="absolute inset-0 h-full w-full text-accent/70"
+              strokeWidth={2.5}
+              duration={1.8}
+              delay={d + 0.3}
+            />
           </div>
-        </div>
-        <div className="text-right font-mono text-xs text-muted-foreground">
-          <p className="tabular-nums">
-            {formatDate(exp.start_date)} — {exp.is_current ? "Present" : formatDate(exp.end_date)}
-          </p>
-          <p className="mt-0.5">{exp.location}</p>
-        </div>
+        )}
       </div>
 
-      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{exp.description}</p>
-
-      {exp.achievements && exp.achievements.length > 0 && (
-        <ul className="mt-4 flex flex-col gap-2">
-          {exp.achievements.map((a) => (
-            <li key={a} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-              {a}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {exp.tech_used && exp.tech_used.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1">
-          {exp.tech_used.map((tech) => (
-            <span key={tech} className="font-mono text-xs text-muted-foreground/60">{tech}</span>
-          ))}
+      {/* content */}
+      <div className="relative flex-1 pt-2">
+        <div className="mb-1 flex items-center gap-3">
+          <Icon className="h-5 w-5 shrink-0 text-accent" />
+          <h3 className="relative inline-block font-sketch text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            {entry.title}
+            <SketchUnderline className="text-accent" strokeWidth={3} duration={1} delay={d + 0.5} />
+          </h3>
         </div>
-      )}
-    </StaggerItem>
+
+        {entry.subtitle && <p className="text-sm font-medium text-accent">{entry.subtitle}</p>}
+        {entry.meta && <p className="mt-0.5 font-mono text-xs text-muted-foreground">{entry.meta}</p>}
+        {entry.description && (
+          <p className="mt-3 max-w-md text-base leading-relaxed text-muted-foreground">{entry.description}</p>
+        )}
+
+        {entry.bullets && entry.bullets.length > 0 && (
+          <ul className="mt-4 flex flex-col gap-2">
+            {entry.bullets.map((b) => (
+              <li key={b} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                <SketchCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                {b}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {entry.tech && entry.tech.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1">
+            {entry.tech.map((t) => (
+              <span key={t} className="font-mono text-xs text-muted-foreground/60">{t}</span>
+            ))}
+          </div>
+        )}
+
+        {/* alternating hand-drawn doodle accents */}
+        {index % 3 === 0 && (
+          <SketchStar className="absolute -right-2 -top-3 h-7 w-7 text-accent-2 sm:right-10" delay={d + 0.8} />
+        )}
+        {index % 3 === 1 && (
+          <SketchArrow className="absolute -right-1 top-0 h-12 w-14 text-accent/70 sm:right-8" curve={1.2} delay={d + 0.7} />
+        )}
+        {index % 3 === 2 && (
+          <SketchSquiggle className="mt-4 max-w-40 text-accent/50" delay={d + 0.7} />
+        )}
+      </div>
+    </div>
   )
 }
 
 export function ExperienceTimeline({ experiences, education, certifications, content }: ExperienceTimelineProps) {
+  const label = (content?.label as string) || "Career Journey"
+  const title = (content?.title as string) || "Experience &"
+  const titleHighlight = (content?.title_highlight as string) || "background."
+  const panelLabel = (content?.panel_label as string) || "At a glance"
+  const panelTitle = (content?.panel_title as string) || "Career highlights"
+  const panelDescription =
+    (content?.panel_description as string) ||
+    "Years of building products that scale, shipping AI-powered tools, and turning complex problems into elegant, reliable solutions."
+  const panelItems = (content?.panel_items as string[]) || [
+    "2+ years in full-stack development",
+    "Scaled platforms to 200+ countries",
+    "AI-powered tooling & automation",
+    "Product-driven engineering",
+  ]
+
+  // One continuous hand-drawn journey: experience, then education, then certs.
+  const entries: JourneyEntry[] = [
+    ...experiences.map((e) => ({
+      icon: Briefcase,
+      title: e.job_title,
+      subtitle: e.company_name,
+      meta: `${formatDate(e.start_date)} — ${e.is_current ? "Present" : formatDate(e.end_date)}${e.location ? ` · ${e.location}` : ""}`,
+      description: e.description,
+      bullets: e.achievements ?? undefined,
+      tech: e.tech_used ?? undefined,
+    })),
+    ...education.map((ed) => ({
+      icon: GraduationCap,
+      title: ed.degree,
+      subtitle: ed.institution,
+      meta: `${formatDate(ed.start_date)} — ${formatDate(ed.end_date)}`,
+      description: ed.field_of_study ?? undefined,
+    })),
+    ...certifications.map((c) => ({
+      icon: Award,
+      title: c.name,
+      subtitle: c.issuer,
+      meta: formatDate(c.issue_date),
+    })),
+  ]
+
   return (
     <section className="relative border-t border-border/50 py-24 sm:py-32">
-      {/* Decorative layers live in their OWN overflow-hidden box so the
-          <section> keeps NO overflow ancestor. overflow:hidden on ANY ancestor
-          breaks position:sticky — that's why the side panel wasn't pinning. */}
+      {/* ghost word clipped in its own box so the section keeps NO overflow
+          ancestor — otherwise the sticky panel below would break */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        {/* background glow drifts up, ghost count drifts down — layered depth */}
-        <Parallax
-          speed={-44}
-          className="absolute -left-24 top-1/3 h-[28rem] w-[28rem] opacity-50"
-        >
-          <div
-            className="h-full w-full rounded-full blur-3xl"
-            style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(255,122,24,0.07), transparent 70%)" }}
-          />
-        </Parallax>
-
-        <Parallax speed={40} className="absolute right-0 top-12 select-none">
-          <span className="font-mono text-[9rem] font-black leading-none tracking-tighter text-muted-foreground/5 sm:text-[14rem]">
-            {String(experiences.length).padStart(2, "0")}
+        <Parallax speed={-44} className="absolute -left-6 top-12 select-none">
+          <span className="block font-mono text-[18vw] font-semibold uppercase leading-none tracking-[-0.05em] text-muted-foreground/5">
+            PATH
           </span>
         </Parallax>
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        {/* header group — eyebrow drops from top, heading slides from left */}
-        <div className="mb-14">
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-16 max-w-3xl">
           <Reveal from="top">
             <span className="flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
               <span className="h-px w-8 bg-accent/60" />
-              {(content?.label as string) || "Career Journey"}
+              {label}
             </span>
           </Reveal>
           <Reveal from="left" delay={0.08}>
             <h2 className="mt-6 text-4xl font-semibold leading-[1.02] tracking-[-0.03em] text-foreground sm:text-5xl md:text-6xl">
-              {(content?.title as string) || "Experience &"}{" "}
-              <span className="relative inline-block text-gradient-static">
-                {(content?.title_highlight as string) || "background."}
-                <SketchUnderline className="text-accent" delay={0.55} />
-              </span>
+              {title} <span className="text-gradient-static">{titleHighlight}</span>
             </h2>
           </Reveal>
         </div>
 
-        <Tabs defaultValue="experience" className="w-full">
-          <Reveal from="zoom" delay={0.1}>
-            <TabsList className="mb-14 inline-flex h-12 rounded-full border border-border/50 bg-card p-1">
-              <TabsTrigger value="experience" className="gap-2 rounded-full px-6 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
-                <Briefcase className="h-4 w-4" /> <span className="hidden sm:inline">Experience</span>
-              </TabsTrigger>
-              <TabsTrigger value="education" className="gap-2 rounded-full px-6 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
-                <GraduationCap className="h-4 w-4" /> <span className="hidden sm:inline">Education</span>
-              </TabsTrigger>
-              <TabsTrigger value="certifications" className="gap-2 rounded-full px-6 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
-                <Award className="h-4 w-4" /> <span className="hidden sm:inline">Certifications</span>
-              </TabsTrigger>
-            </TabsList>
-          </Reveal>
+        {/* LEFT = scrolling hand-drawn journey · RIGHT = sticky panel */}
+        <div className="grid items-start gap-12 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
+          <div>
+            {entries.map((entry, i) => (
+              <JourneyStep key={`${entry.title}-${i}`} entry={entry} index={i} isLast={i === entries.length - 1} />
+            ))}
+          </div>
 
-          {/* Experience */}
-          <TabsContent value="experience">
-            <div className="grid items-start gap-16 lg:grid-cols-[1fr_340px]">
-              <Stagger stagger={0.09} className="relative ml-10 border-l border-border/50 pl-10 sm:ml-14 sm:pl-14">
-                {experiences.map((exp, i) => (
-                  <TimelineItem key={exp.id} exp={exp} index={i} />
-                ))}
-              </Stagger>
-
-              {/* sticky side panel — stays pinned while the timeline scrolls.
-                  Opacity-only entrance (no transform) + lg:self-start so the
-                  position:sticky pin isn't broken; TiltCard adds a hover tilt. */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true, margin: "-10% 0px" }}
-                transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="hidden lg:sticky lg:top-28 lg:block lg:self-start"
-              >
-                <TiltCard className="relative rounded-3xl border border-border/60 bg-card/40 p-8 backdrop-blur-sm">
-                  <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent">
-                    {(content?.panel_label as string) || "At a glance"}
-                  </p>
-                  <h3 className="mt-4 text-2xl font-semibold leading-tight tracking-tight text-foreground">
-                    {(content?.panel_title as string) || "Career highlights"}
-                  </h3>
-                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                    {(content?.panel_description as string) ||
-                      "Years of building products that scale, leading teams, and turning complex problems into elegant solutions."}
-                  </p>
-                  <div className="mt-7 flex flex-col gap-3">
-                    {((content?.panel_items as string[]) || [
-                      "2+ years in full-stack development",
-                      "Scaled platforms to 200+ countries",
-                      "AI-powered tooling & automation",
-                      "Product-driven engineering",
-                    ]).map((item) => (
-                      <div key={item} className="flex items-center gap-3 text-sm text-foreground">
-                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                        {item}
-                      </div>
-                    ))}
+          {/* sticky highlights — stays pinned while the journey scrolls */}
+          <div className="lg:sticky lg:top-24 lg:self-start">
+            <div className="relative border-l-2 border-accent/40 pl-6">
+              <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent">{panelLabel}</p>
+              <h3 className="relative mt-4 inline-block font-sketch text-3xl font-bold leading-tight tracking-tight text-foreground">
+                {panelTitle}
+                <SketchUnderline className="text-accent" strokeWidth={3} delay={0.4} />
+              </h3>
+              <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{panelDescription}</p>
+              <div className="mt-7 flex flex-col gap-3.5">
+                {panelItems.map((item) => (
+                  <div key={item} className="flex items-center gap-3 text-sm text-foreground">
+                    <SketchCheck className="h-5 w-5 shrink-0 text-accent" />
+                    {item}
                   </div>
-
-                  {/* hand-drawn accents on the pinned card */}
-                  <SketchStar className="pointer-events-none absolute -right-3 -top-3 h-7 w-7 text-accent-2" />
-                  <SketchArrow
-                    className="pointer-events-none absolute -bottom-7 -left-7 hidden h-12 w-14 text-accent/70 xl:block"
-                    curve={1.2}
-                    flipX
-                    flipY
-                  />
-                </TiltCard>
-              </motion.div>
+                ))}
+              </div>
+              <SketchStar className="absolute -right-2 top-0 h-6 w-6 text-accent-2" delay={0.9} />
             </div>
-          </TabsContent>
-
-          {/* Education */}
-          <TabsContent value="education">
-            {education.length > 0 ? (
-              <Stagger stagger={0.08} className="max-w-3xl border-t border-border/50">
-                {education.map((edu, i) => (
-                  <StaggerItem key={edu.id} from={i % 2 ? "right" : "left"}>
-                    <div className="group flex items-start justify-between gap-6 border-b border-border/50 py-7">
-                      <div className="flex items-start gap-4">
-                        <GraduationCap className="mt-1 h-5 w-5 shrink-0 text-accent" />
-                        <div>
-                          <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-accent">{edu.degree}</h3>
-                          <p className="text-sm font-medium text-accent">{edu.institution}</p>
-                          {edu.field_of_study && <p className="mt-1 text-sm text-muted-foreground">{edu.field_of_study}</p>}
-                        </div>
-                      </div>
-                      <p className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
-                        {formatDate(edu.start_date)} — {formatDate(edu.end_date)}
-                      </p>
-                    </div>
-                  </StaggerItem>
-                ))}
-              </Stagger>
-            ) : (
-              <p className="py-16 text-center text-muted-foreground">Education details coming soon.</p>
-            )}
-          </TabsContent>
-
-          {/* Certifications */}
-          <TabsContent value="certifications">
-            {certifications.length > 0 ? (
-              <Stagger stagger={0.08} className="max-w-3xl border-t border-border/50">
-                {certifications.map((cert, i) => (
-                  <StaggerItem key={cert.id} from={i % 2 ? "right" : "left"}>
-                    <div className="group flex items-start justify-between gap-6 border-b border-border/50 py-7">
-                      <div className="flex items-start gap-4">
-                        <Award className="mt-1 h-5 w-5 shrink-0 text-accent" />
-                        <div>
-                          <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-accent">{cert.name}</h3>
-                          <p className="text-sm font-medium text-accent">{cert.issuer}</p>
-                        </div>
-                      </div>
-                      <p className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
-                        {formatDate(cert.issue_date)}
-                      </p>
-                    </div>
-                  </StaggerItem>
-                ))}
-              </Stagger>
-            ) : (
-              <p className="py-16 text-center text-muted-foreground">Certifications coming soon.</p>
-            )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
 
-      {/* hand-drawn doodle accents framing the section */}
+      {/* doodle accents framing the section (matches the homepage wrapper) */}
       <SectionSketches seed={4} />
     </section>
   )
