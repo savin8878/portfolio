@@ -1,10 +1,13 @@
 "use client"
 
 import Image from "next/image"
+import { motion } from "framer-motion"
 import { Briefcase, GraduationCap, Award } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Experience, Education, Certification } from "@/lib/db"
 import { Reveal, Stagger, StaggerItem, Parallax, TiltCard } from "@/components/anim"
+import { SectionSketches } from "@/components/section-sketches"
+import { SketchUnderline, SketchStar, SketchArrow } from "@/components/sketch-primitives"
 
 interface ExperienceTimelineProps {
   experiences: Experience[]
@@ -109,7 +112,10 @@ export function ExperienceTimeline({ experiences, education, certifications, con
           <Reveal from="left" delay={0.08}>
             <h2 className="mt-6 text-4xl font-semibold leading-[1.02] tracking-[-0.03em] text-foreground sm:text-5xl md:text-6xl">
               {(content?.title as string) || "Experience &"}{" "}
-              <span className="text-gradient-static">{(content?.title_highlight as string) || "background."}</span>
+              <span className="relative inline-block text-gradient-static">
+                {(content?.title_highlight as string) || "background."}
+                <SketchUnderline className="text-accent" delay={0.55} />
+              </span>
             </h2>
           </Reveal>
         </div>
@@ -138,36 +144,51 @@ export function ExperienceTimeline({ experiences, education, certifications, con
                 ))}
               </Stagger>
 
-              {/* sticky side panel — slides from right, drifts against the page (negative parallax), 3D tilt */}
-              <Reveal from="right" delay={0.15} className="hidden lg:sticky lg:top-28 lg:block">
-                <Parallax speed={-28}>
-                  <TiltCard className="rounded-3xl border border-border/60 bg-card/40 p-8 backdrop-blur-sm">
-                    <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent">
-                      {(content?.panel_label as string) || "At a glance"}
-                    </p>
-                    <h3 className="mt-4 text-2xl font-semibold leading-tight tracking-tight text-foreground">
-                      {(content?.panel_title as string) || "Career highlights"}
-                    </h3>
-                    <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                      {(content?.panel_description as string) ||
-                        "Years of building products that scale, leading teams, and turning complex problems into elegant solutions."}
-                    </p>
-                    <div className="mt-7 flex flex-col gap-3">
-                      {((content?.panel_items as string[]) || [
-                        "8+ years in full-stack development",
-                        "Startup to enterprise scale",
-                        "Team leadership & mentoring",
-                        "Product-driven engineering",
-                      ]).map((item) => (
-                        <div key={item} className="flex items-center gap-3 text-sm text-foreground">
-                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                          {item}
-                        </div>
-                      ))}
-                    </div>
-                  </TiltCard>
-                </Parallax>
-              </Reveal>
+              {/* sticky side panel — stays pinned while the timeline scrolls.
+                  Opacity-only entrance (no transform) + lg:self-start so the
+                  position:sticky pin isn't broken; TiltCard adds a hover tilt. */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: "-10% 0px" }}
+                transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                className="hidden lg:sticky lg:top-28 lg:block lg:self-start"
+              >
+                <TiltCard className="relative rounded-3xl border border-border/60 bg-card/40 p-8 backdrop-blur-sm">
+                  <p className="text-xs font-mono uppercase tracking-[0.2em] text-accent">
+                    {(content?.panel_label as string) || "At a glance"}
+                  </p>
+                  <h3 className="mt-4 text-2xl font-semibold leading-tight tracking-tight text-foreground">
+                    {(content?.panel_title as string) || "Career highlights"}
+                  </h3>
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                    {(content?.panel_description as string) ||
+                      "Years of building products that scale, leading teams, and turning complex problems into elegant solutions."}
+                  </p>
+                  <div className="mt-7 flex flex-col gap-3">
+                    {((content?.panel_items as string[]) || [
+                      "2+ years in full-stack development",
+                      "Scaled platforms to 200+ countries",
+                      "AI-powered tooling & automation",
+                      "Product-driven engineering",
+                    ]).map((item) => (
+                      <div key={item} className="flex items-center gap-3 text-sm text-foreground">
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* hand-drawn accents on the pinned card */}
+                  <SketchStar className="pointer-events-none absolute -right-3 -top-3 h-7 w-7 text-accent-2" />
+                  <SketchArrow
+                    className="pointer-events-none absolute -bottom-7 -left-7 hidden h-12 w-14 text-accent/70 xl:block"
+                    curve={1.2}
+                    flipX
+                    flipY
+                  />
+                </TiltCard>
+              </motion.div>
             </div>
           </TabsContent>
 
@@ -225,6 +246,9 @@ export function ExperienceTimeline({ experiences, education, certifications, con
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* hand-drawn doodle accents framing the section */}
+      <SectionSketches seed={4} />
     </section>
   )
 }
