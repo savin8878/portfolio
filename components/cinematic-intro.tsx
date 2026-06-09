@@ -84,8 +84,8 @@ export function CinematicIntro({
     setMotionOk(!reduce)
 
     // Timeline (ms).
-    const COUNT_OVER = reduce ? 500 : 2300 // counter (and puzzle) resolve window
-    const HOLD = reduce ? 250 : 650 // dwell on the solved name before reveal
+    const COUNT_OVER = reduce ? 500 : 2400 // counter (and puzzle) resolve window
+    const HOLD = reduce ? 250 : 850 // dwell on the solved name before reveal
     const END_AT = COUNT_OVER + HOLD
 
     if (introStartedAt === null) introStartedAt = performance.now()
@@ -117,7 +117,7 @@ export function CinematicIntro({
       // flicker the unsolved glyphs (throttled so it reads as a shuffle)
       if (reduce) {
         setDisplay(target)
-      } else if (now - lastScramble > 55) {
+      } else if (now - lastScramble > 70) {
         lastScramble = now
         let s = ""
         for (let i = 0; i < targetLen; i++) {
@@ -223,33 +223,42 @@ export function CinematicIntro({
             </span>
           </motion.div>
 
-          {/* Center stage — the letter puzzle */}
+          {/* Center stage — the letter puzzle. Each letter is a FIXED-WIDTH cell
+              (so swapping glyphs never shifts the word) with its own gradient
+              (so per-letter transforms are safe), and resolves from a soft,
+              blurred, scaled-down state into sharp focus — a smooth decode. */}
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
             <div
-              className="font-black uppercase leading-[0.85] tracking-tight"
-              style={{
-                fontSize: "clamp(3.5rem, 16vw, 11rem)",
-                backgroundImage: GRADIENT,
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                color: "transparent",
-              }}
+              className="flex justify-center font-black uppercase leading-[0.85]"
+              style={{ fontSize: "clamp(3.5rem, 16vw, 11rem)" }}
               aria-label={target}
             >
-              {display.split("").map((ch, i) => (
-                <span
-                  key={i}
-                  aria-hidden
-                  className="inline-block"
-                  style={{
-                    opacity: i < locked ? 1 : 0.26,
-                    transition: "opacity 0.18s ease",
-                    filter: i < locked ? "none" : "blur(0.4px)",
-                  }}
-                >
-                  {ch}
-                </span>
-              ))}
+              {display.split("").map((ch, i) => {
+                const isLocked = i < locked
+                return (
+                  <span
+                    key={i}
+                    aria-hidden
+                    className="inline-block text-center"
+                    style={{
+                      width: "0.72em",
+                      backgroundImage: GRADIENT,
+                      WebkitBackgroundClip: "text",
+                      backgroundClip: "text",
+                      color: "transparent",
+                      opacity: isLocked ? 1 : 0.22,
+                      filter: isLocked ? "blur(0px)" : "blur(6px)",
+                      transform: isLocked
+                        ? "translateY(0) scale(1)"
+                        : "translateY(0.06em) scale(0.9)",
+                      transition:
+                        "opacity 0.55s ease, filter 0.55s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1)",
+                    }}
+                  >
+                    {ch}
+                  </span>
+                )
+              })}
             </div>
 
             {/* role — fades in once the name is solved */}
