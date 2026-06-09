@@ -23,13 +23,14 @@ import { Play, Pause, Volume2, VolumeX } from "lucide-react"
 interface HeroVideoProps {
   name: string
   src?: string
+  /** optional still frame; omitted by default so there's no 404 if absent */
   poster?: string
 }
 
 export function HeroVideo({
   name,
   src = "/hero-intro.mp4",
-  poster = "/hero-poster.jpg",
+  poster,
 }: HeroVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [failed, setFailed] = useState(false)

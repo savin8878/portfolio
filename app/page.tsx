@@ -146,13 +146,14 @@ export default async function HomePage() {
 
       <main className="relative">
         <CustomBlocksRenderer page="home" />
-        {visibleIds.map((id) => (
+        {visibleIds.map((id, index) => (
           <SectionReveal
             key={id}
             anchorId={SECTION_META[id].anchorId}
             sticky={SECTION_META[id].sticky}
             isHero={id === "hero"}
             thin={id === "clients"}
+            sketchSeed={index}
           >
             {sectionComponents[id]}
           </SectionReveal>

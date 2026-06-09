@@ -29,6 +29,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion"
+import { SectionSketches } from "@/components/section-sketches"
 
 const SPRING = { stiffness: 120, damping: 28, restDelta: 0.001 }
 
@@ -40,6 +41,8 @@ interface SectionRevealProps {
   isHero?: boolean
   /** thin band (logo strip) -> gentler scale so a single row never distorts */
   thin?: boolean
+  /** varies the hand-drawn doodle set per section */
+  sketchSeed?: number
   children: ReactNode
 }
 
@@ -48,6 +51,7 @@ export function SectionReveal({
   sticky = false,
   isHero = false,
   thin = false,
+  sketchSeed = 0,
   children,
 }: SectionRevealProps) {
   const ref = useRef<HTMLElement>(null)
@@ -100,6 +104,7 @@ export function SectionReveal({
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       >
         {children}
+        <SectionSketches seed={sketchSeed} />
       </motion.section>
     )
   }
@@ -112,6 +117,7 @@ export function SectionReveal({
       style={isHero ? { y, scale, opacity } : { y, scale, opacity, clipPath }}
     >
       {children}
+      <SectionSketches seed={sketchSeed} />
     </motion.section>
   )
 }
