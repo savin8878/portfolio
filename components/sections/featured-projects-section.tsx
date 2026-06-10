@@ -4,10 +4,11 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
-import { ArrowRight, ExternalLink, Github, ArrowUpRight } from "lucide-react"
+import { ArrowRight, ExternalLink, Github, ArrowUpRight, Film, Headphones } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { Project } from "@/lib/db"
+import { ProjectExplainer } from "@/components/projects/project-explainer"
 
 const GRADIENTS = [
   "from-violet-600 via-indigo-500 to-blue-600",
@@ -76,6 +77,18 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             <ArrowUpRight className="h-4 w-4 text-white" />
           </div>
 
+          {/* Walkthrough indicator */}
+          {(project.explainer_video_url || project.explainer_audio_url) && (
+            <div
+              className="absolute right-4 bottom-4 z-10 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold text-white"
+              style={{ background: "rgba(26,10,4,0.55)", border: "1px solid rgba(255,122,24,0.4)", backdropFilter: "blur(6px)" }}
+            >
+              {project.explainer_video_url && <Film className="h-3 w-3" style={{ color: "#ff7a18" }} />}
+              {project.explainer_audio_url && <Headphones className="h-3 w-3" style={{ color: "#ff7a18" }} />}
+              Walkthrough
+            </div>
+          )}
+
           {isFeatured && (
             <div className="absolute bottom-0 inset-x-0 p-6 bg-linear-to-t from-black/80 via-black/40 to-transparent">
               <p className="text-white/90 text-sm md:text-base leading-relaxed line-clamp-2 max-w-2xl">
@@ -130,6 +143,15 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
                 </div>
               ))}
             </div>
+          )}
+
+          {(project.explainer_video_url || project.explainer_audio_url) && (
+            <ProjectExplainer
+              title={project.title}
+              videoUrl={project.explainer_video_url}
+              audioUrl={project.explainer_audio_url}
+              className="mt-5"
+            />
           )}
 
           {(project.live_url || project.github_url) && (

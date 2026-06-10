@@ -100,6 +100,8 @@ export interface Project {
   gallery_images: string[] | null
   live_url: string | null
   github_url: string | null
+  explainer_video_url: string | null
+  explainer_audio_url: string | null
   category_id: number | null
   is_featured: boolean
   is_published: boolean

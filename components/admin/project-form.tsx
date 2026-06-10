@@ -32,6 +32,8 @@ interface Project {
   results_metrics?: Record<string, string>
   live_url?: string
   github_url?: string
+  explainer_video_url?: string
+  explainer_audio_url?: string
   is_published: boolean
   is_featured: boolean
 }
@@ -64,6 +66,8 @@ export function ProjectForm({
     results_metrics: project?.results_metrics || {},
     live_url: project?.live_url || "",
     github_url: project?.github_url || "",
+    explainer_video_url: project?.explainer_video_url || "",
+    explainer_audio_url: project?.explainer_audio_url || "",
     is_published: project?.is_published || false,
     is_featured: project?.is_featured || false,
   })
@@ -294,6 +298,51 @@ export function ProjectForm({
                 }
                 placeholder="https://github.com/user/repo"
               />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <div>
+            <h3 className="font-medium text-foreground">Project Walkthrough</h3>
+            <p className="text-sm text-muted-foreground">
+              Optional — let the card play a short explainer. Add either or both;
+              they show up as “Watch” / “Listen” actions on the project card.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="explainer_video_url">Explainer Video URL</Label>
+              <Input
+                id="explainer_video_url"
+                type="url"
+                value={formData.explainer_video_url}
+                onChange={(e) =>
+                  setFormData({ ...formData, explainer_video_url: e.target.value })
+                }
+                placeholder="https://… .mp4  ·  YouTube  ·  Vimeo"
+              />
+              <p className="text-xs text-muted-foreground">
+                A direct <code>.mp4</code>/<code>.webm</code> file, or a YouTube / Vimeo link.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="explainer_audio_url">Explainer Audio URL</Label>
+              <Input
+                id="explainer_audio_url"
+                type="url"
+                value={formData.explainer_audio_url}
+                onChange={(e) =>
+                  setFormData({ ...formData, explainer_audio_url: e.target.value })
+                }
+                placeholder="https://… .mp3 / .m4a"
+              />
+              <p className="text-xs text-muted-foreground">
+                A short spoken note — plays inline with a live waveform.
+              </p>
             </div>
           </div>
         </CardContent>

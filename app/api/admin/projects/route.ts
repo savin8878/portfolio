@@ -16,6 +16,8 @@ export async function POST(request: Request) {
       results_metrics,
       live_url,
       github_url,
+      explainer_video_url,
+      explainer_audio_url,
       is_published,
       is_featured,
     } = body
@@ -24,12 +26,12 @@ export async function POST(request: Request) {
       INSERT INTO projects (
         title, slug, short_description, full_description, problem_statement,
         solution, tech_stack, category_id, results_metrics, live_url,
-        github_url, is_published, is_featured
+        github_url, explainer_video_url, explainer_audio_url, is_published, is_featured
       ) VALUES (
         ${title}, ${slug}, ${short_description}, ${full_description || null},
         ${problem_statement || null}, ${solution || null}, ${tech_stack || []},
         ${category_id || null}, ${results_metrics ? JSON.stringify(results_metrics) : null}, ${live_url || null},
-        ${github_url || null}, ${is_published || false}, ${is_featured || false}
+        ${github_url || null}, ${explainer_video_url || null}, ${explainer_audio_url || null}, ${is_published || false}, ${is_featured || false}
       )
       RETURNING id
     `
@@ -60,6 +62,8 @@ export async function PATCH(request: Request) {
       results_metrics,
       live_url,
       github_url,
+      explainer_video_url,
+      explainer_audio_url,
       is_published,
       is_featured,
     } = body
@@ -77,6 +81,8 @@ export async function PATCH(request: Request) {
         results_metrics = ${results_metrics ? JSON.stringify(results_metrics) : null},
         live_url = ${live_url || null},
         github_url = ${github_url || null},
+        explainer_video_url = ${explainer_video_url || null},
+        explainer_audio_url = ${explainer_audio_url || null},
         is_published = ${is_published || false},
         is_featured = ${is_featured || false},
         updated_at = NOW()
