@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { SmoothScrollProvider } from "@/components/scroll-provider"
 import { SketchDefs } from "@/components/sketch-primitives"
 import { CinematicIntro } from "@/components/cinematic-intro"
+import { TorchCursor } from "@/components/torch-cursor"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -80,6 +81,7 @@ export default function RootLayout({
           <SmoothScrollProvider>
             {children}
           </SmoothScrollProvider>
+          <TorchCursor />
         </ThemeProvider>
       </body>
     </html>

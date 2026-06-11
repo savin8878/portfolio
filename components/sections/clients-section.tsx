@@ -16,7 +16,7 @@ export function ClientsSection({ clients, content }: ClientsSectionProps) {
     <section className="relative py-20 border-y border-border/40 overflow-hidden bg-muted/20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal from="top" className="text-center mb-10">
-          <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+          <span data-thread-heading className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
             <span className="h-px w-6 bg-border" />
             {subtitle}
             <span className="h-px w-6 bg-border" />

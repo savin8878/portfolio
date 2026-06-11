@@ -13,6 +13,7 @@ import { CtaSection } from "@/components/sections/cta-section"
 import { CustomBlocksRenderer } from "@/components/custom-blocks-renderer"
 import { SectionReveal } from "@/components/section-reveal"
 import { SectionRail } from "@/components/section-rail"
+import { HeadingIgnite } from "@/components/heading-ignite"
 import { SECTION_META } from "@/lib/section-meta"
 import {
   getSiteSettings,
@@ -145,6 +146,7 @@ export default async function HomePage() {
       <SectionRail items={railItems} />
 
       <main className="relative">
+        <HeadingIgnite items={railItems} />
         <CustomBlocksRenderer page="home" />
         {visibleIds.map((id, index) => (
           <SectionReveal

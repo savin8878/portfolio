@@ -229,6 +229,91 @@ canvas { touch-action: none; }
   50%      { background-position: 100% 50%; }
 }
 
+/* --- Scroll heading ignite (premium, no rail) ----------- *
+ * Each section heading lights up as it scrolls into focus: a molten gradient
+ * sweeps through the letters and an ember glow blooms.
+ * Toggled by adding `.is-lit` (see components/heading-ignite.tsx). */
+
+/* glow on every lit heading (works for clip-filled titles AND the hero) */
+.thread-heading.is-lit {
+  filter:
+    drop-shadow(0 0 16px oklch(from var(--accent) l c h / 0.42))
+    drop-shadow(0 0 46px oklch(from var(--accent-3) l c h / 0.26));
+}
+
+/* molten gradient swept through the actual letters (skipped on the hero h1) */
+.thread-heading--fill.is-lit {
+  background-image: linear-gradient(
+    95deg,
+    #fff4e6 0%,
+    oklch(from var(--accent-2) l c h) 30%,
+    oklch(from var(--accent) l c h) 64%,
+    oklch(from var(--accent-3) l c h) 100%
+  );
+  background-size: 230% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: thread-heading-sweep 1.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes thread-heading-sweep {
+  0% {
+    background-position: 135% 0;
+    filter: drop-shadow(0 0 3px oklch(from var(--accent) l c h / 0.2));
+  }
+  55% {
+    filter:
+      drop-shadow(0 0 26px oklch(from var(--accent) l c h / 0.75))
+      drop-shadow(0 0 64px oklch(from var(--accent-2) l c h / 0.4));
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thread-heading--fill.is-lit { animation: none; background-position: 0 0; }
+}
+
+/* --- Torch cursor flame flicker (see components/torch-cursor.tsx) --- */
+@keyframes torch-flicker {
+  0%, 100% { filter: brightness(1); }
+  20%      { filter: brightness(1.09); }
+  45%      { filter: brightness(0.93); }
+  70%      { filter: brightness(1.05); }
+  85%      { filter: brightness(0.97); }
+}
+.torch-flicker { animation: torch-flicker 5s ease-in-out infinite; }
+.torch-flicker-fast { animation: torch-flicker 3.1s ease-in-out infinite; }
+
+/* --- "Struck on the anvil" metric strike (see metrics-section.tsx) ---
+ * A number flashes white-hot on impact and tempers down through gold → ember
+ * to its clean resting gradient. drop-shadow glows the real glyph shape (crisp,
+ * no blur on the text itself). */
+@keyframes anvil-temper {
+  0% {
+    filter: brightness(1.55) drop-shadow(0 0 30px rgba(255, 246, 230, 0.95));
+  }
+  22% {
+    filter: brightness(1.4) drop-shadow(0 0 24px oklch(from var(--accent-2) l c h / 0.85));
+  }
+  55% {
+    filter: brightness(1.16) drop-shadow(0 0 15px oklch(from var(--accent) l c h / 0.55));
+  }
+  100% {
+    /* return to the exact non-layered raster path of un-struck siblings */
+    filter: none;
+  }
+}
+.anvil-struck {
+  animation: anvil-temper 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .anvil-struck { animation: none; }
+}
+
 /* --- Gradient border card (conic ring) ------------------ */
 .ring-gradient {
   position: relative;
@@ -488,3 +573,9 @@ canvas { touch-action: none; }
     animation: none !important;
   }
 }
+
+
+
+
+
+

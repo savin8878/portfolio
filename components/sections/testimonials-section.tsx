@@ -35,7 +35,7 @@ export function TestimonialsSection({ testimonials, content }: TestimonialsSecti
 
       <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <Reveal from="top">
-          <span className="flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
+          <span data-thread-heading className="flex items-center gap-3 text-xs font-mono uppercase tracking-[0.25em] text-accent">
             <span className="h-px w-8 bg-accent/60" />
             {label} — {title} {titleHighlight}
           </span>

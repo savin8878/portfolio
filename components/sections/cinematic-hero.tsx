@@ -10,6 +10,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowRight, Github, Linkedin, Twitter, Mail, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Magnetic } from "@/components/magnetic"
 import { HeroVideo } from "@/components/hero-video"
 import { SpeakingIntro } from "@/components/speaking-intro"
 import type { SocialLink } from "@/lib/db"
@@ -149,27 +150,31 @@ export function CinematicHero({
             transition={{ duration: 0.5, delay: 0.4 }}
             className="mt-10 flex flex-col items-center gap-3 sm:flex-row lg:items-start lg:justify-start justify-center"
           >
-            <Button
-              asChild
-              size="lg"
-              className="group h-12 rounded-full px-6 text-sm font-semibold"
-              style={{ background: "linear-gradient(100deg,#ff4d2e,#ff7a18)", color: "#1a0a04", border: "none" }}
-            >
-              <Link href={primaryCtaUrl}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                {primaryCtaText}
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="h-12 rounded-full px-6 text-sm font-semibold"
-              style={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.18)", color: "#f5ede6" }}
-            >
-              <Link href={secondaryCtaUrl}>{secondaryCtaText}</Link>
-            </Button>
+            <Magnetic strength={0.25}>
+              <Button
+                asChild
+                size="lg"
+                className="group h-12 rounded-full px-6 text-sm font-semibold"
+                style={{ background: "linear-gradient(100deg,#ff4d2e,#ff7a18)", color: "#1a0a04", border: "none" }}
+              >
+                <Link href={primaryCtaUrl}>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {primaryCtaText}
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
+            <Magnetic strength={0.25}>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="h-12 rounded-full px-6 text-sm font-semibold"
+                style={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.18)", color: "#f5ede6" }}
+              >
+                <Link href={secondaryCtaUrl}>{secondaryCtaText}</Link>
+              </Button>
+            </Magnetic>
           </motion.div>
 
           <motion.div

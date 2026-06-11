@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Magnetic } from "@/components/magnetic"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -86,18 +87,20 @@ export function Navbar() {
 
           {/* Right actions */}
           <div className="hidden lg:flex items-center gap-2">
-            <Button
-              asChild
-              size="sm"
-              className="group relative overflow-hidden rounded-full h-9 px-4 bg-foreground text-background hover:bg-foreground/90 shadow-sm"
-            >
-              <Link href="/contact">
-                <span className="relative z-10 flex items-center text-xs font-semibold tracking-tight">
-                  Start a Project
-                  <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                </span>
-              </Link>
-            </Button>
+            <Magnetic embers={false}>
+              <Button
+                asChild
+                size="sm"
+                className="group relative overflow-hidden rounded-full h-9 px-4 bg-foreground text-background hover:bg-foreground/90 shadow-sm"
+              >
+                <Link href="/contact">
+                  <span className="relative z-10 flex items-center text-xs font-semibold tracking-tight">
+                    Start a Project
+                    <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </Link>
+              </Button>
+            </Magnetic>
           </div>
 
           {/* Mobile */}
